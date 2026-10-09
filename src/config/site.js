@@ -30,9 +30,3 @@ export const SOCIAL_LINKS = [
   { name: 'Instagram', href: 'https://www.instagram.com/firstclicksolutionsltd/' },
   { name: 'LinkedIn', href: 'https://www.linkedin.com/company/first-click-solutions-ltd/' },
 ];
-
-// --- Abdullah Kneaders (reference/rollback) ---
-// export const BRAND_NAME = 'Abdullah Kneaders';
-// export const DEV_BACKEND_PORT = 3006;
-// export const DEV_FRONTEND_PORT = 5174;
-// export const PROD_API_URL = 'https://backend.abdullahkneaders.com';
