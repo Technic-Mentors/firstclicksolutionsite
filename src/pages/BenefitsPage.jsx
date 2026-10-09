@@ -12,10 +12,8 @@ const fadeUp = {
 
 const staggerContainer = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
+  show: { transition: { staggerChildren: 0.12, delayChildren: 0.06 } },
 };
-
-const FOUNDED = 1958;
 
 /* ═══════════════ Icons ═══════════════ */
 const IconClock = () => (
@@ -38,17 +36,17 @@ const IconClock = () => (
     />
   </svg>
 );
-const IconDough = () => (
+const IconShield = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-6 w-6">
     <motion.path
-      d="M4 14c0-4 3-7 8-7s8 3 8 7c0 3-2 5-5 5H9c-3 0-5-2-5-5z"
+      d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"
       initial={{ pathLength: 0 }}
       whileInView={{ pathLength: 1 }}
       viewport={{ once: true, amount: 0 }}
       transition={{ duration: 1.1, ease: EASE }}
     />
     <motion.path
-      d="M9 4c1-1.5 5-1.5 6 0M12 7v-2"
+      d="m9 12 2 2 4-4"
       initial={{ pathLength: 0 }}
       whileInView={{ pathLength: 1 }}
       viewport={{ once: true, amount: 0 }}
@@ -123,14 +121,21 @@ const IconBadge = () => (
     />
   </svg>
 );
-const IconDroplet = () => (
+const IconLeaf = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-6 w-6">
     <motion.path
-      d="M12 3s7 7.5 7 12a7 7 0 0 1-14 0c0-4.5 7-12 7-12z"
+      d="M4 20c0-8 5-14 16-15 0 10-5 15-12 15H4z"
       initial={{ pathLength: 0 }}
       whileInView={{ pathLength: 1 }}
       viewport={{ once: true, amount: 0 }}
       transition={{ duration: 1.2, ease: EASE }}
+    />
+    <motion.path
+      d="M8 18c2-4 5-7 9-9"
+      initial={{ pathLength: 0 }}
+      whileInView={{ pathLength: 1 }}
+      viewport={{ once: true, amount: 0 }}
+      transition={{ duration: 0.7, delay: 0.7, ease: EASE }}
     />
   </svg>
 );
@@ -138,34 +143,34 @@ const IconDroplet = () => (
 /* ═══════════════ Data ═══════════════ */
 const BENEFITS = [
   {
-    icon: IconClock,
-    title: 'Saves Time & Effort',
-    desc: 'Add flour, pour water, close the lid, and start. Perfectly kneaded dough in about five minutes — no tired arms, no mess.',
+    icon: IconBadge,
+    title: 'Tested, Not Just Wiped',
+    desc: 'Every machine is stripped, cleaned and bench-tested — memory, storage health, thermals and ports all checked under load before it is listed for sale.',
   },
   {
-    icon: IconDough,
-    title: 'Consistent, Smooth Dough',
-    desc: 'One machine handles atta, maida, and qeema, delivering the same reliable texture every single time — for roti, naan, pizza, and pastries.',
+    icon: IconShield,
+    title: '12 Month Warranty',
+    desc: 'All refurbished hardware is covered by a 12 month return-to-base warranty. If a fault develops, we repair or replace it.',
   },
   {
     icon: IconLayers,
-    title: 'Sizes for Every Family',
-    desc: 'Choose the compact 3.5 kg model for smaller households or the spacious 5 kg kneader for bigger batches — both built for daily kitchen use.',
+    title: 'Business Specs, Home Prices',
+    desc: 'Ex-corporate Dell, HP and Lenovo hardware is built to a higher standard than consumer kit — and costs a fraction of new second time around.',
   },
   {
-    icon: IconBadge,
-    title: 'Genuine, Tested Quality',
-    desc: 'Every dough maker uses authentic, durable components chosen for performance, and is quality-checked before it leaves our facility.',
+    icon: IconClock,
+    title: 'Ready to Use on Arrival',
+    desc: 'Each machine ships with a fresh, activated installation of Windows 11 Pro. Unbox it, sign in and get on with your work.',
   },
   {
-    icon: IconDroplet,
-    title: 'Easy to Clean & Maintain',
-    desc: 'A straightforward design keeps daily cleanup quick, so your kitchen stays tidy after every batch of dough.',
+    icon: IconLeaf,
+    title: 'Better for the Planet',
+    desc: 'Refurbishing a desktop avoids a large share of the carbon cost of manufacturing a new one, and keeps working hardware out of landfill.',
   },
   {
     icon: IconTruck,
-    title: 'Cash on Delivery, Nationwide',
-    desc: 'We deliver to 50+ cities across Pakistan with Cash on Delivery — pay only once your dough maker arrives, safe and inspected.',
+    title: 'Free UK Delivery & Collection',
+    desc: 'Free delivery on orders over £250, usually dispatched within 48 hours — or collect from our Burnley unit, often the same working day.',
   },
 ];
 
@@ -175,13 +180,13 @@ export default function BenefitsPage() {
   return (
     <div className="relative">
       {/* ══════════════ HERO ══════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gold-100 via-cream to-stone-200">
+      <section className="relative overflow-hidden bg-gold-500 text-white">
         <motion.div
           aria-hidden
           initial={{ opacity: 0, scale: 1.15 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2, ease: EASE }}
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(217,96,10,0.1),transparent_65%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_18%_28%,rgba(255,255,255,0.12),transparent_58%),radial-gradient(ellipse_at_82%_72%,rgba(0,0,0,0.08),transparent_58%)]"
         />
         <motion.div
           aria-hidden
@@ -191,7 +196,7 @@ export default function BenefitsPage() {
           className="pointer-events-none absolute inset-0"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(28,25,23,1) 1px, transparent 1px), linear-gradient(90deg, rgba(28,25,23,1) 1px, transparent 1px)',
+              'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)',
             backgroundSize: '48px 48px',
           }}
         />
@@ -201,11 +206,11 @@ export default function BenefitsPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: EASE }}
-            className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-charcoal-light"
+            className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-white/75"
           >
-            <Link to="/" className="transition-colors hover:text-gold-600">Home</Link>
-            <span className="text-stone-400">/</span>
-            <span className="font-medium text-charcoal">Benefits</span>
+            <Link to="/" className="transition-colors hover:text-white">Home</Link>
+            <span className="text-white/50">/</span>
+            <span className="font-medium text-white">Benefits</span>
           </motion.nav>
 
           <motion.div
@@ -218,16 +223,16 @@ export default function BenefitsPage() {
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 0.7, delay: 0.3, ease: EASE }}
-              className="h-px w-10 origin-right bg-gradient-to-r from-transparent to-gold-600/70"
+              className="h-px w-10 origin-right bg-gradient-to-r from-transparent to-white/70"
             />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-600">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/85">
               Why Choose Us
             </span>
             <motion.span
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 0.7, delay: 0.3, ease: EASE }}
-              className="h-px w-10 origin-left bg-gradient-to-l from-transparent to-gold-600/70"
+              className="h-px w-10 origin-left bg-gradient-to-l from-transparent to-white/70"
             />
           </motion.div>
 
@@ -235,26 +240,26 @@ export default function BenefitsPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2, ease: EASE }}
-            className="font-serif text-4xl leading-tight text-charcoal sm:text-5xl lg:text-6xl"
+            className="font-serif text-4xl leading-tight text-white sm:text-5xl lg:text-6xl"
           >
-            Benefits of an <span className="text-gold-600">Abdullah Dough Maker</span>
+            Why buy <span className="text-white">refurbished</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.4, ease: EASE }}
-            className="mx-auto mt-4 max-w-lg text-sm text-charcoal-light sm:text-base"
+            className="mx-auto mt-4 max-w-lg text-sm text-white/85 sm:text-base"
           >
-            Trusted by Pakistani kitchens since {FOUNDED} — here's what makes our dough makers a
-            daily essential.
+            Professionally refurbished computers from Burnley — here&rsquo;s what you get that a
+            cheap new machine won&rsquo;t give you.
           </motion.p>
 
           <motion.div
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ duration: 0.8, delay: 0.6, ease: EASE }}
-            className="mx-auto mt-6 h-px w-24 origin-center bg-gradient-to-r from-transparent via-gold-400 to-transparent"
+            className="mx-auto mt-6 h-px w-24 origin-center bg-gradient-to-r from-transparent via-white/80 to-transparent"
           />
         </div>
       </section>
@@ -266,45 +271,49 @@ export default function BenefitsPage() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, amount: 0 }}
           transition={{ duration: 1.2, ease: EASE }}
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(217,96,10,0.1),transparent_55%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(240,108,12,0.1),transparent_55%)]"
         />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
           <motion.div
             variants={staggerContainer}
-            initial="hidden"
+            initial={reduce ? false : 'hidden'}
             whileInView="show"
-            viewport={{ once: true, amount: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
             className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
           >
             {BENEFITS.map(({ icon: Icon, title, desc }, i) => (
               <motion.div
                 key={title}
-                variants={fadeUp}
-                whileHover={{ y: -10, scale: 1.02, transition: SPRING }}
-                className="group flex flex-col items-start rounded-xl border border-gold-500/15 bg-white p-6 text-left shadow-sm transition-all duration-300 hover:border-gold-500/50 hover:shadow-xl hover:shadow-gold-500/20"
+                variants={reduce ? undefined : fadeUp}
+                whileHover={reduce ? undefined : { y: -6, transition: SPRING }}
+                className="group relative flex min-h-64 flex-col overflow-hidden rounded-3xl border border-charcoal/8 bg-white p-6 text-left shadow-[0_14px_36px_rgba(28,25,23,0.05)] transition-all duration-300 hover:border-gold-500/35 hover:shadow-[0_20px_44px_rgba(28,25,23,0.1)] sm:p-7"
               >
-                <motion.span
-                  initial={{ scale: 0, rotate: -180 }}
-                  whileInView={{ scale: 1, rotate: 0 }}
-                  viewport={{ once: true, amount: 0 }}
-                  transition={{ duration: 0.6, delay: i * 0.08, ease: EASE }}
-                  whileHover={{ scale: 1.15, rotate: 8 }}
-                  className="relative mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gold-500/10 text-gold-600 transition-colors duration-300 group-hover:bg-gold-500 group-hover:text-white"
-                >
+                <span
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-gold-500 via-gold-400 to-leaf-500 transition-transform duration-500 group-hover:scale-x-100"
+                />
+                <div className="relative mb-6 flex items-center justify-between">
                   <motion.span
-                    aria-hidden
-                    initial={{ scale: 0.6, opacity: 0 }}
-                    whileInView={{ scale: [0.6, 1.6], opacity: [0.6, 0] }}
-                    viewport={{ once: true, amount: 0 }}
-                    transition={{ duration: 1.2, delay: 0.4 + i * 0.08, ease: EASE }}
-                    className="absolute inset-0 rounded-full border border-gold-500/50"
-                  />
-                  <Icon />
-                </motion.span>
-                <h3 className="mb-2 font-serif text-lg text-charcoal transition-colors duration-300 group-hover:text-gold-600">
+                    initial={reduce ? false : { opacity: 0, scale: 0.8 }}
+                    whileInView={reduce ? undefined : { opacity: 1, scale: 1 }}
+                    viewport={{ once: true, amount: 0.25 }}
+                    transition={{ duration: 0.45, delay: reduce ? 0 : i * 0.12, ease: EASE }}
+                    className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gold-500/10 text-gold-600 transition-colors duration-300 group-hover:bg-gold-500 group-hover:text-white"
+                  >
+                    <Icon />
+                  </motion.span>
+                  <span className="font-serif text-4xl leading-none text-charcoal/10 transition-colors duration-300 group-hover:text-gold-500/25">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                </div>
+                <h3 className="relative font-serif text-lg leading-snug text-charcoal transition-colors duration-300 group-hover:text-gold-600">
                   {title}
                 </h3>
-                <p className="text-sm leading-relaxed text-charcoal-light">{desc}</p>
+                <p className="relative mt-2 text-sm leading-relaxed text-charcoal-light">{desc}</p>
+                <span
+                  aria-hidden
+                  className="mt-auto block h-px w-10 bg-gold-500/50 pt-0 transition-all duration-300 group-hover:w-16"
+                />
               </motion.div>
             ))}
           </motion.div>
@@ -317,7 +326,7 @@ export default function BenefitsPage() {
           aria-hidden
           animate={reduce ? {} : { opacity: [0.35, 0.7, 0.35], scale: [1, 1.08, 1] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(217,96,10,0.14),transparent_60%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(240,108,12,0.14),transparent_60%)]"
         />
 
         <motion.div
@@ -334,7 +343,7 @@ export default function BenefitsPage() {
             transition={{ duration: 0.6, delay: 0.1, ease: EASE }}
             className="font-serif text-2xl leading-tight text-charcoal sm:text-3xl lg:text-4xl"
           >
-            Ready to Bring Home <span className="text-gold-600">Effortless Dough?</span>
+            Ready to find <span className="text-gold-600">the right machine?</span>
           </motion.h2>
 
           <motion.p
@@ -344,7 +353,8 @@ export default function BenefitsPage() {
             transition={{ duration: 0.6, delay: 0.2, ease: EASE }}
             className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-charcoal-light sm:text-base"
           >
-            Explore our collection of dough makers, with Cash on Delivery available nationwide.
+            Browse desktops, laptops, gaming PCs, monitors and complete dual screen setups — all
+            tested, all warranted, all ready to ship.
           </motion.p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">

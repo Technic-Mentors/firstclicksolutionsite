@@ -11,7 +11,7 @@ export const addressSchema = z.object({
   phone: z
     .string()
     .trim()
-    .regex(/^\d{11}$/, 'Enter an 11-digit phone number'),
+    .regex(/^(?:\+?44\s?|0)(?:\d\s?){9,10}\d$/, 'Enter a UK phone number, e.g. 07700 900123'),
   addressLine1: z.string().trim().min(3, 'Address is too short').max(100, 'Address must be 100 characters or fewer'),
   addressLine2: z.string().trim().max(100, 'Address must be 100 characters or fewer').optional(),
   city: z.string().trim().min(2, 'Enter a valid city').max(100),

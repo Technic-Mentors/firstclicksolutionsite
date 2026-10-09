@@ -7,6 +7,7 @@ import EmptyState from '../components/ui/EmptyState';
 import Button from '../components/ui/Button';
 import { formatDate } from '../utils/format';
 import { assetUrl } from '../utils/media';
+import PageHeroBg from '../components/layout/PageHeroBg';
 
 export default function BlogListPage() {
   const [page, setPage] = useState(1);
@@ -15,41 +16,33 @@ export default function BlogListPage() {
   return (
     <div>
       {/* ══════════════ HERO — Sunlit Gradient ══════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gold-100 via-cream to-stone-200">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(217,96,10,0.1),transparent_65%)]" />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(28,25,23,1) 1px, transparent 1px), linear-gradient(90deg, rgba(28,25,23,1) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
-          }}
-        />
+      <section className="relative isolate overflow-hidden bg-gold-500 text-white">
+        <PageHeroBg />
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:py-20">
-          <nav className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-charcoal-light">
-            <Link to="/" className="transition-colors hover:text-gold-600">Home</Link>
-            <span className="text-stone-400">/</span>
-            <span className="font-medium text-charcoal">Blog</span>
+          <nav className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-white/75">
+            <Link to="/" className="transition-colors hover:text-white">Home</Link>
+            <span className="text-white/50">/</span>
+            <span className="font-medium text-white">Blog</span>
           </nav>
 
           <div className="mb-4 flex items-center justify-center gap-3">
-            <span className="h-px w-10 bg-gradient-to-r from-transparent to-gold-600/70" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-600">
-              Recipes &amp; Guides
+            <span className="h-px w-10 bg-gradient-to-r from-transparent to-white/70" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/85">
+              Guides &amp; Workshop Notes
             </span>
-            <span className="h-px w-10 bg-gradient-to-l from-transparent to-gold-600/70" />
+            <span className="h-px w-10 bg-gradient-to-l from-transparent to-white/70" />
           </div>
 
-          <h1 className="font-serif text-4xl leading-tight text-charcoal sm:text-5xl lg:text-6xl">
-            Dough Making <span className="text-gold-600">Guides</span>
+          <h1 className="font-serif text-4xl leading-tight text-white sm:text-5xl lg:text-6xl">
+            Buying <span className="text-white">Guides</span>
           </h1>
 
-          <p className="mx-auto mt-4 max-w-lg text-sm text-charcoal-light sm:text-base">
-            Tips, recipes, and guidance for making perfect roti, naan, pizza, and pastry dough at home.
+          <p className="mx-auto mt-4 max-w-lg text-sm text-white/85 sm:text-base">
+            Advice on choosing, upgrading and looking after refurbished computers — plus what we have learned in the workshop.
           </p>
 
-          <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+          <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-white/80 to-transparent" />
         </div>
       </section>
 
@@ -61,7 +54,7 @@ export default function BlogListPage() {
         ) : !data?.data?.length ? (
           <EmptyState
             title="No articles yet"
-            description="Check back soon for dough making guides, recipes, and kitchen tips."
+            description="Check back soon for buying guides, upgrade walkthroughs and workshop notes."
           />
         ) : (
           <>

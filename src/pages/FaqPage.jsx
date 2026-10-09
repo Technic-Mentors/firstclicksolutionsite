@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import Button from '../components/ui/Button';
+import PageHeroBg from '../components/layout/PageHeroBg';
 
 const EASE = [0.22, 1, 0.36, 1];
 
@@ -17,28 +18,44 @@ const staggerContainer = {
 
 const FAQS = [
   {
-    q: 'How long does it take to knead dough?',
-    a: 'Add the flour and water, close the lid, and start the machine. Five minutes later, your dough is ready to cook — soft, smooth, and consistent every time.',
+    q: 'What does "refurbished" actually mean here?',
+    a: 'Every machine is stripped down, cleaned, data-wiped and bench-tested. Faulty parts are replaced, thermal paste is renewed where needed, and a fresh activated copy of Windows 11 Pro is installed before it is listed for sale.',
   },
   {
-    q: 'What can I make with the Abdullah Dough Maker?',
-    a: 'Atta for roti and chapati, maida for naan, pizza, pastries and cookies, and minced qeema mixtures. One machine handles all your family recipes.',
+    q: 'What is the difference between Grade A and Grade B?',
+    a: 'The grade describes cosmetic condition only, never performance. Grade A has little to no visible wear; Grade B has light scuffs or scratches on the casing. Both are tested to the same standard and carry the same warranty.',
   },
   {
-    q: 'How much water should I add?',
-    a: 'Use the measuring cup that comes with your machine to pour the water. For best results, add the measured flour first, then the measured water.',
+    q: 'What warranty do I get?',
+    a: 'All refurbished hardware comes with a 12 month return-to-base warranty. If a fault develops, contact us and we will arrange repair or replacement.',
   },
   {
-    q: 'Which size should I choose?',
-    a: 'We offer a 3.5 kg model (AE-900A) for everyday family cooking, and a 5 kg model (AE-221) for bigger batches and households. Pick the size that suits your kitchen.',
+    q: 'How much is delivery, and how long does it take?',
+    a: 'UK mainland delivery is free on orders over £250, and charged at a flat rate below that. Orders usually leave us within 48 hours. You are also welcome to collect from our Burnley unit, often the same working day.',
   },
   {
-    q: 'How do delivery and payment work?',
-    a: 'Delivery is free on orders over Rs. 5,000, and Cash on Delivery is available nationwide. Pay by direct bank transfer and get an exclusive ₨ 200 discount on your order.',
+    q: 'Can I return something if it is not right?',
+    a: 'Yes — you have 14 days from delivery to return an item unused and in its original packaging. Get in touch and we will arrange it.',
+  },
+  {
+    q: 'Which machine should I choose?',
+    a: 'For office and home admin, a refurbished desktop or SFF machine is plenty. For tight spaces, look at mini computers. For gaming or content creation, choose one of our dedicated-graphics builds. If you are unsure, call us and tell us what you need it for.',
+  },
+  {
+    q: 'Do you supply businesses and schools?',
+    a: 'We do. We can supply matched machines in bulk, stage a rollout, and set up trade or education accounts. Call us to talk through what you need.',
+  },
+  {
+    q: 'What happens to the data on the old drives?',
+    a: 'Every drive is wiped to recognised data-destruction standards before a machine is resold, and drives that fail testing are physically destroyed rather than reused.',
+  },
+  {
+    q: 'Can you upgrade or repair a machine I already own?',
+    a: 'Yes. We handle memory, storage, graphics and power supply upgrades, plus diagnostics and repair. Bring it in to the Burnley unit or call us first to describe the fault.',
   },
   {
     q: 'Who do I contact if something is wrong?',
-    a: 'Call us on  +923206466000 between 08:00 and 17:00, or send a message through our Contact page. We respond within 24 hours — before, during, and after your order arrives.',
+    a: 'Call us on 01282 421306, email info@firstclicksolutions.co.uk, or send a message through our Contact page and we will come back to you.',
   },
 ];
 
@@ -48,41 +65,33 @@ export default function FaqPage() {
   return (
     <div>
       {/* ══════════════ HERO — Sunlit Gradient ══════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gold-100 via-cream to-stone-200">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(217,96,10,0.1),transparent_65%)]" />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(28,25,23,1) 1px, transparent 1px), linear-gradient(90deg, rgba(28,25,23,1) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
-          }}
-        />
+      <section className="relative isolate overflow-hidden bg-gold-500 text-white">
+        <PageHeroBg />
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:py-20">
-          <nav className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-charcoal-light">
-            <Link to="/" className="transition-colors hover:text-gold-600">Home</Link>
-            <span className="text-stone-400">/</span>
-            <span className="font-medium text-charcoal">FAQ</span>
+          <nav className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-white/75">
+            <Link to="/" className="transition-colors hover:text-white">Home</Link>
+            <span className="text-white/50">/</span>
+            <span className="font-medium text-white">FAQ</span>
           </nav>
 
           <div className="mb-4 flex items-center justify-center gap-3">
-            <span className="h-px w-10 bg-gradient-to-r from-transparent to-gold-600/70" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-600">
+            <span className="h-px w-10 bg-gradient-to-r from-transparent to-white/70" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/85">
               Help Center
             </span>
-            <span className="h-px w-10 bg-gradient-to-l from-transparent to-gold-600/70" />
+            <span className="h-px w-10 bg-gradient-to-l from-transparent to-white/70" />
           </div>
 
-          <h1 className="font-serif text-4xl leading-tight text-charcoal sm:text-5xl lg:text-6xl">
-            Frequently Asked <span className="text-gold-600">Questions</span>
+          <h1 className="font-serif text-4xl leading-tight text-white sm:text-5xl lg:text-6xl">
+            Frequently Asked <span className="text-white">Questions</span>
           </h1>
 
-          <p className="mx-auto mt-4 max-w-lg text-sm text-charcoal-light sm:text-base">
-            Quick answers to common questions about dough making, sizing, delivery, and payment.
+          <p className="mx-auto mt-4 max-w-lg text-sm text-white/85 sm:text-base">
+            Quick answers on condition grades, warranty, delivery, returns and choosing the right machine.
           </p>
 
-          <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+          <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-white/80 to-transparent" />
         </div>
       </section>
 
@@ -208,7 +217,7 @@ export default function FaqPage() {
           </h2>
 
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-charcoal-light sm:text-base">
-            Our team responds within 24 hours — before, during, and after your order arrives.
+            Call 01282 421306 or drop us a message — we are happy to talk through what you need before you buy.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">

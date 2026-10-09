@@ -6,6 +6,7 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { formatCurrency, formatDateTime } from '../utils/format';
 import { getErrorMessage } from '../utils/errorMessage';
+import PageHeroBg from '../components/layout/PageHeroBg';
 
 const STATUS_STEPS = ['placed', 'confirmed', 'packed', 'shipped', 'delivered'];
 
@@ -48,37 +49,29 @@ export default function TrackOrderPage() {
   return (
     <div>
       {/* ══════════════ HERO — Sunlit Gradient ══════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gold-100 via-cream to-stone-200">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(217,96,10,0.1),transparent_65%)]" />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(28,25,23,1) 1px, transparent 1px), linear-gradient(90deg, rgba(28,25,23,1) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
-          }}
-        />
+      <section className="relative isolate overflow-hidden bg-gold-500 text-white">
+        <PageHeroBg />
 
         <div className="relative mx-auto max-w-7xl px-4 py-12 text-center sm:px-6 lg:py-14">
-          <nav className="mb-3 flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] text-charcoal-light">
-            <Link to="/" className="transition-colors hover:text-gold-600">Home</Link>
-            <span className="text-stone-400">/</span>
-            <span className="font-medium text-charcoal">Track Order</span>
+          <nav className="mb-3 flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/75">
+            <Link to="/" className="transition-colors hover:text-white">Home</Link>
+            <span className="text-white/50">/</span>
+            <span className="font-medium text-white">Track Order</span>
           </nav>
 
           <div className="mb-3 flex items-center justify-center gap-3">
-            <span className="h-px w-10 bg-gradient-to-r from-transparent to-gold-600/70" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-600">
+            <span className="h-px w-10 bg-gradient-to-r from-transparent to-white/70" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/85">
               Order Status
             </span>
-            <span className="h-px w-10 bg-gradient-to-l from-transparent to-gold-600/70" />
+            <span className="h-px w-10 bg-gradient-to-l from-transparent to-white/70" />
           </div>
 
-          <h1 className="font-serif text-3xl leading-tight text-charcoal sm:text-4xl lg:text-5xl">
-            Track Your <span className="text-gold-600">Order</span>
+          <h1 className="font-serif text-3xl leading-tight text-white sm:text-4xl lg:text-5xl">
+            Track Your <span className="text-white">Order</span>
           </h1>
 
-          <p className="mx-auto mt-3 max-w-xl text-sm text-charcoal-light">
+          <p className="mx-auto mt-3 max-w-xl text-sm text-white/85">
             Enter your order number and the phone number used at checkout to see the latest status.
           </p>
         </div>
@@ -159,7 +152,7 @@ export default function TrackOrderPage() {
                 {order.items.map((item) => (
                   <div key={item.id} className="flex items-center justify-between border-b border-stone-100 py-2 text-sm">
                     <span>
-                      {item.product_name} ({item.size}/{item.color}) × {item.quantity}
+                      {item.product_name} ({item.spec}/{item.condition_grade}) × {item.quantity}
                     </span>
                     <span>{formatCurrency(item.line_total)}</span>
                   </div>

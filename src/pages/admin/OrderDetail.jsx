@@ -104,7 +104,7 @@ export default function OrderDetail() {
                     <tr key={item.id} className="border-b border-stone-100 last:border-0">
                       <td className="py-2.5 pr-4 text-charcoal">{item.product_name || item.name}</td>
                       <td className="py-2.5 pr-4 text-charcoal-light">
-                        {[item.size, item.color].filter(Boolean).join(' / ')}
+                        {[item.spec, item.condition_grade].filter(Boolean).join(' / ')}
                       </td>
                       <td className="py-2.5 pr-4 text-charcoal">{item.quantity}</td>
                       <td className="py-2.5 pr-4 text-charcoal">{formatCurrency(item.price)}</td>

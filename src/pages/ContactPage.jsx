@@ -18,6 +18,7 @@ import { getErrorMessage } from '../utils/errorMessage';
 import Input from '../components/ui/Input';
 import Textarea from '../components/ui/Textarea';
 import Button from '../components/ui/Button';
+import { STORE_ADDRESS, STORE_PHONE, STORE_EMAIL } from '../config/site';
 
 const EASE = [0.22, 1, 0.36, 1];
 const SPRING = { type: 'spring', stiffness: 260, damping: 24, mass: 0.9 };
@@ -72,9 +73,9 @@ export default function ContactPage() {
   const [sent, setSent] = useState(false);
   const reduce = useReducedMotion();
 
-  const address = settings?.store_address || 'Address: Gondlanwala Rd, Gobandgarh, Gujranwala, 52250';
-  const phone = settings?.store_phone;
-  const email = settings?.store_email;
+  const address = settings?.store_address || STORE_ADDRESS;
+  const phone = settings?.store_phone || STORE_PHONE;
+  const email = settings?.store_email || STORE_EMAIL;
 
   const heroRef = useRef(null);
   const { scrollYProgress: heroScroll } = useScroll({
@@ -123,7 +124,7 @@ export default function ContactPage() {
       <ScrollProgressBar />
 
       {/* ══════════════ HERO — Compact Sunlit Gradient ══════════════ */}
-      <section ref={heroRef} className="relative overflow-hidden bg-gradient-to-br from-gold-100 via-cream to-stone-200">
+      <section ref={heroRef} className="relative overflow-hidden bg-gold-500 text-white">
         <motion.div
           style={reduce ? {} : { scale: heroExitScale, opacity: heroExitOpacity, y: heroExitY }}
           className="absolute inset-0"
@@ -134,7 +135,7 @@ export default function ContactPage() {
             initial={{ opacity: 0, scale: 1.15 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, ease: EASE }}
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(217,96,10,0.1),transparent_65%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_18%_28%,rgba(255,255,255,0.12),transparent_58%),radial-gradient(ellipse_at_82%_72%,rgba(0,0,0,0.08),transparent_58%)]"
           />
 
           {/* Drifting glow */}
@@ -149,7 +150,7 @@ export default function ContactPage() {
             className="pointer-events-none absolute -inset-20"
             style={{
               background:
-                'radial-gradient(circle at 40% 40%, rgba(217,96,10,0.14), transparent 55%)',
+                'radial-gradient(circle at 32% 38%, rgba(255,255,255,0.10), transparent 55%), radial-gradient(circle at 70% 62%, rgba(0,0,0,0.06), transparent 55%)',
               filter: 'blur(30px)',
             }}
           />
@@ -163,7 +164,7 @@ export default function ContactPage() {
             className="pointer-events-none absolute inset-0"
             style={{
               backgroundImage:
-                'linear-gradient(rgba(28,25,23,1) 1px, transparent 1px), linear-gradient(90deg, rgba(28,25,23,1) 1px, transparent 1px)',
+                'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)',
               backgroundSize: '48px 48px',
             }}
           />
@@ -200,11 +201,11 @@ export default function ContactPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: EASE }}
-            className="mb-3 flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] text-charcoal-light"
+            className="mb-3 flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/75"
           >
-            <Link to="/" className="transition-colors hover:text-gold-600">Home</Link>
-            <span className="text-stone-400">/</span>
-            <span className="font-medium text-charcoal">Contact</span>
+            <Link to="/" className="transition-colors hover:text-white">Home</Link>
+            <span className="text-white/50">/</span>
+            <span className="font-medium text-white">Contact</span>
           </motion.nav>
 
           <motion.div
@@ -217,22 +218,22 @@ export default function ContactPage() {
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 0.7, delay: 0.4, ease: EASE }}
-              className="h-px w-10 origin-right bg-gradient-to-r from-transparent to-gold-600/70"
+              className="h-px w-10 origin-right bg-gradient-to-r from-transparent to-white/70"
             />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-600">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/85">
               We&apos;re Here to Help
             </span>
             <motion.span
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 0.7, delay: 0.4, ease: EASE }}
-              className="h-px w-10 origin-left bg-gradient-to-l from-transparent to-gold-600/70"
+              className="h-px w-10 origin-left bg-gradient-to-l from-transparent to-white/70"
             />
           </motion.div>
 
-          <h1 className="font-serif text-3xl leading-tight text-charcoal sm:text-4xl lg:text-5xl">
+          <h1 className="font-serif text-3xl leading-tight text-white sm:text-4xl lg:text-5xl">
             <RevealWords text="Get in" delay={0.35} stagger={0.08} />{' '}
-            <span className="text-gold-600">
+            <span className="text-white">
               <RevealWords text="Touch" delay={0.55} stagger={0.08} />
             </span>
           </h1>
@@ -241,16 +242,16 @@ export default function ContactPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.9, ease: EASE }}
-            className="mx-auto mt-3 max-w-xl text-sm text-charcoal-light"
+            className="mx-auto mt-3 max-w-xl text-sm text-white/85"
           >
-            Questions about a dough maker, delivery, or payment? We&apos;re happy to help.
+            Questions about a machine, a spec, delivery or a repair? We&apos;re happy to help.
           </motion.p>
 
           <motion.div
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ duration: 0.8, delay: 1.1, ease: EASE }}
-            className="mx-auto mt-5 h-px w-20 origin-center bg-gradient-to-r from-transparent via-gold-500 to-transparent"
+            className="mx-auto mt-5 h-px w-20 origin-center bg-gradient-to-r from-transparent via-white/80 to-transparent"
           />
         </div>
       </section>
@@ -557,11 +558,11 @@ export default function ContactPage() {
                       transition={{ duration: 0.5, delay: 0.7, ease: EASE }}
                       className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 pt-1 text-[10px] uppercase tracking-wider text-charcoal-light/70"
                     >
-                      <span>Cash on Delivery</span>
+                      <span>12 Month Warranty</span>
                       <span className="text-gold-500">·</span>
-                      <span>Free Delivery over Rs. 5,000</span>
+                      <span>Free UK Delivery over £250</span>
                       <span className="text-gold-500">·</span>
-                      <span>Trusted since 1958</span>
+                      <span>Tested in Burnley</span>
                     </motion.div>
                   </motion.div>
                 )}
@@ -578,7 +579,7 @@ export default function ContactPage() {
           aria-hidden
           animate={reduce ? {} : { opacity: [0.35, 0.7, 0.35], scale: [1, 1.08, 1] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(217,96,10,0.14),transparent_60%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(240,108,12,0.14),transparent_60%)]"
         />
 
         <motion.div
@@ -615,7 +616,7 @@ export default function ContactPage() {
             transition={{ duration: 0.6, delay: 0.15, ease: EASE }}
             className="font-serif text-2xl leading-tight text-charcoal sm:text-3xl lg:text-4xl"
           >
-            Ready to Make <span className="text-gold-600">Perfect Dough?</span>
+            Ready to Find <span className="text-gold-600">Your Machine?</span>
           </motion.h2>
 
           <motion.p
@@ -625,8 +626,8 @@ export default function ContactPage() {
             transition={{ duration: 0.6, delay: 0.25, ease: EASE }}
             className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-charcoal-light sm:text-base"
           >
-            Browse our dough makers and accessories — Cash on Delivery across Pakistan, delivering to 50+ cities
-            nationwide.
+            Browse refurbished desktops, laptops, gaming PCs and monitors — all tested, all warranted,
+            with free UK delivery over £250.
           </motion.p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -731,10 +732,10 @@ function CornerAccent({ position = 'tl' }) {
         isTop ? 'top-2' : 'bottom-2'
       } ${isLeft ? 'left-2' : 'right-2'}`}
       style={{
-        borderTop: isTop ? '2px solid rgba(217,96,10,0.5)' : 'none',
-        borderBottom: !isTop ? '2px solid rgba(217,96,10,0.5)' : 'none',
-        borderLeft: isLeft ? '2px solid rgba(217,96,10,0.5)' : 'none',
-        borderRight: !isLeft ? '2px solid rgba(217,96,10,0.5)' : 'none',
+        borderTop: isTop ? '2px solid rgba(240,108,12,0.5)' : 'none',
+        borderBottom: !isTop ? '2px solid rgba(240,108,12,0.5)' : 'none',
+        borderLeft: isLeft ? '2px solid rgba(240,108,12,0.5)' : 'none',
+        borderRight: !isLeft ? '2px solid rgba(240,108,12,0.5)' : 'none',
       }}
     />
   );

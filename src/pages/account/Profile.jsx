@@ -86,7 +86,7 @@ export default function Profile() {
           {editing ? (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <Input label="Full Name" maxLength={25} {...register('name')} error={errors.name?.message} />
-              <Input label="Phone" placeholder="03XXXXXXXXX" maxLength={11} {...register('phone')} error={errors.phone?.message} />
+              <Input label="Phone" placeholder="07700 900123" maxLength={16} {...register('phone')} error={errors.phone?.message} />
               <div className="flex gap-3 pt-1">
                 <Button type="submit" loading={saving}>
                   Save Changes

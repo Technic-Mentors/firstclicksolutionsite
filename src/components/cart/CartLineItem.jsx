@@ -28,7 +28,7 @@ export default function CartLineItem({ item }) {
             {item.productName}
           </Link>
           <p className="text-xs text-stone-500">
-            {item.size} / {item.color}
+            {item.spec} / {item.condition_grade}
           </p>
         </div>
         <div className="flex items-center justify-between">

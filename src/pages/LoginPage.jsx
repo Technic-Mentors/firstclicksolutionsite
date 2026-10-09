@@ -37,7 +37,7 @@ export default function LoginPage() {
   return (
     <div className="mx-auto max-w-md px-4 py-16 sm:px-6">
       <div className="mb-8 text-center">
-        <img src="/logo.png" alt="Abdullah Kneaders" className="mx-auto h-20 w-auto" />
+        <img src="/logo.png" alt="First Click Solutions" className="mx-auto h-20 w-auto" />
         <h1 className="mt-4 font-serif text-2xl text-charcoal">Welcome Back</h1>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Button from '../components/ui/Button';
+import PageHeroBg from '../components/layout/PageHeroBg';
 
 const EASE = [0.22, 1, 0.36, 1];
 
@@ -16,69 +17,86 @@ const staggerContainer = {
 
 const SECTIONS = [
   {
-    category: '3.5 kg Model',
+    category: 'Condition Grades',
     groups: [
       {
-        label: 'AE-900A — Compact Dough Maker',
-        note: 'Ideal for everyday family cooking. Handles up to 3.5 kg of flour per batch — perfect for roti, chapati, and small naan batches.',
-        headers: ['Specification', 'Detail'],
+        label: 'What the grade actually tells you',
+        note: 'The grade describes cosmetic condition only — never performance. Every machine, whatever its grade, goes through the same testing and carries the same 12 month warranty.',
+        headers: ['Grade', 'What to expect'],
         rows: [
-          ['Model', 'AE-900A'],
-          ['Capacity', '3.5 kg flour per batch'],
-          ['Kneading Time', '5 minutes'],
-          ['Best For', 'Roti, Chapati, Paratha'],
-          ['Power', 'Efficient motor, low energy use'],
-          ['Warranty', 'Covered — see product page for details'],
+          ['Grade A', 'Little to no visible wear. Near-indistinguishable from new.'],
+          ['Grade B', 'Light scuffs or scratches on the casing. Identical internals and testing.'],
+          ['Refurbished build', 'Our own build — a refurbished chassis fitted with new parts such as a GPU, PSU, memory or storage.'],
         ],
       },
     ],
   },
   {
-    category: '5 kg Model',
+    category: 'Which Machine',
     groups: [
       {
-        label: 'AE-221 — Spacious Dough Maker',
-        note: 'Built for bigger batches and bigger households. Handles up to 5 kg of flour per batch — ideal for naan, pizza, pastries, and large family gatherings.',
-        headers: ['Specification', 'Detail'],
+        label: 'Matching the form factor to the job',
+        note: 'All seven categories run the same Windows 11 Pro install. The difference is size, expandability and graphics power.',
+        headers: ['Type', 'Best for'],
         rows: [
-          ['Model', 'AE-221'],
-          ['Capacity', '5 kg flour per batch'],
-          ['Kneading Time', '5 minutes'],
-          ['Best For', 'Naan, Pizza, Pastry, Cookies'],
-          ['Power', 'Efficient motor, low energy use'],
-          ['Warranty', 'Covered — see product page for details'],
+          ['Refurbished Computers', 'Full-size tower. Office work, accounts, home study. Easiest to upgrade later.'],
+          ['SFF Computers', 'Same performance, about a third of the volume. Tucks under a monitor.'],
+          ['Mini Computers', 'One-litre micro desktop. Reception desks, kiosks, signage, tight spaces.'],
+          ['Laptops', 'Ex-corporate Dell, HP and Lenovo. Hybrid working, coursework, travel.'],
+          ['Gaming PCs', 'Dedicated graphics for 1080p and 1440p gaming, streaming and editing.'],
+          ['Dual Screen Systems', 'Tower plus two matched monitors, cables and stands in one box.'],
+          ['LCDs/LEDs', 'Single monitors or matched pairs, 19 inch to 27 inch.'],
         ],
       },
     ],
   },
   {
-    category: 'What It Kneads',
+    category: 'Specification',
     groups: [
       {
-        label: 'Atta, Maida, and Qeema',
-        note: 'One machine handles everything your kitchen makes — from daily roti to festive bakes and minced mixtures.',
-        headers: ['Ingredient', 'Perfect For'],
+        label: 'How much machine do you actually need?',
+        note: 'Processor, memory and storage matter in that order for most people. If you are unsure, tell us what you will run and we will point you at the right spec.',
+        headers: ['Use case', 'Suggested spec'],
         rows: [
-          ['Atta', 'Roti, Chapati, Paratha'],
-          ['Maida', 'Naan, Pizza, Pastry, Cookies'],
-          ['Qeema', 'Kebab mixes, Koftay'],
+          ['Browsing, email, office', 'i3 or i5 / 8GB RAM / 256GB SSD'],
+          ['Accounts, multi-window, light CAD', 'i5 / 16GB RAM / 512GB SSD'],
+          ['Heavy multitasking, dev work', 'i7 / 16–32GB RAM / 512GB–1TB SSD'],
+          ['1080p gaming', 'i5 or i7 / 16GB RAM / GTX 1650 or better'],
+          ['1440p gaming, streaming, editing', 'i7 / 16–32GB RAM / RTX 3060 or better'],
         ],
       },
     ],
   },
   {
-    category: 'Delivery & Payment',
+    category: 'Jargon',
     groups: [
       {
-        label: 'How Ordering Works',
-        note: 'Simple, transparent, and Cash on Delivery — pay only when your machine arrives at your door.',
+        label: 'Plain-English glossary',
+        note: 'The terms that show up most often on our product pages.',
+        headers: ['Term', 'What it means'],
+        rows: [
+          ['SSD', 'Solid state drive. No moving parts — far faster to boot and open files than an old hard disk.'],
+          ['NVMe', 'A faster type of SSD that plugs straight into the motherboard.'],
+          ['RAM', 'Working memory. More RAM means more programs and browser tabs open at once.'],
+          ['SFF', 'Small Form Factor — a compact desktop case.'],
+          ['Return to base', 'For a warranty repair, the machine comes back to us and we cover the work.'],
+        ],
+      },
+    ],
+  },
+  {
+    category: 'Delivery & Collection',
+    groups: [
+      {
+        label: 'How ordering works',
+        note: 'Everything is tested and data-wiped before it leaves us, and the delivery cost is shown at checkout before you pay.',
         headers: ['Item', 'Detail'],
         rows: [
-          ['Delivery Fee', 'Free on orders over Rs. 5,000'],
-          ['Cash on Delivery', 'Available nationwide'],
-          ['Bank Transfer Discount', '₨ 200 off on bank transfer'],
-          ['Delivery Time', '3–7 business days after confirmation'],
-          ['Coverage', '50+ cities across Pakistan'],
+          ['Delivery', 'Free on UK mainland orders over £250'],
+          ['Dispatch', 'Typically within 48 hours, on a tracked service'],
+          ['Click & collect', 'From our Burnley unit, often the same working day'],
+          ['Returns', '14 days from delivery, unused and in original packaging'],
+          ['Warranty', '12 months, return to base'],
         ],
       },
     ],
@@ -86,51 +104,43 @@ const SECTIONS = [
 ];
 
 const HOW_TO_CHOOSE = [
-  ['Household Size', 'For 1–4 people, the 3.5 kg (AE-900A) is ideal. For 5+ people or frequent large batches, choose the 5 kg (AE-221).'],
-  ['Daily vs. Occasional', 'Cooking roti every day? The 3.5 kg model keeps up. Baking naan, pizza, or pastries regularly? Go with the 5 kg.'],
-  ['Counter Space', 'Both models are compact and designed for modern kitchens. Measure your countertop space if you plan to keep it out.'],
-  ['What You Knead', 'Atta, maida, and qeema are all handled by both models — pick the capacity that matches your weekly cooking.'],
+  ['What will you run?', 'Office work and browsing are happy on an i5 with 8GB. Heavy multitasking, big spreadsheets or dev work want 16GB and an i7.'],
+  ['How much space is there?', 'A full tower is easiest to upgrade. An SFF is a third of the size for the same performance, and a mini desktop will mount behind the monitor.'],
+  ['Do you need graphics?', 'Only gaming, 3D and video editing need a dedicated graphics card. For everything else, the built-in graphics are plenty.'],
+  ['Does cosmetic condition matter?', 'If the machine faces clients, choose Grade A. If it lives under a desk, Grade B performs identically for less.'],
 ];
 
 export default function SizeGuidePage() {
   return (
     <div>
       {/* ══════════════ HERO — Sunlit Gradient ══════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gold-100 via-cream to-stone-200">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(217,96,10,0.1),transparent_65%)]" />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(28,25,23,1) 1px, transparent 1px), linear-gradient(90deg, rgba(28,25,23,1) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
-          }}
-        />
+      <section className="relative isolate overflow-hidden bg-gold-500 text-white">
+        <PageHeroBg />
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:py-20">
-          <nav className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-charcoal-light">
-            <Link to="/" className="transition-colors hover:text-gold-600">Home</Link>
-            <span className="text-stone-400">/</span>
-            <span className="font-medium text-charcoal">Size Guide</span>
+          <nav className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-white/75">
+            <Link to="/" className="transition-colors hover:text-white">Home</Link>
+            <span className="text-white/50">/</span>
+            <span className="font-medium text-white">Buying Guide</span>
           </nav>
 
           <div className="mb-4 flex items-center justify-center gap-3">
-            <span className="h-px w-10 bg-gradient-to-r from-transparent to-gold-600/70" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-600">
-              Find Your Model
+            <span className="h-px w-10 bg-gradient-to-r from-transparent to-white/70" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/85">
+              Before You Buy
             </span>
-            <span className="h-px w-10 bg-gradient-to-l from-transparent to-gold-600/70" />
+            <span className="h-px w-10 bg-gradient-to-l from-transparent to-white/70" />
           </div>
 
-          <h1 className="font-serif text-4xl leading-tight text-charcoal sm:text-5xl lg:text-6xl">
-            Model &amp; <span className="text-gold-600">Size Guide</span>
+          <h1 className="font-serif text-4xl leading-tight text-white sm:text-5xl lg:text-6xl">
+            Buying <span className="text-white">Guide</span>
           </h1>
 
-          <p className="mx-auto mt-4 max-w-lg text-sm text-charcoal-light sm:text-base">
-            Compare our dough maker models, kneading capacities, and everything each machine can do — find your perfect fit before you order.
+          <p className="mx-auto mt-4 max-w-lg text-sm text-white/85 sm:text-base">
+            Condition grades, form factors, specifications and the jargon explained — so you can pick the right machine with confidence.
           </p>
 
-          <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+          <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-white/80 to-transparent" />
         </div>
       </section>
 
@@ -148,7 +158,7 @@ export default function SizeGuidePage() {
 
           <span className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-600">
             <span className="h-px w-5 bg-gold-400" />
-            Choosing the Right Dough Maker
+            Choosing the Right Machine
             <span className="h-px w-5 bg-gold-400" />
           </span>
 
@@ -271,11 +281,11 @@ export default function SizeGuidePage() {
           </div>
 
           <h2 className="font-serif text-2xl leading-tight text-charcoal sm:text-3xl lg:text-4xl">
-            Still Unsure Which <span className="text-gold-600">Model to Pick?</span>
+            Still Unsure What <span className="text-gold-600">You Need?</span>
           </h2>
 
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-charcoal-light sm:text-base">
-            Send us your household size and cooking habits, and we&apos;ll help you choose the perfect dough maker before you order.
+            Tell us what you will use the machine for and we&apos;ll point you at the right spec — call 01282 421306 or drop us a message.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">

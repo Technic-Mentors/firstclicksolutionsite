@@ -18,7 +18,7 @@ export default function AccountNeededAnimation() {
     <div className="relative mt-4 h-64 overflow-hidden rounded-xl border border-gold-500/15 bg-gold-50/40">
       <svg viewBox="0 0 320 230" className="h-full w-full" aria-hidden>
         {/* ground line */}
-        <line x1="10" y1="182" x2="310" y2="182" stroke="#d9600a" strokeOpacity="0.2" strokeWidth="2" />
+        <line x1="10" y1="182" x2="310" y2="182" stroke="#f06c0c" strokeOpacity="0.2" strokeWidth="2" />
 
         {/* destination marker: delivery & payment, waiting past the gate */}
         <g transform="translate(280,140)" stroke="#1c1917" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round">
@@ -34,7 +34,7 @@ export default function AccountNeededAnimation() {
             transition={{ duration: CYCLE, repeat: Infinity, ease: 'easeInOut', times: TIMES }}
             style={{ transformOrigin: '0px 104px' }}
           >
-            <rect x="-78" y="99" width="78" height="9" rx="4" fill="#d9600a" />
+            <rect x="-78" y="99" width="78" height="9" rx="4" fill="#f06c0c" />
             <rect x="-78" y="99" width="13" height="9" fill="#fff" fillOpacity="0.7" />
             <rect x="-52" y="99" width="13" height="9" fill="#fff" fillOpacity="0.7" />
             <rect x="-26" y="99" width="13" height="9" fill="#fff" fillOpacity="0.7" />
@@ -59,7 +59,7 @@ export default function AccountNeededAnimation() {
 
         {/* ── Shopper: walks up, waits for the gate, then walks through ── */}
         <motion.g
-          stroke="#d9600a"
+          stroke="#f06c0c"
           strokeWidth="2.5"
           fill="none"
           strokeLinecap="round"
@@ -70,7 +70,7 @@ export default function AccountNeededAnimation() {
           }}
           transition={{ duration: CYCLE, repeat: Infinity, ease: 'easeInOut', times: TIMES }}
         >
-          <circle cx="0" cy="145" r="9" fill="#d9600a" stroke="none" />
+          <circle cx="0" cy="145" r="9" fill="#f06c0c" stroke="none" />
           <path d="M0 154 V170" />
           <path d="M0 170 V196" />
           <path d="M0 178 L-12 190 M0 178 L12 190" />

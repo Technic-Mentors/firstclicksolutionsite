@@ -109,7 +109,7 @@ export default function OrderDetail() {
             return (
               <div key={item.id} className="flex items-center justify-between border-b border-stone-100 py-2 text-sm">
                 <span>
-                  {item.product_name} ({item.size}/{item.color}) × {item.quantity}
+                  {item.product_name} ({item.spec}/{item.condition_grade}) × {item.quantity}
                 </span>
                 <div className="flex items-center gap-3">
                   <span>{formatCurrency(item.line_total)}</span>

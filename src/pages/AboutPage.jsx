@@ -6,7 +6,6 @@ import {
   useSpring,
   useTransform,
   useReducedMotion,
-  useMotionValue,
   useInView,
 } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
@@ -31,8 +30,16 @@ const staggerContainer = {
   show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
 };
 
-const FOUNDED = 1958;
-const YEARS = new Date().getFullYear() - FOUNDED;
+const slowStaggerContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.18, delayChildren: 0.08 } },
+};
+
+const missionStaggerContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.28, delayChildren: 0.12 } },
+};
+
 
 /* ═══════════════ Word-by-word reveal ═══════════════ */
 function RevealWords({ text, className = '', delay = 0, stagger = 0.04 }) {
@@ -74,17 +81,17 @@ const IconQuality = () => (
     />
   </svg>
 );
-const IconDough = () => (
+const IconShield = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-5 w-5">
     <motion.path
-      d="M4 14c0-4 3-7 8-7s8 3 8 7c0 3-2 5-5 5H9c-3 0-5-2-5-5z"
+      d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"
       initial={{ pathLength: 0 }}
       whileInView={{ pathLength: 1 }}
       viewport={{ once: true, amount: 0 }}
       transition={{ duration: 1.1, ease: EASE }}
     />
     <motion.path
-      d="M9 4c1-1.5 5-1.5 6 0M12 7v-2"
+      d="m9 12 2 2 4-4"
       initial={{ pathLength: 0 }}
       whileInView={{ pathLength: 1 }}
       viewport={{ once: true, amount: 0 }}
@@ -146,23 +153,23 @@ const IconPin = () => (
 const VALUES = [
   {
     icon: IconQuality,
-    title: 'Authentic Quality',
-    desc: 'Genuine, tested components chosen for durability and performance — so every batch of dough comes out right.',
+    title: 'Tested, Not Just Wiped',
+    desc: 'Memory, storage health, thermals and ports are all checked under load. Anything that fails is repaired or stripped for parts rather than sold on.',
   },
   {
-    icon: IconDough,
-    title: 'Effortless Kneading',
-    desc: 'One machine handles atta, maida, and qeema. From roti and naan to pizza and pastries — all in just five minutes.',
+    icon: IconShield,
+    title: '12 Month Warranty',
+    desc: 'Every refurbished machine is covered return-to-base, so you are not left stuck if a fault develops after it reaches you.',
   },
   {
     icon: IconTruck,
-    title: 'Cash on Delivery',
-    desc: 'Available across Pakistan — pay only when your dough maker arrives at your door, safe and inspected.',
+    title: 'Free UK Delivery',
+    desc: 'Free on orders over £250 and usually dispatched within 48 hours — or collect from the Burnley unit, often the same working day.',
   },
   {
     icon: IconPin,
-    title: 'Nationwide Reach',
-    desc: 'From Karachi to Islamabad and beyond, we deliver to 50+ cities so every kitchen can knead with ease.',
+    title: 'A Real Workshop',
+    desc: 'We are not a drop-shipper. Machines are refurbished, built and tested at our unit on Balderstone Lane, and you are welcome to visit.',
   },
 ];
 
@@ -170,8 +177,8 @@ const VISION_MISSION = [
   {
     key: 'vision',
     eyebrow: 'Our Vision',
-    title: 'To make perfect dough effortless in every Pakistani kitchen.',
-    desc: 'We envision a future where no home cook has to spend hours kneading by hand — where a dependable dough maker sits in every kitchen, making roti, naan, and every family recipe simpler.',
+    title: 'To make good computing affordable, and far less wasteful.',
+    desc: 'Perfectly good business hardware gets replaced on a three-year cycle and thrown away. We think most of it has years of life left — and that a properly refurbished machine should be an obvious choice, not a compromise.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-6 w-6">
         <motion.path
@@ -196,8 +203,8 @@ const VISION_MISSION = [
   {
     key: 'mission',
     eyebrow: 'Our Mission',
-    title: 'Crafting efficient, reliable dough makers for every home.',
-    desc: 'We are committed to designing dough makers that are efficient, dependable, and easy to use — simplifying daily cooking and saving families valuable time in the kitchen since 1958.',
+    title: 'Refurbish properly, price fairly, stand behind it.',
+    desc: 'Every machine is stripped, cleaned, data-wiped and bench-tested before it is listed. We grade honestly, we say what is in the box, and we back it for twelve months.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-6 w-6">
         <motion.circle
@@ -233,18 +240,56 @@ const VISION_MISSION = [
 ];
 
 const INTRO_PARAGRAPHS = [
-  `Dough maker innovation in Pakistan started with Abdullah Kneaders in ${FOUNDED}. From the very beginning, our mission has been to design efficient, reliable, and easy-to-use dough makers that simplify daily cooking for every home.`,
-  'Every machine we make — from our compact 3.5 kg model to our spacious 5 kg kneader — is built for one purpose: to give you perfectly kneaded dough without the mess, the tired arms, or the wasted time.',
-  'Whether you are preparing atta for roti, maida for naan and pastries, or minced mixtures like qeema, our dough makers deliver consistent texture and smooth results every single time. Add the flour, pour the water, close the lid, and start. Five minutes later, your dough is ready to cook.',
-  'We are proud to offer Cash on Delivery across Pakistan and deliver to 50+ cities nationwide, so every family can bring home a dough maker they can trust.',
+  'First Click Solutions is a refurbished computer specialist based in Burnley, Lancashire. We take ex-corporate desktops, laptops and monitors — hardware built to a far higher standard than consumer kit — and bring them back to a condition we are happy to put our name on.',
+  'Every machine is stripped down and cleaned, its drive wiped to recognised data-destruction standards, and its memory, storage health, thermals and ports bench-tested under load. Faulty parts are replaced and thermal paste renewed where it is needed. Only then does it get a fresh, activated copy of Windows 11 Pro and go on sale.',
+  'We grade honestly. Grade A means little to no visible wear; Grade B means light scuffs on the casing. The grade describes how a machine looks, never how it performs — both are tested to the same standard and carry the same twelve month warranty.',
+  'Alongside the shop we run a workshop: upgrades and repairs on machines you already own, bulk supply and staged rollouts for offices and schools, and trade-in or responsible recycling for old hardware. If you would rather talk it through than click, call us on 01282 421306 or come and see us.',
 ];
 
 const STATS = [
-  { value: 15000, suffix: '+', label: 'Happy Kitchens' },
-  { value: YEARS, suffix: '+', label: 'Years of Trust' },
-  { value: 50, suffix: '+', label: 'Cities Covered' },
-  { value: 98, suffix: '%', label: 'Satisfaction Rate' },
+  { value: 12, suffix: ' mo', label: 'Warranty as Standard' },
+  { value: 7, suffix: '', label: 'Product Categories' },
+  { value: 14, suffix: ' days', label: 'Return Window' },
+  { value: 100, suffix: '%', label: 'Bench-Tested' },
 ];
+
+const WORKFLOW = ['Inspect', 'Clean & wipe', 'Bench-test', 'Ready to ship'];
+
+function RefurbishmentProgress() {
+  return (
+    <div className="mt-6 rounded-2xl border border-charcoal/5 bg-white/85 p-4 shadow-[0_12px_32px_rgba(28,25,23,0.06)] sm:p-5">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-semibold text-charcoal">Every machine follows the same process</p>
+        <span className="shrink-0 rounded-full bg-leaf-50 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-leaf-700">
+          4 stages
+        </span>
+      </div>
+      <div className="relative mt-4">
+        <div aria-hidden className="absolute left-3 right-3 top-2 h-px bg-charcoal/10" />
+        <motion.div
+          aria-hidden
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 1.1, ease: EASE, delay: 0.2 }}
+          className="absolute left-3 right-3 top-2 h-px origin-left bg-linear-to-r from-leaf-500 to-gold-500"
+        />
+        <ol className="relative grid grid-cols-4 gap-1">
+          {WORKFLOW.map((step) => (
+            <li key={step} className="flex flex-col items-center gap-2 text-center">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-gold-500 shadow-[0_0_0_1px_rgba(240,108,12,0.25)]">
+                <span className="h-1 w-1 rounded-full bg-white" />
+              </span>
+              <span className="text-[9px] font-medium leading-tight text-charcoal-light sm:text-[10px]">
+                {step}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  );
+}
 
 /* ═══════════════ Scroll Progress Bar ═══════════════ */
 function ScrollProgressBar() {
@@ -350,13 +395,11 @@ function StatCounter({ value, suffix = '', label, delay = 0 }) {
       whileHover={{ y: -6, scale: 1.03, transition: SPRING }}
       viewport={{ once: true, amount: 0 }}
       transition={{ duration: 0.6, delay, ease: EASE }}
-      className="relative flex flex-col items-center gap-1 overflow-hidden rounded-lg bg-gradient-to-br from-gold-300 to-gold-500 px-4 py-6 text-center shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-gold-500/40 hover:from-gold-200 hover:to-gold-400"
+      className="relative flex flex-col items-center gap-1 overflow-hidden rounded-2xl border border-charcoal/5 bg-white px-4 py-6 text-center shadow-[0_12px_32px_rgba(28,25,23,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(240,108,12,0.12)]"
     >
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute -top-6 -right-6 h-24 w-24 rounded-full bg-white/25 blur-xl"
-        animate={{ scale: [1, 1.15, 1], opacity: [0.7, 1, 0.7] }}
-        transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay }}
+        className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-linear-to-r from-leaf-500 via-gold-500 to-gold-400"
       />
 
       <AnimatePresence>
@@ -367,7 +410,7 @@ function StatCounter({ value, suffix = '', label, delay = 0 }) {
             animate={{ x: '120%', opacity: [0, 0.9, 0] }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.1, ease: EASE }}
-            className="pointer-events-none absolute inset-y-0 left-0 w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/60 to-transparent"
+            className="pointer-events-none absolute inset-y-0 left-0 w-1/2 -skew-x-12 bg-linear-to-r from-transparent via-gold-100/80 to-transparent"
           />
         )}
       </AnimatePresence>
@@ -378,12 +421,12 @@ function StatCounter({ value, suffix = '', label, delay = 0 }) {
         viewport={{ once: true, amount: 0 }}
         transition={{ duration: 0.8, delay: delay + 0.2, ease: EASE }}
         animate={done ? { scale: [1, 1.06, 1] } : {}}
-        className="relative font-serif text-3xl text-white sm:text-4xl lg:text-5xl"
+        className="relative font-serif text-3xl text-charcoal sm:text-4xl lg:text-5xl"
       >
         {count.toLocaleString()}
         {suffix}
       </motion.span>
-      <span className="relative text-[10px] font-semibold uppercase tracking-[0.2em] text-white/85 sm:text-xs">
+      <span className="relative text-[10px] font-semibold uppercase tracking-[0.2em] text-charcoal-light sm:text-xs">
         {label}
       </span>
     </motion.div>
@@ -393,7 +436,7 @@ function StatCounter({ value, suffix = '', label, delay = 0 }) {
 /* ═══════════════ Stats Section ═══════════════ */
 function StatsSection() {
   return (
-    <section className="bg-white py-10">
+    <section className="bg-cream-dark py-10 sm:py-12">
       <motion.div
         variants={staggerContainer}
         initial="hidden"
@@ -409,36 +452,43 @@ function StatsSection() {
   );
 }
 
-/* ═══════════════ Tilt Card ═══════════════ */
-function TiltCard({ children, className = '', max = 8 }) {
-  const reduce = useReducedMotion();
-  const rx = useMotionValue(0);
-  const ry = useMotionValue(0);
-  const srx = useSpring(rx, { stiffness: 180, damping: 18 });
-  const sry = useSpring(ry, { stiffness: 180, damping: 18 });
-
-  const onMove = (e) => {
-    if (reduce) return;
-    const el = e.currentTarget.getBoundingClientRect();
-    const px = (e.clientX - el.left) / el.width - 0.5;
-    const py = (e.clientY - el.top) / el.height - 0.5;
-    ry.set(px * max * 2);
-    rx.set(-py * max * 2);
-  };
-  const onLeave = () => {
-    rx.set(0);
-    ry.set(0);
-  };
-
+function ProductCollageTile({ product, featured = false }) {
   return (
-    <motion.div
-      onMouseMove={onMove}
-      onMouseLeave={onLeave}
-      style={{ rotateX: srx, rotateY: sry, transformPerspective: 900 }}
-      className={className}
+    <motion.figure
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.6, ease: EASE, delay: featured ? 0.08 : 0.2 }}
+      className={`group relative isolate overflow-hidden rounded-2xl border border-white bg-white shadow-[0_18px_42px_rgba(28,25,23,0.12)] ring-1 ring-charcoal/5 ${
+        featured ? 'min-h-95 sm:min-h-125' : 'min-h-45 sm:min-h-60'
+      }`}
     >
-      {children}
-    </motion.div>
+      <div aria-hidden className="absolute inset-0 -z-10 bg-linear-to-br from-white via-cream to-leaf-50/70" />
+      {product?.primary_image ? (
+        <img
+          src={assetUrl(product.primary_image)}
+          alt={product.name}
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-contain p-3 transition-transform duration-700 group-hover:scale-105 sm:p-5"
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-linear-to-br from-leaf-50 via-white to-gold-50">
+          <span className="font-serif text-4xl text-gold-300">{product?.name?.[0] || 'F'}</span>
+        </div>
+      )}
+      <div aria-hidden className="absolute inset-0 bg-linear-to-t from-charcoal/70 via-transparent to-transparent opacity-80" />
+      {featured && (
+        <span className="absolute left-3 top-3 rounded-full border border-white/70 bg-white/85 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-charcoal shadow-sm backdrop-blur-sm sm:left-4 sm:top-4 sm:text-[10px]">
+          From our workshop
+        </span>
+      )}
+      <figcaption className={`absolute inset-x-0 bottom-0 p-3 text-white sm:p-4 ${featured ? 'sm:p-5' : ''}`}>
+        <span className="mb-1 block h-0.5 w-7 rounded-full bg-gold-400" />
+        <span className={`line-clamp-2 font-serif leading-tight ${featured ? 'text-base sm:text-xl' : 'text-xs sm:text-sm'}`}>
+          {product?.name || (featured ? 'Quality refurbished computers' : 'Tested and ready to go')}
+        </span>
+      </figcaption>
+    </motion.figure>
   );
 }
 
@@ -456,31 +506,12 @@ export default function AboutPage() {
   const heroExitOpacity = useTransform(heroScroll, [0, 0.9], [1, 0]);
   const heroExitY = useTransform(heroScroll, [0, 1], [0, -40]);
 
-  const [ratingVal, setRatingVal] = useState(0);
-  const ratingRef = useRef(null);
-  const ratingInView = useInView(ratingRef, { once: true, amount: 0.3 });
-  useEffect(() => {
-    if (!ratingInView) return;
-    const duration = 1200;
-    const start = performance.now();
-    let raf;
-    const tick = (now) => {
-      const p = Math.min((now - start) / duration, 1);
-      const eased = p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
-      setRatingVal(eased * 4.9);
-      if (p < 1) raf = requestAnimationFrame(tick);
-      else setRatingVal(4.9);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [ratingInView]);
-
   return (
     <div className="relative">
       <ScrollProgressBar />
 
       {/* ══════════════ HERO — Sunlit Gradient ══════════════ */}
-      <section ref={heroRef} className="relative overflow-hidden bg-gradient-to-br from-gold-100 via-cream to-stone-200">
+      <section ref={heroRef} className="relative overflow-hidden bg-gold-500 text-white">
         <motion.div
           style={reduce ? {} : { scale: heroExitScale, opacity: heroExitOpacity, y: heroExitY }}
           className="absolute inset-0"
@@ -490,7 +521,7 @@ export default function AboutPage() {
             initial={{ opacity: 0, scale: 1.15 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.2, ease: EASE }}
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(217,96,10,0.1),transparent_65%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_18%_28%,rgba(255,255,255,0.12),transparent_58%),radial-gradient(ellipse_at_82%_72%,rgba(0,0,0,0.08),transparent_58%)]"
           />
           <motion.div
             aria-hidden
@@ -506,46 +537,10 @@ export default function AboutPage() {
             className="pointer-events-none absolute -inset-20"
             style={{
               background:
-                'radial-gradient(circle at 40% 40%, rgba(217,96,10,0.14), transparent 55%)',
+                'radial-gradient(circle at 32% 38%, rgba(255,255,255,0.10), transparent 55%), radial-gradient(circle at 70% 62%, rgba(0,0,0,0.06), transparent 55%)',
               filter: 'blur(30px)',
             }}
           />
-          <motion.div
-            aria-hidden
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.05 }}
-            transition={{ duration: 1.5, ease: EASE }}
-            className="pointer-events-none absolute inset-0"
-            style={{
-              backgroundImage:
-                'linear-gradient(rgba(28,25,23,1) 1px, transparent 1px), linear-gradient(90deg, rgba(28,25,23,1) 1px, transparent 1px)',
-              backgroundSize: '48px 48px',
-            }}
-          />
-          {!reduce && (
-            <div className="pointer-events-none absolute inset-0">
-              {[
-                { left: '8%', top: '70%', s: 6, d: 12, del: 0 },
-                { left: '22%', top: '40%', s: 4, d: 14, del: 1.5 },
-                { left: '55%', top: '80%', s: 5, d: 13, del: 0.8 },
-                { left: '72%', top: '30%', s: 3, d: 15, del: 2.1 },
-                { left: '88%', top: '62%', s: 5, d: 12.5, del: 0.4 },
-              ].map((p, i) => (
-                <motion.span
-                  key={i}
-                  className="absolute rounded-full bg-gold-400/60 blur-[1px]"
-                  style={{ left: p.left, top: p.top, width: p.s, height: p.s }}
-                  animate={{ y: [0, -60, 0], opacity: [0, 0.9, 0] }}
-                  transition={{
-                    duration: p.d,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                    delay: p.del,
-                  }}
-                />
-              ))}
-            </div>
-          )}
         </motion.div>
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:py-20">
@@ -553,11 +548,11 @@ export default function AboutPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: EASE }}
-            className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-charcoal-light"
+            className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-white/75"
           >
-            <Link to="/" className="transition-colors hover:text-gold-600">Home</Link>
-            <span className="text-stone-400">/</span>
-            <span className="font-medium text-charcoal">About</span>
+            <Link to="/" className="transition-colors hover:text-white">Home</Link>
+            <span className="text-white/50">/</span>
+            <span className="font-medium text-white">About</span>
           </motion.nav>
 
           <motion.div
@@ -570,44 +565,44 @@ export default function AboutPage() {
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 0.7, delay: 0.4, ease: EASE }}
-              className="h-px w-10 origin-right bg-gradient-to-r from-transparent to-gold-600/70"
+              className="h-px w-10 origin-right bg-gradient-to-r from-transparent to-white/70"
             />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-600">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/85">
               Our Story
             </span>
             <motion.span
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 0.7, delay: 0.4, ease: EASE }}
-              className="h-px w-10 origin-left bg-gradient-to-l from-transparent to-gold-600/70"
+              className="h-px w-10 origin-left bg-gradient-to-l from-transparent to-white/70"
             />
           </motion.div>
 
-          <h1 className="font-serif text-4xl leading-tight text-charcoal sm:text-5xl lg:text-6xl">
-            <RevealWords text="About Abdullah Kneaders" delay={0.35} stagger={0.08} />
+          <h1 className="font-serif text-4xl leading-tight text-white sm:text-5xl lg:text-6xl">
+            <RevealWords text="About First Click Solutions" delay={0.35} stagger={0.08} />
           </h1>
 
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.9, ease: EASE }}
-            className="mx-auto mt-4 max-w-lg text-sm text-charcoal-light sm:text-base"
+            className="mx-auto mt-4 max-w-lg text-sm text-white/85 sm:text-base"
           >
-            Making dough effortless for every Pakistani kitchen since {FOUNDED}.
+            Refurbished computers, properly tested, from a real workshop in Burnley.
           </motion.p>
 
           <motion.div
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ duration: 0.8, delay: 1.1, ease: EASE }}
-            className="mx-auto mt-6 h-px w-24 origin-center bg-gradient-to-r from-transparent via-gold-400 to-transparent"
+            className="mx-auto mt-6 h-px w-24 origin-center bg-gradient-to-r from-transparent via-white/80 to-transparent"
           />
         </div>
       </section>
 
       {/* ══════════════ INTRO — text left, collage right ══════════════ */}
-      <section className="relative overflow-hidden bg-cream py-10 sm:py-12">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-stretch gap-6 px-4 sm:px-6 lg:grid-cols-2 lg:gap-8">
+      <section className="relative overflow-hidden bg-cream-dark py-12 sm:py-16">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
           {/* LEFT: Text content */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
@@ -633,7 +628,7 @@ export default function AboutPage() {
               transition={{ duration: 0.6, delay: 0.2, ease: EASE }}
               className="font-serif text-2xl leading-tight text-charcoal sm:text-3xl lg:text-4xl"
             >
-              Perfect Dough, <span className="text-gold-600">Every Single Time.</span>
+              Properly Tested, <span className="text-gold-600">Honestly Graded.</span>
             </motion.h2>
 
             <div className="mt-4 space-y-3">
@@ -650,137 +645,68 @@ export default function AboutPage() {
                 </motion.p>
               ))}
             </div>
+            <RefurbishmentProgress />
           </motion.div>
 
-          {/* RIGHT: 2×2 collage */}
+          {/* Product collage: one feature image with two supporting details. */}
           <motion.div
-            initial={{ opacity: 0, x: 40, rotate: 2 }}
-            whileInView={{ opacity: 1, x: 0, rotate: 0 }}
-            viewport={{ once: true, amount: 0 }}
-            transition={{ duration: 0.7, ease: EASE, delay: 0.15 }}
-            className="relative mx-auto flex w-full max-w-[420px] items-center lg:h-full"
+            initial={{ opacity: 0, x: 32 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
+            className="relative mx-auto w-full max-w-155"
           >
-            <TiltCard max={6} className="relative w-full">
-              <div className="relative grid aspect-square h-full w-full grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden rounded-2xl bg-gold-500/15 p-0.5 shadow-lg shadow-gold-900/10 ring-1 ring-gold-500/15">
-                {[0, 1, 2, 3].map((idx) => {
-                  const product = featured?.[idx];
-                  const origin = [
-                    { x: -30, y: -30 },
-                    { x: 30, y: -30 },
-                    { x: -30, y: 30 },
-                    { x: 30, y: 30 },
-                  ][idx];
-                  return (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, scale: 1.15, x: origin.x, y: origin.y }}
-                      whileInView={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-                      viewport={{ once: true, amount: 0 }}
-                      transition={{ duration: 0.7, delay: 0.25 + idx * 0.1, ease: EASE }}
-                      className="group relative flex items-center justify-center overflow-hidden rounded-lg bg-white"
-                    >
-                      {product?.primary_image ? (
-                        <motion.img
-                          src={assetUrl(product.primary_image)}
-                          alt={product.name}
-                          className="h-full w-full object-contain p-1.5"
-                          whileHover={{ scale: 1.08 }}
-                          transition={{ duration: 0.4, ease: EASE }}
-                        />
-                      ) : (
-                        <span className="font-serif text-2xl text-gold-300">
-                          {product?.name?.[0] || '·'}
-                        </span>
-                      )}
-                      <motion.span
-                        aria-hidden
-                        initial={{ x: '-120%', opacity: 0 }}
-                        whileInView={{ x: '120%', opacity: [0, 0.8, 0] }}
-                        viewport={{ once: true, amount: 0 }}
-                        transition={{
-                          duration: 1.1,
-                          delay: 0.8 + idx * 0.15,
-                          ease: EASE,
-                        }}
-                        className="pointer-events-none absolute inset-y-0 left-0 w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/70 to-transparent"
-                      />
-                    </motion.div>
-                  );
-                })}
+            <div className="grid min-h-95 grid-cols-[1.15fr_0.85fr] items-center gap-3 sm:min-h-125 sm:gap-4">
+              <ProductCollageTile product={featured?.[0]} featured />
+              <div className="grid gap-3 sm:gap-4">
+                <ProductCollageTile product={featured?.[1]} />
+                <ProductCollageTile product={featured?.[2]} />
               </div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 12, scale: 0.9 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, amount: 0 }}
-                transition={{ duration: 0.5, delay: 0.7, ease: EASE }}
-                animate={{ y: [0, -3, 0] }}
-                whileHover={{ scale: 1.06 }}
-                className="absolute -bottom-3 left-4 z-20 flex items-center gap-2 rounded-full border border-gold-400/50 bg-charcoal px-3 py-1.5 shadow-md"
-              >
-                <motion.span
-                  animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.3, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                  className="h-1.5 w-1.5 rounded-full bg-gold-400"
-                />
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cream">
-                  Made for Every Kitchen
-                </span>
-              </motion.div>
-
-              <motion.div
-                ref={ratingRef}
-                initial={{ opacity: 0, y: -12, scale: 0.9 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, amount: 0 }}
-                transition={{ duration: 0.5, delay: 0.8, ease: EASE }}
-                animate={{ y: [0, -3, 0] }}
-                whileHover={{ scale: 1.08, rotate: -3 }}
-                className="absolute -top-3 -right-3 z-20 flex flex-col items-center rounded-xl border border-gold-400/40 bg-white px-3 py-1.5 shadow-md"
-              >
-                <span className="flex items-center gap-1 font-serif text-sm text-charcoal">
-                  {ratingVal.toFixed(1)} <span className="text-gold-500">★</span>
-                </span>
-                <span className="text-[8px] font-semibold uppercase tracking-wider text-charcoal-light">
-                  Rated
-                </span>
-              </motion.div>
-            </TiltCard>
+            </div>
+            <div className="mt-5 flex items-center gap-3 rounded-2xl border border-charcoal/5 bg-white/80 px-4 py-3 shadow-sm">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-leaf-50 text-leaf-700">
+                <IconShield />
+              </span>
+              <div>
+                <p className="text-xs font-semibold text-charcoal">Checked by our Burnley team</p>
+                <p className="mt-0.5 text-[11px] text-charcoal-light">Every device is cleaned, tested and covered by warranty.</p>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
 
       {/* ══════════════ VALUES ══════════════ */}
-      <section className="relative overflow-hidden bg-white py-10">
+      <section className="relative overflow-hidden bg-cream-dark py-12 sm:py-16">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, amount: 0 }}
           transition={{ duration: 1.2, ease: EASE }}
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(217,96,10,0.12),transparent_55%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(240,108,12,0.06),transparent_55%)]"
         />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
           <SectionHeading eyebrow="What We Stand For" title="Our Values" />
 
           <motion.div
-            variants={staggerContainer}
+            variants={slowStaggerContainer}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true, amount: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
             className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4"
           >
             {VALUES.map(({ icon: Icon, title, desc }, i) => (
               <motion.div
                 key={title}
                 variants={fadeUp}
-                whileHover={{ y: -10, scale: 1.03, transition: SPRING }}
-                className="group flex flex-col items-center rounded-xl border border-gold-500/15 bg-white p-5 text-center shadow-sm transition-all duration-300 hover:border-gold-500/50 hover:shadow-xl hover:shadow-gold-500/20"
+                whileHover={{ y: -5, transition: SPRING }}
+                className="group flex flex-col items-center rounded-2xl border border-charcoal/5 bg-white p-6 text-center shadow-[0_12px_32px_rgba(28,25,23,0.05)] transition-all duration-300 hover:border-gold-500/30 hover:shadow-[0_18px_38px_rgba(28,25,23,0.09)]"
               >
                 <motion.span
                   initial={{ scale: 0, rotate: -180 }}
                   whileInView={{ scale: 1, rotate: 0 }}
-                  viewport={{ once: true, amount: 0 }}
-                  transition={{ duration: 0.6, delay: i * 0.1, ease: EASE }}
+                  viewport={{ once: true, amount: 0.25 }}
+                  transition={{ duration: 0.6, delay: i * 0.18, ease: EASE }}
                   whileHover={{ scale: 1.15, rotate: 8 }}
                   className="relative mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gold-500/10 text-gold-600 transition-colors duration-300 group-hover:bg-gold-500 group-hover:text-white"
                 >
@@ -788,8 +714,8 @@ export default function AboutPage() {
                     aria-hidden
                     initial={{ scale: 0.6, opacity: 0 }}
                     whileInView={{ scale: [0.6, 1.6], opacity: [0.6, 0] }}
-                    viewport={{ once: true, amount: 0 }}
-                    transition={{ duration: 1.2, delay: 0.4 + i * 0.1, ease: EASE }}
+                    viewport={{ once: true, amount: 0.25 }}
+                    transition={{ duration: 1.2, delay: 0.4 + i * 0.18, ease: EASE }}
                     className="absolute inset-0 rounded-full border border-gold-500/50"
                   />
                   <Icon />
@@ -811,91 +737,98 @@ export default function AboutPage() {
       </section>
 
       {/* ══════════════ VISION & MISSION ══════════════ */}
-      <section className="relative overflow-hidden bg-cream py-8">
+      <section className="relative overflow-hidden bg-white py-12 sm:py-16">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, amount: 0 }}
           transition={{ duration: 1.2, ease: EASE }}
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(217,96,10,0.12),transparent_55%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(144,192,48,0.07),transparent_55%)]"
         />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
           <SectionHeading
             eyebrow="What Drives Us"
             title="Our Vision & Mission"
-            subtitle="Two guiding principles behind every dough maker we build."
+            subtitle="The two principles behind every machine that leaves the workshop."
           />
 
-          <div className="relative mx-auto max-w-2xl">
-            <motion.div
-              initial={{ scaleY: 0 }}
-              whileInView={{ scaleY: 1 }}
-              viewport={{ once: true, amount: 0 }}
-              transition={{ duration: 1.1, ease: EASE }}
-              className="absolute left-6 top-6 bottom-6 w-px origin-top bg-gold-500/20"
-            />
-
-            <div className="flex flex-col gap-5">
-              {VISION_MISSION.map((item, i) => {
-                const fromLeft = i % 2 === 0;
+          <motion.div
+            variants={missionStaggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.2 }}
+            className="mx-auto grid max-w-5xl grid-cols-1 gap-5 md:grid-cols-2 md:gap-6"
+          >
+              {VISION_MISSION.map((item) => {
+                const isVision = item.key === 'vision';
                 return (
                   <motion.div
                     key={item.key}
-                    initial={{ opacity: 0, x: fromLeft ? -24 : 24 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, amount: 0 }}
-                    transition={{ duration: 0.6, delay: i * 0.1, ease: EASE }}
-                    className="group relative flex items-start gap-4"
+                    variants={fadeUp}
+                    className={`group relative flex min-h-full flex-col overflow-hidden rounded-3xl border bg-white p-6 shadow-[0_16px_40px_rgba(28,25,23,0.06)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_48px_rgba(28,25,23,0.1)] sm:p-8 ${
+                      isVision
+                        ? 'border-gold-500/20'
+                        : 'border-leaf-700/15'
+                    }`}
                   >
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      whileInView={{ scale: 1 }}
-                      viewport={{ once: true, amount: 0 }}
-                      transition={{ ...SPRING, delay: i * 0.1 + 0.1 }}
-                      whileHover={{ scale: 1.08 }}
-                      className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-gold-500/30 bg-white text-gold-600 shadow-sm transition-colors duration-300 group-hover:border-gold-500 group-hover:bg-gold-500 group-hover:text-white"
-                    >
+                    <div
+                      aria-hidden
+                      className={`absolute -right-12 -top-12 h-40 w-40 rounded-full ${
+                        isVision ? 'bg-gold-500/8' : 'bg-leaf-500/10'
+                      }`}
+                    />
+                    <div className="relative flex items-center justify-between">
                       <motion.span
-                        aria-hidden
-                        initial={{ scale: 0.6, opacity: 0 }}
-                        whileInView={{ scale: [0.6, 1.7], opacity: [0.5, 0] }}
-                        viewport={{ once: true, amount: 0 }}
-                        transition={{ duration: 1.4, delay: 0.5 + i * 0.15, ease: EASE }}
-                        className="absolute inset-0 rounded-full border border-gold-500/50"
-                      />
-                      {item.icon}
-                    </motion.div>
-
-                    <motion.div
-                      whileHover={{ x: 4, transition: SPRING_SOFT }}
-                      className="relative flex-1 overflow-hidden rounded-lg border border-gold-500/15 bg-white px-4 py-3 shadow-sm transition-all duration-300 group-hover:border-gold-500/50 group-hover:shadow-md sm:px-5 sm:py-4"
-                    >
-                      <motion.span
-                        aria-hidden
-                        initial={{ opacity: 0, y: -8 }}
-                        whileInView={{ opacity: 0.08, y: 0 }}
-                        viewport={{ once: true, amount: 0 }}
-                        transition={{ duration: 0.7, delay: 0.35 + i * 0.1, ease: EASE }}
-                        className="pointer-events-none absolute -right-2 -top-3 font-serif text-6xl leading-none text-gold-600"
+                        whileHover={{ scale: 1.08, rotate: isVision ? -4 : 4 }}
+                        transition={SPRING}
+                        className={`flex h-14 w-14 items-center justify-center rounded-2xl ${
+                          isVision
+                            ? 'bg-gold-500/10 text-gold-600'
+                            : 'bg-leaf-500/10 text-leaf-700'
+                        }`}
                       >
-                        &ldquo;
+                        {item.icon}
                       </motion.span>
-
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-600">
+                      <span
+                        aria-hidden
+                        className={`font-serif text-6xl leading-none ${
+                          isVision ? 'text-gold-500/15' : 'text-leaf-700/15'
+                        }`}
+                      >
+                        {isVision ? '01' : '02'}
+                      </span>
+                    </div>
+                    <div className="relative mt-7">
+                      <span
+                        className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${
+                          isVision ? 'text-gold-600' : 'text-leaf-700'
+                        }`}
+                      >
                         {item.eyebrow}
                       </span>
-                      <h3 className="mt-0.5 font-serif text-lg leading-snug text-charcoal sm:text-xl">
+                      <h3 className="mt-2 max-w-sm font-serif text-xl leading-snug text-charcoal sm:text-2xl">
                         {item.title}
                       </h3>
-                      <p className="mt-1.5 text-sm leading-relaxed text-charcoal-light">
+                      <p className="mt-3 text-sm leading-relaxed text-charcoal-light">
                         {item.desc}
                       </p>
-                    </motion.div>
+                    </div>
+                    <div
+                      aria-hidden
+                      className={`mt-auto pt-7 ${
+                        isVision ? 'text-gold-500' : 'text-leaf-700'
+                      }`}
+                    >
+                      <span
+                        className={`block h-1 w-14 rounded-full transition-all duration-300 group-hover:w-24 ${
+                          isVision ? 'bg-gold-500' : 'bg-leaf-600'
+                        }`}
+                      />
+                    </div>
                   </motion.div>
                 );
               })}
-            </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -903,11 +836,12 @@ export default function AboutPage() {
       <StatsSection />
 
       {/* ══════════════ FEATURED PRODUCTS ══════════════ */}
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+      <section className="bg-white py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHeading
           eyebrow="Our Collection"
-          title="Featured Dough Makers"
-          subtitle="A closer look at the machines families across Pakistan trust."
+          title="Featured Machines"
+          subtitle="A closer look at what is on the bench and ready to ship."
         />
 
         <AnimatePresence mode="wait">
@@ -982,6 +916,7 @@ export default function AboutPage() {
             <p className="text-center text-charcoal-light">New arrivals coming soon.</p>
           )}
         </AnimatePresence>
+        </div>
       </section>
 
       {/* ══════════════ OUR PROMISE ══════════════ */}
@@ -1041,9 +976,9 @@ export default function AboutPage() {
             transition={{ duration: 0.6, delay: 0.3, ease: EASE }}
             className="mt-3 text-sm leading-relaxed text-charcoal-light sm:text-base"
           >
-            Every Abdullah Dough Maker is thoughtfully designed and quality-checked before it reaches your kitchen.
-            From roti and naan to pizza and pastries — we ensure consistent texture, effortless kneading, and a
-            cleaner kitchen, every single day. If anything is not right, our team is one call away.
+            Every machine is stripped, cleaned, data-wiped and bench-tested before it reaches you, then backed
+            by a twelve month return-to-base warranty. We grade honestly and list exactly what is in the box. If
+            anything is not right, our team is one call away.
           </motion.p>
         </motion.div>
       </section>
@@ -1054,7 +989,7 @@ export default function AboutPage() {
           aria-hidden
           animate={reduce ? {} : { opacity: [0.35, 0.7, 0.35], scale: [1, 1.08, 1] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(217,96,10,0.14),transparent_60%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(240,108,12,0.14),transparent_60%)]"
         />
 
         <motion.div
@@ -1091,7 +1026,7 @@ export default function AboutPage() {
             transition={{ duration: 0.6, delay: 0.15, ease: EASE }}
             className="font-serif text-2xl leading-tight text-charcoal sm:text-3xl lg:text-4xl"
           >
-            Bring Home the <span className="text-gold-600">All-in-One Dough Maker</span>
+            Find the <span className="text-gold-600">Right Machine</span>
           </motion.h2>
 
           <motion.p
@@ -1101,8 +1036,8 @@ export default function AboutPage() {
             transition={{ duration: 0.6, delay: 0.25, ease: EASE }}
             className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-charcoal-light sm:text-base"
           >
-            Explore our collection of dough makers built for atta, maida, and qeema — thoughtfully crafted for
-            everyday cooking, trusted by families across Pakistan since {FOUNDED}.
+            Browse refurbished desktops, laptops, gaming PCs, monitors and complete dual screen setups —
+            every one tested, graded honestly and backed for twelve months.
           </motion.p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">

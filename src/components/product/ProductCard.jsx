@@ -9,6 +9,7 @@ import { useFlyToStore } from '../../store/useFlyToStore';
 import { getIconTargetRect } from '../../utils/iconTargets';
 import { assetUrl } from '../../utils/media';
 import Stars from '../ui/Stars';
+import { CategoryIcon } from '../icons/CategoryIcons';
 
 const LOW_STOCK_THRESHOLD = 5;
 
@@ -68,73 +69,102 @@ export default function ProductCard({ product, onToggleWishlist, isWishlisted: i
       className="group relative"
     >
       <Link to={`/product/${product.slug}`} className="block">
-        <div className="relative aspect-4/5 overflow-hidden rounded-lg bg-stone-100 shadow-sm ring-1 ring-gold-500/20 transition-all duration-300 group-hover:shadow-md group-hover:ring-gold-500/50">
-          {product.primary_image ? (
-            <img
-              ref={imageRef}
-              src={assetUrl(product.primary_image)}
-              alt={product.name}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center text-stone-300">No image</div>
-          )}
-          {outOfStock && (
-            <span className="absolute left-2 top-2 rounded-full bg-charcoal/80 px-2.5 py-1 text-[11px] font-medium text-white">
-              Out of stock
-            </span>
-          )}
-          {compareAt && compareAt > price && !outOfStock && (
-            <span className="absolute left-2 top-2 rounded-full bg-gold-500 px-2.5 py-1 text-[11px] font-medium text-white">
-              Sale
-            </span>
-          )}
-          {lowStock && (
-            <span className="absolute left-2 bottom-2 rounded-full bg-red-600/90 px-2.5 py-1 text-[11px] font-medium text-white">
-              Only {totalStock} left
-            </span>
-          )}
+        <div className="relative rounded-[22px] border border-charcoal/5 bg-white p-2 shadow-[0_18px_40px_rgba(28,25,23,0.07)] transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_24px_54px_rgba(240,108,12,0.12)]">
+          <div className="relative aspect-4/5 overflow-hidden rounded-[18px] bg-stone-100 ring-1 ring-charcoal/5">
+            {product.primary_image ? (
+              <img
+                ref={imageRef}
+                src={assetUrl(product.primary_image)}
+                alt={product.name}
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            ) : (
+              <div className="relative flex h-full flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-leaf-50 via-white to-gold-50">
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -left-8 -top-8 h-24 w-24 rounded-full bg-leaf-400/20 blur-2xl"
+                />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -bottom-8 -right-8 h-24 w-24 rounded-full bg-gold-400/20 blur-2xl"
+                />
+                <span className="relative text-gold-500/70 transition-transform duration-500 group-hover:scale-110">
+                  <CategoryIcon slug={product.category_slug} className="h-14 w-14" strokeWidth={1.2} />
+                </span>
+                <span className="relative mt-2 px-3 text-center text-[10px] font-medium uppercase tracking-[0.18em] text-charcoal-light/70">
+                  {product.category_name || 'Photo coming soon'}
+                </span>
+              </div>
+            )}
 
-          <div className="absolute right-1.5 top-1.5 flex flex-col gap-1.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-            <button
-              onClick={handleWishlistClick}
-              aria-label="Toggle wishlist"
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-charcoal shadow-sm transition-colors hover:text-gold-600"
-            >
-              <motion.span
-                key={isWishlisted}
-                initial={{ scale: 0.5 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 15 }}
-                className="flex"
-              >
-                <HeartIcon filled={isWishlisted} />
-              </motion.span>
-            </button>
+            <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-charcoal/25 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+            {outOfStock && (
+              <span className="absolute left-2 top-2 rounded-full bg-charcoal/80 px-2.5 py-1 text-[11px] font-medium text-white">
+                Out of stock
+              </span>
+            )}
+            {compareAt && compareAt > price && !outOfStock && (
+              <span className="absolute left-2 top-2 rounded-full bg-gold-500 px-2.5 py-1 text-[11px] font-medium text-white">
+                Sale
+              </span>
+            )}
             {!outOfStock && (
+              <div className="absolute inset-x-2 bottom-2 flex items-center justify-between gap-2">
+                <span className="rounded-full border border-white/50 bg-white/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-charcoal shadow-sm backdrop-blur-sm">
+                  Ready to ship
+                </span>
+                <span className="rounded-full bg-leaf-500/90 px-2 py-1 text-[10px] font-semibold text-white shadow-sm">
+                  Tested
+                </span>
+              </div>
+            )}
+
+            <div className="absolute right-1.5 top-1.5 flex flex-col gap-1.5 opacity-0 transition-all duration-300 group-hover:opacity-100 focus-within:opacity-100">
               <button
-                onClick={handleCartClick}
-                aria-label="View and add to cart"
+                onClick={handleWishlistClick}
+                aria-label="Toggle wishlist"
                 className="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-charcoal shadow-sm transition-colors hover:text-gold-600"
               >
-                <CartIcon />
+                <motion.span
+                  key={isWishlisted}
+                  initial={{ scale: 0.5 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                  className="flex"
+                >
+                  <HeartIcon filled={isWishlisted} />
+                </motion.span>
               </button>
+              {!outOfStock && (
+                <button
+                  onClick={handleCartClick}
+                  aria-label="View and add to cart"
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-charcoal shadow-sm transition-colors hover:text-gold-600"
+                >
+                  <CartIcon />
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <h3 className="truncate font-serif text-sm text-charcoal">{product.name}</h3>
+            {compareAt && compareAt > price && (
+              <span className="shrink-0 text-[11px] text-stone-400 line-through">{formatCurrency(compareAt)}</span>
             )}
           </div>
-        </div>
-        <div className="mt-1.5 flex items-center justify-between gap-2">
-          <h3 className="truncate font-serif text-sm text-charcoal">{product.name}</h3>
-          {compareAt && compareAt > price && (
-            <span className="shrink-0 text-[11px] text-stone-400 line-through">{formatCurrency(compareAt)}</span>
+          {ratingCount > 0 && (
+            <div className="mt-1 flex items-center gap-1.5">
+              <Stars value={ratingAvg} size="sm" />
+              <span className="text-[11px] text-stone-400">({ratingCount})</span>
+            </div>
           )}
-        </div>
-        {ratingCount > 0 && (
-          <div className="mt-0.5 flex items-center gap-1.5">
-            <Stars value={ratingAvg} size="sm" />
-            <span className="text-[11px] text-stone-400">({ratingCount})</span>
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <span className="text-base font-semibold text-gold-700">{formatCurrency(price)}</span>
+            {!outOfStock && <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-leaf-700">In stock</span>}
           </div>
-        )}
-        <span className="text-sm font-semibold text-gold-700">{formatCurrency(price)}</span>
+        </div>
       </Link>
     </motion.div>
   );

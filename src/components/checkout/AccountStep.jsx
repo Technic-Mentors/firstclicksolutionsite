@@ -149,14 +149,14 @@ export default function AccountStep({ onAuthenticated }) {
             />
             <Input
               label="Phone"
-              placeholder="03XXXXXXXXX"
-              maxLength={11}
+              placeholder="07700 900123"
+              maxLength={16}
               {...registerForm.register('phone')}
               error={registerForm.formState.errors.phone?.message}
             />
             <Input
               label="Delivery Address"
-              placeholder="House #, street, area"
+              placeholder="House number and street"
               maxLength={100}
               {...registerForm.register('addressLine1')}
               error={registerForm.formState.errors.addressLine1?.message}

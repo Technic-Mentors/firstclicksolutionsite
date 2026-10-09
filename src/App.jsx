@@ -72,8 +72,11 @@ function PageFallback() {
 }
 
 /* ═══════════════ Floating WhatsApp Button ═══════════════ */
-const WHATSAPP_NUMBER = '923107777899';
-const WHATSAPP_MESSAGE = 'Hello Abdullah Kneaders, I would like to know more about your products.';
+// TODO: set this once First Click Solutions has a WhatsApp business number.
+// Left empty on purpose — FloatingWhatsApp hides itself while it is blank, which is
+// better than linking customers to the previous brand's number.
+const WHATSAPP_NUMBER = '';
+const WHATSAPP_MESSAGE = 'Hello First Click Solutions, I would like to know more about your products.';
 
 function FloatingWhatsApp() {
   const { pathname } = useLocation();

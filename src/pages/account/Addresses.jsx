@@ -126,7 +126,7 @@ export default function Addresses() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
           <Input label="Label" {...register('label')} error={errors.label?.message} />
           <Input label="Full Name" required maxLength={25} {...register('fullName')} error={errors.fullName?.message} />
-          <Input label="Phone" required placeholder="03XXXXXXXXX" maxLength={11} {...register('phone')} error={errors.phone?.message} />
+          <Input label="Phone" required placeholder="07700 900123" maxLength={16} {...register('phone')} error={errors.phone?.message} />
           <Input label="Address Line 1" required maxLength={100} {...register('addressLine1')} error={errors.addressLine1?.message} />
           <Input label="Address Line 2 (optional)" maxLength={100} {...register('addressLine2')} error={errors.addressLine2?.message} />
           <Input label="City" required {...register('city')} error={errors.city?.message} />

@@ -4,6 +4,7 @@ import { useAsync } from '../hooks/useAsync';
 import { getPublicSettings } from '../api/settings.api';
 import Spinner from '../components/ui/Spinner';
 import Button from '../components/ui/Button';
+import PageHeroBg from '../components/layout/PageHeroBg';
 
 const EASE = [0.22, 1, 0.36, 1];
 
@@ -25,41 +26,33 @@ export default function PolicyPage() {
   return (
     <div>
       {/* ══════════════ HERO — Sunlit Gradient ══════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gold-100 via-cream to-stone-200">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(217,96,10,0.1),transparent_65%)]" />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(28,25,23,1) 1px, transparent 1px), linear-gradient(90deg, rgba(28,25,23,1) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
-          }}
-        />
+      <section className="relative isolate overflow-hidden bg-gold-500 text-white">
+        <PageHeroBg />
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:py-20">
-          <nav className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-charcoal-light">
-            <Link to="/" className="transition-colors hover:text-gold-600">Home</Link>
-            <span className="text-stone-400">/</span>
-            <span className="font-medium text-charcoal">Shipping &amp; Returns</span>
+          <nav className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-white/75">
+            <Link to="/" className="transition-colors hover:text-white">Home</Link>
+            <span className="text-white/50">/</span>
+            <span className="font-medium text-white">Shipping &amp; Returns</span>
           </nav>
 
           <div className="mb-4 flex items-center justify-center gap-3">
-            <span className="h-px w-10 bg-gradient-to-r from-transparent to-gold-600/70" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-600">
+            <span className="h-px w-10 bg-gradient-to-r from-transparent to-white/70" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/85">
               Policy &amp; Information
             </span>
-            <span className="h-px w-10 bg-gradient-to-l from-transparent to-gold-600/70" />
+            <span className="h-px w-10 bg-gradient-to-l from-transparent to-white/70" />
           </div>
 
-          <h1 className="font-serif text-4xl leading-tight text-charcoal sm:text-5xl lg:text-6xl">
-            Shipping &amp; <span className="text-gold-600">Returns</span>
+          <h1 className="font-serif text-4xl leading-tight text-white sm:text-5xl lg:text-6xl">
+            Shipping &amp; <span className="text-white">Returns</span>
           </h1>
 
-          <p className="mx-auto mt-4 max-w-lg text-sm text-charcoal-light sm:text-base">
-            Everything you need to know about delivery times and our return policy.
+          <p className="mx-auto mt-4 max-w-lg text-sm text-white/85 sm:text-base">
+            Everything you need to know about delivery, returns and your 12 month warranty.
           </p>
 
-          <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+          <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-white/80 to-transparent" />
         </div>
       </section>
 
@@ -95,24 +88,26 @@ export default function PolicyPage() {
                   <h2 className="mt-0.5 font-serif text-xl text-charcoal sm:text-2xl">Shipping</h2>
                   <div className="mt-3 space-y-2 text-sm leading-relaxed text-charcoal-light">
                     <p>
-                      We deliver across Pakistan via <strong className="text-charcoal">Cash on Delivery</strong> —
-                      pay only when your order arrives at your doorstep. No advance payment required.
+                      Delivery to UK mainland addresses is{' '}
+                      <strong className="text-charcoal">free on orders over £250</strong>, and charged at a flat
+                      rate below that. The rate is shown at checkout before you pay.
                     </p>
                     <p>
-                      Orders are confirmed by phone before dispatch and typically arrive within{' '}
-                      <strong className="text-charcoal">3–7 business days</strong>. Remote areas may take slightly
-                      longer.
+                      Orders are typically dispatched within{' '}
+                      <strong className="text-charcoal">48 hours</strong> and arrive on a tracked courier service.
+                      The Scottish Highlands, Northern Ireland and offshore addresses may take a little longer.
                     </p>
                     <p>
-                      We also ship internationally, including to the USA — <a href="/contact" className="font-medium text-gold-600 hover:underline">contact us</a> for
-                      shipping rates and delivery timelines to your country.
+                      You are also welcome to{' '}
+                      <strong className="text-charcoal">collect from our Burnley unit</strong> — often the same
+                      working day. Call ahead on 01282 421306 and we will have it ready and running.
                     </p>
                   </div>
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <InfoPill label="Cash on Delivery" />
-                    <InfoPill label="3–7 business days" />
-                    <InfoPill label="Phone confirmation" />
+                    <InfoPill label="Free over £250" />
+                    <InfoPill label="Dispatched in 48h" />
+                    <InfoPill label="Click &amp; collect" />
                   </div>
                 </div>
               </div>
@@ -153,6 +148,48 @@ export default function PolicyPage() {
                 </div>
               </div>
             </motion.div>
+
+            {/* ── Warranty ── */}
+            <motion.div
+              variants={fadeUp}
+              className="group relative overflow-hidden rounded-xl border border-gold-500/15 bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-md sm:p-7"
+            >
+              <span className="absolute inset-y-5 left-0 w-0.5 bg-gradient-to-b from-leaf-400 to-leaf-600" />
+
+              <div className="flex items-start gap-4">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-leaf-500/10 text-leaf-700">
+                  <ShieldIcon />
+                </span>
+                <div className="flex-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-leaf-700">
+                    Covered
+                  </span>
+                  <h2 className="mt-0.5 font-serif text-xl text-charcoal sm:text-2xl">Warranty</h2>
+                  <div className="mt-3 space-y-2 text-sm leading-relaxed text-charcoal-light">
+                    <p>
+                      All refurbished hardware is covered by a{' '}
+                      <strong className="text-charcoal">12 month return-to-base warranty</strong> from the date of
+                      delivery. If a fault develops, contact us and we will arrange repair or replacement.
+                    </p>
+                    <p>
+                      Return-to-base means you send the machine back to us (or bring it in to the Burnley unit) and
+                      we cover the repair. The warranty covers hardware faults, not accidental damage, liquid
+                      damage, or software problems caused after delivery.
+                    </p>
+                    <p>
+                      Your statutory rights under the Consumer Rights Act 2015 apply in addition to this warranty
+                      and are not affected by it.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <InfoPill label="12 months" />
+                    <InfoPill label="Return to base" />
+                    <InfoPill label="Hardware faults" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </div>
@@ -179,7 +216,7 @@ export default function PolicyPage() {
           </h2>
 
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-charcoal-light sm:text-base">
-            Reach out before, during, or after your order — we respond within 24 hours.
+            Call 01282 421306 or email info@firstclicksolutions.co.uk — before, during or after your order.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -211,6 +248,15 @@ function TruckIcon() {
       <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z" />
       <circle cx="5.5" cy="18.5" r="2" />
       <circle cx="18.5" cy="18.5" r="2" />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z" />
+      <path d="m9 12 2 2 4-4" />
     </svg>
   );
 }

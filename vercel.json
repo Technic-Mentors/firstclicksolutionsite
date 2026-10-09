@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://backend.abdullahkneaders.com/api/:path*"
+      "destination": "https://fcsbackend.technicmentors.com/api/:path*"
     },
     {
       "source": "/(.*)",

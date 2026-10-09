@@ -139,7 +139,7 @@ export default function Dashboard() {
                     to={item.product_id ? `/admin/products/${item.product_id}/edit` : '/admin/inventory'}
                     className="text-charcoal hover:text-gold-600"
                   >
-                    {item.product_name} {item.size ? `(${item.size}${item.color ? ` / ${item.color}` : ''})` : ''}
+                    {item.product_name} {item.spec ? `(${item.spec}${item.condition_grade ? ` / ${item.condition_grade}` : ''})` : ''}
                   </Link>
                   <span className="font-medium text-red-600">{item.stock_quantity} left</span>
                 </li>

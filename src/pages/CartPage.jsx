@@ -186,7 +186,7 @@ export default function CartPage() {
           </Button>
 
           <div className="flex items-center justify-center gap-2 pt-2 text-xs text-charcoal-light">
-            <TruckIcon /> Cash on Delivery available across Pakistan
+            <TruckIcon /> Free UK delivery on orders over £250
           </div>
         </div>
       </div>

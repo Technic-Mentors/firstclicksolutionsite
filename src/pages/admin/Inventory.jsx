@@ -25,8 +25,8 @@ export default function Inventory() {
           emptyMessage="Nothing is low on stock right now."
           columns={[
             { key: 'product_name', label: 'Product', render: (row) => row.product_name || row.productName },
-            { key: 'size', label: 'Size', render: (row) => row.size || '-' },
-            { key: 'color', label: 'Color', render: (row) => row.color || '-' },
+            { key: 'spec', label: 'Spec', render: (row) => row.spec || '-' },
+            { key: 'condition_grade', label: 'Condition', render: (row) => row.condition_grade || '-' },
             {
               key: 'stock_quantity',
               label: 'Current Stock',

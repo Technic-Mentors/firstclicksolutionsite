@@ -117,8 +117,8 @@ export default function ProductPage() {
           productId: product.id,
           productName: product.name,
           productSlug: product.slug,
-          size: selectedVariant.size,
-          color: selectedVariant.color,
+          spec: selectedVariant.spec,
+          conditionGrade: selectedVariant.condition_grade,
           unitPrice: Number(selectedVariant.price_override ?? product.base_price),
           primaryImage: product.images?.[0]?.image_path,
           stockQuantity: selectedVariant.stock_quantity,
@@ -328,9 +328,9 @@ export default function ProductPage() {
           )}
 
           <div className="mt-6 grid grid-cols-2 gap-3 rounded-xl border border-gold-500/15 bg-gold-50/40 p-4 sm:grid-cols-4">
-            <TrustPoint icon={<TruckIcon />} label="Cash on Delivery" />
-            <TrustPoint icon={<ReturnIcon />} label="Easy Returns" />
-            <TrustPoint icon={<BadgeIcon />} label="Quality Assured" />
+            <TrustPoint icon={<TruckIcon />} label="Free UK Delivery" />
+            <TrustPoint icon={<ReturnIcon />} label="14 Day Returns" />
+            <TrustPoint icon={<BadgeIcon />} label="12 Month Warranty" />
             <TrustPoint icon={<LockIcon />} label="Secure Checkout" />
           </div>
 
@@ -346,7 +346,7 @@ export default function ProductPage() {
             {product.fabric && (
               <div>
                 <h3 className="mb-1 flex items-center gap-2 font-medium text-charcoal">
-                  <MaterialIcon /> Material
+                  <MaterialIcon /> Brand
                 </h3>
                 <p>{product.fabric}</p>
               </div>
@@ -354,7 +354,7 @@ export default function ProductPage() {
             {product.care_instructions && (
               <div>
                 <h3 className="mb-1 flex items-center gap-2 font-medium text-charcoal">
-                  <CareIcon /> Care Instructions
+                  <CareIcon /> Condition &amp; what&rsquo;s included
                 </h3>
                 <p>{product.care_instructions}</p>
               </div>

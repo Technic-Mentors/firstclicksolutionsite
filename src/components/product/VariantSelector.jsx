@@ -2,15 +2,15 @@ import { useMemo, useState, useEffect } from 'react';
 import { cn } from '../../utils/cn';
 
 export default function VariantSelector({ variants = [], onChange }) {
-  const sizes = useMemo(() => [...new Set(variants.map((v) => v.size))], [variants]);
-  const colors = useMemo(() => [...new Set(variants.map((v) => v.color))], [variants]);
+  const specs = useMemo(() => [...new Set(variants.map((v) => v.spec))], [variants]);
+  const grades = useMemo(() => [...new Set(variants.map((v) => v.condition_grade))], [variants]);
 
-  const [size, setSize] = useState(sizes[0] ?? null);
-  const [color, setColor] = useState(colors[0] ?? null);
+  const [spec, setSpec] = useState(specs[0] ?? null);
+  const [grade, setGrade] = useState(grades[0] ?? null);
 
   const selected = useMemo(
-    () => variants.find((v) => v.size === size && v.color === color) ?? null,
-    [variants, size, color],
+    () => variants.find((v) => v.spec === spec && v.condition_grade === grade) ?? null,
+    [variants, spec, grade],
   );
 
   useEffect(() => {
@@ -18,44 +18,46 @@ export default function VariantSelector({ variants = [], onChange }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
-  function stockFor(candidateSize, candidateColor) {
-    return variants.find((v) => v.size === candidateSize && v.color === candidateColor)?.stock_quantity ?? 0;
+  function stockFor(candidateSpec, candidateGrade) {
+    return (
+      variants.find((v) => v.spec === candidateSpec && v.condition_grade === candidateGrade)?.stock_quantity ?? 0
+    );
   }
 
-  function handleSelectSize(nextSize) {
-    setSize(nextSize);
-    // Variant combinations aren't always a full grid (e.g. L only comes in Beige) —
-    // if the current color has no stock for this size, jump to a color that does.
-    if (stockFor(nextSize, color) === 0) {
-      const fallback = colors.find((c) => stockFor(nextSize, c) > 0);
-      if (fallback) setColor(fallback);
+  function handleSelectSpec(nextSpec) {
+    setSpec(nextSpec);
+    // Variant combinations aren't always a full grid (e.g. the 32GB build only comes
+    // in Grade A) — if the current grade has no stock for this spec, jump to one that does.
+    if (stockFor(nextSpec, grade) === 0) {
+      const fallback = grades.find((g) => stockFor(nextSpec, g) > 0);
+      if (fallback) setGrade(fallback);
     }
   }
 
-  function handleSelectColor(nextColor) {
-    setColor(nextColor);
-    if (stockFor(size, nextColor) === 0) {
-      const fallback = sizes.find((s) => stockFor(s, nextColor) > 0);
-      if (fallback) setSize(fallback);
+  function handleSelectGrade(nextGrade) {
+    setGrade(nextGrade);
+    if (stockFor(spec, nextGrade) === 0) {
+      const fallback = specs.find((s) => stockFor(s, nextGrade) > 0);
+      if (fallback) setSpec(fallback);
     }
   }
 
   return (
     <div className="space-y-4">
-      {sizes.length > 1 && (
+      {specs.length > 1 && (
         <div>
-          <p className="mb-2 text-sm font-medium text-charcoal-light">Size</p>
+          <p className="mb-2 text-sm font-medium text-charcoal-light">Specification</p>
           <div className="flex flex-wrap gap-2">
-            {sizes.map((s) => {
-              const disabled = variants.every((v) => v.size !== s || v.stock_quantity === 0);
+            {specs.map((s) => {
+              const disabled = variants.every((v) => v.spec !== s || v.stock_quantity === 0);
               return (
                 <button
                   key={s}
                   disabled={disabled}
-                  onClick={() => handleSelectSize(s)}
+                  onClick={() => handleSelectSpec(s)}
                   className={cn(
                     'rounded-md border px-4 py-2 text-sm transition-colors',
-                    s === size ? 'border-gold-500 bg-gold-50 text-gold-700' : 'border-stone-300 text-charcoal',
+                    s === spec ? 'border-gold-500 bg-gold-50 text-gold-700' : 'border-stone-300 text-charcoal',
                     disabled && 'cursor-not-allowed opacity-40 line-through',
                   )}
                 >
@@ -67,24 +69,24 @@ export default function VariantSelector({ variants = [], onChange }) {
         </div>
       )}
 
-      {colors.length > 1 && (
+      {grades.length > 1 && (
         <div>
-          <p className="mb-2 text-sm font-medium text-charcoal-light">Color</p>
+          <p className="mb-2 text-sm font-medium text-charcoal-light">Condition</p>
           <div className="flex flex-wrap gap-2">
-            {colors.map((c) => {
-              const disabled = variants.every((v) => v.color !== c || v.stock_quantity === 0);
+            {grades.map((g) => {
+              const disabled = variants.every((v) => v.condition_grade !== g || v.stock_quantity === 0);
               return (
                 <button
-                  key={c}
+                  key={g}
                   disabled={disabled}
-                  onClick={() => handleSelectColor(c)}
+                  onClick={() => handleSelectGrade(g)}
                   className={cn(
                     'rounded-md border px-4 py-2 text-sm transition-colors',
-                    c === color ? 'border-gold-500 bg-gold-50 text-gold-700' : 'border-stone-300 text-charcoal',
+                    g === grade ? 'border-gold-500 bg-gold-50 text-gold-700' : 'border-stone-300 text-charcoal',
                     disabled && 'cursor-not-allowed opacity-40 line-through',
                   )}
                 >
-                  {c}
+                  {g}
                 </button>
               );
             })}
@@ -95,8 +97,8 @@ export default function VariantSelector({ variants = [], onChange }) {
       {selected && selected.stock_quantity > 0 && selected.stock_quantity <= 5 && (
         <p className="text-xs font-medium text-amber-600">Only {selected.stock_quantity} left in stock</p>
       )}
-      {!selected && (sizes.length > 1 || colors.length > 1) && (
-        <p className="text-xs text-charcoal-light">Select a size and color to see availability.</p>
+      {!selected && (specs.length > 1 || grades.length > 1) && (
+        <p className="text-xs text-charcoal-light">Select a specification and condition to see availability.</p>
       )}
     </div>
   );

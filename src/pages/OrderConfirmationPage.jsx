@@ -47,7 +47,7 @@ export default function OrderConfirmationPage() {
           {order.items.map((item) => (
             <div key={item.id} className="flex justify-between text-sm">
               <span>
-                {item.product_name} ({item.size}/{item.color}) × {item.quantity}
+                {item.product_name} ({item.spec}/{item.condition_grade}) × {item.quantity}
               </span>
               <span>{formatCurrency(item.line_total)}</span>
             </div>

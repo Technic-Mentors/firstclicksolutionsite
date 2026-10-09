@@ -71,47 +71,38 @@ export default function ShopPage() {
 
   return (
     <div>
-      {/* ══════════════ SHOP HERO — Sunlit Gradient ══════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-gold-100 via-cream to-stone-200">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(217,96,10,0.1),transparent_65%)]" />
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(28,25,23,1) 1px, transparent 1px), linear-gradient(90deg, rgba(28,25,23,1) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
-          }}
-        />
-
+      {/* Shop hero uses the same orange as the site header. */}
+      <section className="relative isolate overflow-hidden bg-gold-500 text-white">
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(255,255,255,0.12),transparent_28%),radial-gradient(circle_at_85%_100%,rgba(0,0,0,0.08),transparent_34%)]" />
         <div className="relative mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:py-20">
           {/* Breadcrumb */}
-          <nav className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-charcoal-light">
-            <Link to="/" className="transition-colors hover:text-gold-600">Home</Link>
-            <span className="text-stone-400">/</span>
-            <span className="font-medium text-charcoal">{current?.name || 'Shop'}</span>
+          <nav className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-white/75">
+            <Link to="/" className="transition-colors hover:text-white">Home</Link>
+            <span className="text-white/50">/</span>
+            <span className="font-medium text-white">{current?.name || 'Shop'}</span>
           </nav>
 
           {/* Eyebrow */}
           <div className="mb-4 flex items-center justify-center gap-3">
-            <span className="h-px w-10 bg-gradient-to-r from-transparent to-gold-600/70" />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-600">
+            <span className="h-px w-10 bg-gradient-to-r from-transparent to-white/70" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/85">
               Shop the Collection
             </span>
-            <span className="h-px w-10 bg-gradient-to-l from-transparent to-gold-600/70" />
+            <span className="h-px w-10 bg-gradient-to-l from-transparent to-white/70" />
           </div>
 
           {/* Title */}
-          <h1 className="font-serif text-4xl capitalize leading-tight text-charcoal sm:text-5xl lg:text-6xl">
+          <h1 className="font-serif text-4xl capitalize leading-tight text-white sm:text-5xl lg:text-6xl">
             {current?.name || 'Shop'}
           </h1>
 
           {/* Subtitle */}
-          <p className="mx-auto mt-4 max-w-lg text-sm text-charcoal-light sm:text-base">
+          <p className="mx-auto mt-4 max-w-lg text-sm text-white/85 sm:text-base">
             Premium gear crafted with care — thoughtfully engineered for training, competition, and everyday performance.
           </p>
 
           {/* Underline */}
-          <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+          <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-white/80 to-transparent" />
         </div>
       </section>
 

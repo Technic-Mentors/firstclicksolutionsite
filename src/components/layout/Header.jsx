@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, NavLink } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -11,6 +12,16 @@ import { cn } from '../../utils/cn';
 import { registerIconTarget } from '../../utils/iconTargets';
 import CustomerNotificationBell from './CustomerNotificationBell';
 import SearchBar from './SearchBar';
+import {
+  BRAND_NAME,
+  STORE_PHONE,
+  STORE_PHONE_HREF,
+  STORE_PHONE_SECONDARY,
+  STORE_PHONE_SECONDARY_HREF,
+  STORE_EMAIL,
+  STORE_EMAIL_HREF,
+  SOCIAL_LINKS,
+} from '../../config/site';
 
 const NAV_LINKS = [
   { to: '/about', label: 'About' },
@@ -20,14 +31,13 @@ const NAV_LINKS = [
   { to: '/contact', label: 'Contact' },
 ];
 
-const FACEBOOK_URL = 'https://www.facebook.com/CapitalDoughMaker';
-const INSTAGRAM_URL = 'https://www.instagram.com/capitaldoughmaker/';
-const WHATSAPP_NUMBER = '923107777899';
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
-
 const Header = React.forwardRef(function Header(_, ref) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [mobileMenuTop, setMobileMenuTop] = useState(0);
+  const headerElementRef = useRef(null);
+  const mobileMenuRef = useRef(null);
   const customer = useAuthStore((s) => s.customer);
   const items = useCartStore((s) => s.items);
   const count = cartItemCount(items);
@@ -42,6 +52,31 @@ const Header = React.forwardRef(function Header(_, ref) {
     (categories || []).filter((c) => c.parent_id === id);
 
   useEffect(() => {
+    if (!mobileMenuOpen) return undefined;
+
+    function updateMenuTop() {
+      if (headerElementRef.current) {
+        setMobileMenuTop(headerElementRef.current.getBoundingClientRect().bottom);
+      }
+    }
+
+    updateMenuTop();
+    window.addEventListener('resize', updateMenuTop);
+
+    function handleOutsidePointer(event) {
+      if (!mobileMenuRef.current?.contains(event.target)) {
+        setMobileMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('pointerdown', handleOutsidePointer);
+    return () => {
+      window.removeEventListener('resize', updateMenuTop);
+      document.removeEventListener('pointerdown', handleOutsidePointer);
+    };
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
     if (customer && !wishlistLoaded) {
       useWishlistStore.getState().load();
     }
@@ -49,48 +84,58 @@ const Header = React.forwardRef(function Header(_, ref) {
 
   return (
     <header
-      ref={ref}
-      className="sticky top-0 z-40 border-b border-stone-200 bg-cream/95 backdrop-blur"
+      ref={(node) => {
+        headerElementRef.current = node;
+        if (typeof ref === 'function') ref(node);
+        else if (ref) ref.current = node;
+      }}
+      className="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur md:bg-cream/95"
     >
       {/* ══════════════ TOP ANNOUNCEMENT STRIP ══════════════ */}
-      <div className="relative overflow-hidden bg-charcoal">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,0.1),transparent_70%)]" />
-        <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2 sm:px-6">
-          {/* Left: Welcome message */}
-          <p className="text-[11px] font-medium tracking-wide text-stone-300 sm:text-xs">
-            Welcome to <span className="text-stone-300">Abdullah Kneaders</span>
-            <span className="mx-1.5 text-stone-300">—</span>
-           Perfect Dough, Every Time.
-          </p>
+      {/* Solid orange band in the logo's accent, white text throughout, carrying the
+          social accounts on the left and both contact numbers on the right. */}
+      <div className="bg-gold-500 text-white">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-1.5 px-4 py-2 sm:px-6">
+          {/* Left: social accounts */}
+          <div className="flex items-center gap-1.5">
+            {SOCIAL_LINKS.map((social) => (
+              <a
+                key={social.name}
+                href={social.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label={social.name}
+                title={social.name}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-gold-600 shadow-sm transition-transform duration-200 hover:scale-110 hover:text-gold-700"
+              >
+                <SocialIcon name={social.name} className="h-[1.1rem] w-[1.1rem]" />
+              </a>
+            ))}
+            <span className="ml-1.5 hidden text-[11px] font-medium tracking-wide text-white/90 sm:inline sm:text-xs">
+              Welcome to <span className="font-semibold text-white">{BRAND_NAME}</span>
+            </span>
+          </div>
 
-          {/* Right: Social icons (bigger, compact) */}
-          <div className="flex items-center gap-0.5">
+          {/* Right: both contact numbers + email */}
+          <div className="flex items-center gap-x-3 gap-y-1">
             <a
-              href={FACEBOOK_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-stone-400 transition-all duration-300 hover:bg-gold-500/15 hover:text-gold-400"
+              href={STORE_PHONE_HREF}
+              className="text-[11px] font-semibold text-white transition-opacity hover:opacity-80 sm:text-xs"
             >
-              <FacebookIcon />
+              {STORE_PHONE}
+            </a>
+            <span className="text-white/40" aria-hidden="true">|</span>
+            <a
+              href={STORE_PHONE_SECONDARY_HREF}
+              className="text-[11px] font-semibold text-white transition-opacity hover:opacity-80 sm:text-xs"
+            >
+              {STORE_PHONE_SECONDARY}
             </a>
             <a
-              href={INSTAGRAM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-stone-400 transition-all duration-300 hover:bg-gold-500/15 hover:text-gold-400"
+              href={STORE_EMAIL_HREF}
+              className="hidden text-[11px] font-medium text-white/90 transition-opacity hover:opacity-80 md:inline md:text-xs"
             >
-              <InstagramIcon />
-            </a>
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="WhatsApp"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-stone-400 transition-all duration-300 hover:bg-gold-500/15 hover:text-gold-400"
-            >
-              <WhatsAppIcon />
+              {STORE_EMAIL}
             </a>
           </div>
         </div>
@@ -103,7 +148,7 @@ const Header = React.forwardRef(function Header(_, ref) {
         <div className="flex shrink-0 items-center gap-2.5">
           {!mobileSearchOpen && (
             <Link to="/" className="flex items-center gap-2.5">
-              <img src="/logo.png" alt="Abdullah Kneaders" className="h-12 w-auto sm:h-16" />
+              <img src="/logo.png" alt={BRAND_NAME} className="h-12 w-auto sm:h-16" />
             </Link>
           )}
         </div>
@@ -243,15 +288,31 @@ const Header = React.forwardRef(function Header(_, ref) {
         </div>
       </div>
 
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden border-t border-stone-200 bg-white md:hidden"
+      {createPortal(
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+            ref={mobileMenuRef}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            style={{ top: mobileMenuTop }}
+            className="fixed inset-x-0 bottom-0 z-50 overflow-y-auto border-t border-stone-200 bg-white md:hidden"
           >
-            <div className="flex flex-col gap-3 px-4 py-4 sm:px-6">
+            <div className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6">
+              <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+                <span className="font-serif text-lg text-charcoal">Menu</span>
+                <button
+                  type="button"
+                  aria-label="Close menu"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-charcoal-light transition-colors hover:bg-stone-100 hover:text-gold-600"
+                >
+                  <CloseIcon className="h-5 w-5" />
+                </button>
+              </div>
+
               <SearchBar
                 placeholder="Search products..."
                 iconClassName="left-3"
@@ -276,16 +337,48 @@ const Header = React.forwardRef(function Header(_, ref) {
                 Shop
               </NavLink>
 
-              {topCategories.map((cat) => (
-                <NavLink
-                  key={cat.id}
-                  to={`/onlineshop?category=${cat.slug}`}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) => navLinkClass(isActive)}
+              <div className="border-y border-stone-100 py-2">
+                <button
+                  type="button"
+                  aria-expanded={mobileCategoriesOpen}
+                  aria-controls="mobile-category-links"
+                  onClick={() => setMobileCategoriesOpen((open) => !open)}
+                  className="flex w-full items-center justify-between py-1 text-left text-sm font-medium tracking-wide text-charcoal-light transition-colors hover:text-gold-600"
                 >
-                  {cat.name}
-                </NavLink>
-              ))}
+                  Categories
+                  <ChevronIcon open={mobileCategoriesOpen} />
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {mobileCategoriesOpen && (
+                    <motion.div
+                      id="mobile-category-links"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex flex-col gap-3 pb-2 pl-3 pt-3">
+                        {topCategories.length > 0 ? (
+                          topCategories.map((cat) => (
+                            <NavLink
+                              key={cat.id}
+                              to={`/onlineshop?category=${cat.slug}`}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className={({ isActive }) => navLinkClass(isActive)}
+                            >
+                              {cat.name}
+                            </NavLink>
+                          ))
+                        ) : (
+                          <span className="text-sm text-charcoal-light">No categories yet.</span>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               {NAV_LINKS.map((link) => (
                 <NavLink
@@ -314,43 +407,85 @@ const Header = React.forwardRef(function Header(_, ref) {
                 {customer ? 'My Account' : 'Login'}
               </NavLink>
 
-              {/* Mobile social strip */}
-              <div className="mt-2 flex items-center gap-2 border-t border-stone-200 pt-3">
+              {/* Mobile contact strip */}
+              <div className="mt-2 flex flex-col gap-2 border-t border-stone-200 pt-3">
                 <a
-                  href={FACEBOOK_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gold-500/10 text-gold-600 transition-colors hover:bg-gold-500/20"
+                  href={STORE_PHONE_HREF}
+                  className="text-sm font-medium text-gold-600 transition-colors hover:text-gold-700"
                 >
-                  <FacebookIcon />
+                  {STORE_PHONE}
                 </a>
                 <a
-                  href={INSTAGRAM_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gold-500/10 text-gold-600 transition-colors hover:bg-gold-500/20"
+                  href={STORE_PHONE_SECONDARY_HREF}
+                  className="text-sm font-medium text-gold-600 transition-colors hover:text-gold-700"
                 >
-                  <InstagramIcon />
+                  {STORE_PHONE_SECONDARY}
                 </a>
                 <a
-                  href={WHATSAPP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="WhatsApp"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gold-500/10 text-gold-600 transition-colors hover:bg-gold-500/20"
+                  href={STORE_EMAIL_HREF}
+                  className="text-sm font-medium text-gold-600 transition-colors hover:text-gold-700"
                 >
-                  <WhatsAppIcon />
+                  {STORE_EMAIL}
                 </a>
+                <div className="flex items-center gap-2 pt-1">
+                  {SOCIAL_LINKS.map((social) => (
+                    <a
+                      key={social.name}
+                      href={social.href}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      aria-label={social.name}
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-gold-500 text-white transition-colors hover:bg-gold-600"
+                    >
+                      <SocialIcon name={social.name} className="h-4 w-4" />
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </header>
   );
 });
+
+function SocialIcon({ name, className }) {
+  // Facebook and LinkedIn are solid glyphs; Instagram's mark is an outlined camera,
+  // so it is drawn from primitives rather than one filled path — the single-path
+  // version collapses into a blob at this size.
+  const glyphs = {
+    Facebook: (
+      <path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.9h2.54V9.85c0-2.52 1.5-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.9h-2.33V22c4.78-.79 8.44-4.94 8.44-9.94z" />
+    ),
+    Instagram: (
+      <>
+        <rect
+          x="2.75"
+          y="2.75"
+          width="18.5"
+          height="18.5"
+          rx="5.25"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.1"
+        />
+        <circle cx="12" cy="12" r="4.1" fill="none" stroke="currentColor" strokeWidth="2.1" />
+        <circle cx="17.4" cy="6.6" r="1.45" />
+      </>
+    ),
+    LinkedIn: (
+      <path d="M6.94 5.5a2 2 0 11-4 0 2 2 0 014 0zM3.2 21.5h3.5V8.9H3.2v12.6zM9.2 8.9h3.35v1.73h.05c.47-.88 1.6-1.81 3.3-1.81 3.53 0 4.18 2.32 4.18 5.34v7.34h-3.49v-6.5c0-1.55-.03-3.55-2.16-3.55-2.17 0-2.5 1.69-2.5 3.44v6.61H9.2V8.9z" />
+    ),
+  };
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+      {glyphs[name]}
+    </svg>
+  );
+}
 
 function navLinkClass(isActive) {
   return `text-sm font-medium tracking-wide transition-colors ${
@@ -495,33 +630,6 @@ function ChevronIcon({ open }) {
       className={cn('transition-transform', open && 'rotate-180')}
     >
       <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
-
-/* ═══════════════ Social Icons — Bigger ═══════════════ */
-function FacebookIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.5-3.89 3.78-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.77l-.44 2.89h-2.33v6.99A10 10 0 0 0 22 12z" />
-    </svg>
-  );
-}
-
-function InstagramIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <rect x="2" y="2" width="20" height="20" rx="5" />
-      <circle cx="12" cy="12" r="4" />
-      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-function WhatsAppIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor">
-      <path d="M16.001 3C9.376 3 4 8.376 4 15c0 2.378.694 4.59 1.885 6.45L4 29l7.76-1.832A11.94 11.94 0 0 0 16 27c6.624 0 12-5.376 12-12S22.625 3 16.001 3zm0 21.75a9.68 9.68 0 0 1-4.94-1.352l-.354-.21-4.605 1.087 1.115-4.486-.23-.368A9.7 9.7 0 0 1 6.25 15c0-5.376 4.375-9.75 9.75-9.75 5.376 0 9.75 4.374 9.75 9.75 0 5.376-4.374 9.75-9.75 9.75zm5.35-7.296c-.294-.147-1.737-.857-2.006-.954-.27-.098-.466-.147-.662.147-.196.294-.759.954-.93 1.15-.173.196-.343.22-.637.074-.294-.147-1.243-.458-2.367-1.46-.875-.78-1.465-1.744-1.637-2.038-.172-.294-.018-.453.128-.6.13-.13.294-.343.44-.515.147-.171.196-.294.294-.49.098-.196.049-.368-.024-.515-.074-.147-.662-1.598-.908-2.188-.238-.574-.48-.497-.662-.506l-.564-.01c-.196 0-.514.073-.784.367-.27.294-1.029 1.006-1.029 2.452s1.054 2.844 1.2 3.04c.147.196 2.073 3.166 5.023 4.44.702.302 1.25.482 1.677.617.705.223 1.347.191 1.855.116.566-.084 1.737-.71 1.983-1.396.245-.687.245-1.276.172-1.396-.074-.122-.27-.196-.564-.343z" />
     </svg>
   );
 }

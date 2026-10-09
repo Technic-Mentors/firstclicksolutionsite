@@ -27,8 +27,8 @@ import { assetUrl } from '../../utils/media';
 
 const emptyVariant = () => ({
   id: null,
-  size: '',
-  color: '',
+  spec: '',
+  conditionGrade: '',
   sku: '',
   priceOverride: '',
   stockQuantity: '',
@@ -93,8 +93,8 @@ export default function ProductForm() {
         metaDescription: product.meta_description || product.metaDescription || '',
         variants: (product.variants || []).map((v) => ({
           id: v.id,
-          size: v.size || '',
-          color: v.color || '',
+          spec: v.spec || '',
+          conditionGrade: v.condition_grade ?? v.conditionGrade ?? '',
           sku: v.sku || '',
           priceOverride: v.price_override ?? v.priceOverride ?? '',
           stockQuantity: v.stock_quantity ?? v.stockQuantity ?? '',
@@ -118,8 +118,8 @@ export default function ProductForm() {
 
   function buildVariantPayload(v) {
     return {
-      size: v.size,
-      color: v.color,
+      spec: v.spec,
+      conditionGrade: v.conditionGrade,
       sku: v.sku,
       priceOverride: v.priceOverride === '' ? undefined : Number(v.priceOverride),
       stockQuantity: Number(v.stockQuantity) || 0,
@@ -295,18 +295,18 @@ export default function ProductForm() {
               <div key={field.id} className="flex flex-wrap items-end gap-3 rounded-md border border-stone-200 p-3">
                 <div className="w-28 flex-1 min-w-[7rem]">
                   <Input
-                    label="Size"
-                    maxLength={30}
-                    error={errors.variants?.[idx]?.size?.message}
-                    {...register(`variants.${idx}.size`, { required: 'Required' })}
+                    label="Spec"
+                    maxLength={100}
+                    error={errors.variants?.[idx]?.spec?.message}
+                    {...register(`variants.${idx}.spec`, { required: 'Required' })}
                   />
                 </div>
                 <div className="w-28 flex-1 min-w-[7rem]">
                   <Input
-                    label="Color"
+                    label="Condition"
                     maxLength={50}
-                    error={errors.variants?.[idx]?.color?.message}
-                    {...register(`variants.${idx}.color`, { required: 'Required' })}
+                    error={errors.variants?.[idx]?.conditionGrade?.message}
+                    {...register(`variants.${idx}.conditionGrade`, { required: 'Required' })}
                   />
                 </div>
                 <div className="w-36 flex-1 min-w-[9rem]">

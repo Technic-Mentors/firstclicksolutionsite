@@ -14,6 +14,7 @@ import { useCartStore, cartSubtotal, cartItemCount } from '../store/useCartStore
 import AccountStep from '../components/checkout/AccountStep';
 import AccountNeededAnimation from '../components/checkout/AccountNeededAnimation';
 import PaymentMethodAnimation from '../components/checkout/PaymentMethodAnimation';
+import CheckoutReassurance from '../components/checkout/CheckoutReassurance';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Spinner from '../components/ui/Spinner';
@@ -229,7 +230,7 @@ export default function CheckoutPage() {
               {showNewAddress && (
                 <form onSubmit={handleSubmit(placeOrder)} className="space-y-3 rounded-md bg-stone-50 p-4">
                   <Input label="Full Name" maxLength={25} {...register('fullName')} error={errors.fullName?.message} />
-                  <Input label="Phone" placeholder="03XXXXXXXXX" maxLength={11} {...register('phone')} error={errors.phone?.message} />
+                  <Input label="Phone" placeholder="07700 900123" maxLength={16} {...register('phone')} error={errors.phone?.message} />
                   <Input label="Address Line 1" maxLength={100} {...register('addressLine1')} error={errors.addressLine1?.message} />
                   <Input label="Address Line 2 (optional)" maxLength={100} {...register('addressLine2')} error={errors.addressLine2?.message} />
                   <Input
@@ -244,6 +245,10 @@ export default function CheckoutPage() {
           )}
 
           <PaymentMethodAnimation method={paymentMethod} productImage={productImage} />
+
+          {/* Fills the gap under the animation — the order summary column runs much
+              longer, which left this side empty next to the Place Order button. */}
+          <CheckoutReassurance />
         </div>
 
         {/* RIGHT COLUMN: Order details + payment + place order */}
@@ -290,8 +295,12 @@ export default function CheckoutPage() {
                 className="mt-0.5"
               />
               <span>
-                <span className="block font-medium text-charcoal">Cash on Delivery</span>
-                <span className="block text-xs text-charcoal-light">Pay when your order arrives.</span>
+                {/* The stored enum value is still `cod`; only the customer-facing label
+                    changes, so no migration is needed. */}
+                <span className="block font-medium text-charcoal">Pay on collection</span>
+                <span className="block text-xs text-charcoal-light">
+                  Reserve now and pay when you collect from our Burnley unit.
+                </span>
               </span>
             </label>
             <label className="flex cursor-pointer items-start gap-2 rounded-md border border-stone-200 bg-white p-3 text-sm has-checked:border-gold-400 has-checked:bg-gold-50">
@@ -427,8 +436,8 @@ function OrderItemsList({ items }) {
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-charcoal">{item.productName}</p>
             <p className="text-xs text-charcoal-light">
-              {[item.size, item.color].filter(Boolean).join(' · ')}
-              {(item.size || item.color) && ' · '}
+              {[item.spec, item.condition_grade].filter(Boolean).join(' · ')}
+              {(item.spec || item.condition_grade) && ' · '}
               Qty {item.quantity}
             </p>
           </div>

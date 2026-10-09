@@ -1,20 +1,41 @@
 @import "tailwindcss";
 
 @theme {
-  /* Orange-to-gold scale sampled from the MA Universal logo's gradient mark. */
-  --color-gold-50: #fef3ea;
-  --color-gold-100: #fde3c8;
-  --color-gold-200: #fac68d;
-  --color-gold-300: #f5a352;
-  --color-gold-400: #ee7d1f;
-  --color-gold-500: #d9600a;
-  --color-gold-600: #c2550c;
-  --color-gold-700: #8c3c09;
-  --color-gold-800: #6b2f0c;
-  --color-gold-900: #47210b;
+  /* Sampled from the First Click Solutions logo:
+       #f06c0c — the orange of "CLICK"
+       #90c030 — the green of "FIRST"
+       #000000 — "SOLUTIONS"
+       #9c9c9c — the signal arcs above the cursor
+     The orange keeps the `gold-*` token names the rest of the app already uses, so
+     retuning the values rebrands every page without touching 40+ files. */
+  --color-gold-50: #fff4ec;
+  --color-gold-100: #ffe4d1;
+  --color-gold-200: #fec5a3;
+  --color-gold-300: #fba06a;
+  --color-gold-400: #f8803a;
+  --color-gold-500: #f06c0c;
+  --color-gold-600: #d25a08;
+  --color-gold-700: #a84608;
+  --color-gold-800: #83370c;
+  --color-gold-900: #5c270b;
 
+  /* The logo's green — the secondary accent. */
+  --color-leaf-50: #f6fbea;
+  --color-leaf-100: #eaf6cf;
+  --color-leaf-200: #d6eda3;
+  --color-leaf-300: #bbdf6d;
+  --color-leaf-400: #a3d244;
+  --color-leaf-500: #90c030;
+  --color-leaf-600: #739c23;
+  --color-leaf-700: #57761f;
+  --color-leaf-800: #465e1e;
+  --color-leaf-900: #3b4f1d;
+
+  /* Light-first neutrals. `cream` is the page, `cream-dark` the tinted band used to
+     separate sections now that the dark bands are gone. */
   --color-cream: #ffffff;
-  --color-cream-dark: #f5f5f4;
+  --color-cream-dark: #f7f7f5;
+  --color-cream-deep: #eff0ec;
   --color-charcoal: #1c1917;
   --color-charcoal-light: #57534e;
 
@@ -43,4 +64,41 @@ body {
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
+}
+
+@keyframes floatSoft {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 rgba(240, 108, 12, 0.12); }
+  50% { box-shadow: 0 0 24px rgba(240, 108, 12, 0.18); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+.float-soft {
+  animation: floatSoft 6s ease-in-out infinite;
+}
+
+.glow-card {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+.shimmer-sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.55) 45%, transparent 100%);
+  transform: translateX(-120%);
+  animation: shimmer 3.2s ease-in-out infinite;
 }

@@ -38,13 +38,13 @@ export default function RegisterPage() {
   return (
     <div className="mx-auto max-w-md px-4 py-16 sm:px-6">
       <div className="mb-8 text-center">
-        <img src="/logo.png" alt="Abdullah Kneaders" className="mx-auto h-20 w-auto" />
+        <img src="/logo.png" alt="First Click Solutions" className="mx-auto h-20 w-auto" />
         <h1 className="mt-4 font-serif text-2xl text-charcoal">Create an Account</h1>
       </div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Input label="Full Name" maxLength={25} {...register('name')} error={errors.name?.message} />
         <Input label="Email" type="email" {...register('email')} error={errors.email?.message} />
-        <Input label="Phone" placeholder="03XXXXXXXXX" maxLength={11} {...register('phone')} error={errors.phone?.message} />
+        <Input label="Phone" placeholder="07700 900123" maxLength={16} {...register('phone')} error={errors.phone?.message} />
         <Input label="Password" type="password" {...register('password')} error={errors.password?.message} />
         <Button type="submit" loading={loading} className="w-full">
           Register

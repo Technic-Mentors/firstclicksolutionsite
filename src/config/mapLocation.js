@@ -1,7 +1,10 @@
-// The verified Google Business listing for the physical store — used for the "get directions" link.
+// The physical store/workshop — used for the "get directions" link.
+// NOTE: pinned by address rather than by a Google Business place ID. Once First Click
+// Solutions has a verified Google Business listing, swap these for its place URL and
+// exact coordinates so the pin lands on the unit rather than the street.
 export const STORE_MAP_PLACE_URL =
-  'https://www.google.com/maps/place/Abdullah+Atta+Machine/@32.1719361,74.1733663,591m/data=!3m2!1e3!4b1!4m6!3m5!1s0x391f29f49afc815f:0x723e5b2c79ec50bd!8m2!3d32.1719361!4d74.1733663!16s%2Fg%2F11jp0tdt98?hl=en&entry=ttu';
+  'https://www.google.com/maps/search/?api=1&query=Unit+1B+Balderstone+Lane+Burnley+BB10+2TS';
 
-// A no-API-key embeddable version of the same location, pinned to its exact coordinates.
+// A no-API-key embeddable version of the same location.
 export const STORE_MAP_EMBED_URL =
-  'https://www.google.com/maps?q=Abdullah+Atta+Machine,32.1719361,74.1733663&output=embed';
+  'https://www.google.com/maps?q=Unit+1B+Balderstone+Lane,+Burnley,+BB10+2TS&output=embed';
