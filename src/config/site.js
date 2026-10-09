@@ -5,7 +5,7 @@
 export const BRAND_NAME = 'First Click Solutions';
 export const DEV_BACKEND_PORT = 3009;
 export const DEV_FRONTEND_PORT = 5174;
-export const PROD_API_URL = 'https://fcsbackend.technicmentors.com';
+export const PROD_API_URL = 'https://backend.buraqstudyadvisor.com';
 
 // Customer-facing contact details — kept here so the header, footer, contact page
 // and home page all read the same values.
