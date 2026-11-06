@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import PublicLayout from './components/layout/PublicLayout';
 import AccountLayout from './components/layout/AccountLayout';
@@ -6,6 +6,7 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import AdminProtectedRoute from './routes/AdminProtectedRoute';
 import Spinner from './components/ui/Spinner';
 import ScrollToTop from './components/ScrollToTop';
+import { STORE_WHATSAPP_HREF } from './config/site';
 
 // Customer pages--there 
 const Home = lazy(() => import('./pages/Home'));
@@ -72,19 +73,56 @@ function PageFallback() {
 }
 
 /* ═══════════════ Floating WhatsApp Button ═══════════════ */
-// TODO: set this once First Click Solutions has a WhatsApp business number.
-// Left empty on purpose — FloatingWhatsApp hides itself while it is blank, which is
-// better than linking customers to the previous brand's number.
-const WHATSAPP_NUMBER = '';
 const WHATSAPP_MESSAGE = 'Hello First Click Solutions, I would like to know more about your products.';
 
 function FloatingWhatsApp() {
   const { pathname } = useLocation();
+  const [heroVisible, setHeroVisible] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches && window.location.pathname === '/',
+  );
 
-  // Hide on admin pages, and until a real WhatsApp number is configured
-  if (pathname.startsWith('/admin') || !WHATSAPP_NUMBER) return null;
+  useEffect(() => {
+    if (pathname !== '/') {
+      setHeroVisible(false);
+      return undefined;
+    }
 
-  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+    const mobile = window.matchMedia('(max-width: 639px)');
+    setHeroVisible(mobile.matches);
+    let intersectionObserver;
+    let blockedSections = new Map();
+    const observeSections = () => {
+      const sections = ['home-hero', 'home-products', 'home-offers']
+        .map((id) => document.getElementById(id))
+        .filter(Boolean);
+      if (!sections.length || !('IntersectionObserver' in window)) return false;
+      intersectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => blockedSections.set(entry.target.id, entry.isIntersecting));
+        setHeroVisible(mobile.matches && [...blockedSections.values()].some(Boolean));
+      });
+      sections.forEach((section) => intersectionObserver.observe(section));
+      return true;
+    };
+    const pendingHeroObserver = new MutationObserver(() => {
+      if (observeSections()) pendingHeroObserver.disconnect();
+    });
+    if (!observeSections()) pendingHeroObserver.observe(document.body, { childList: true, subtree: true });
+    const onBreakpointChange = () => setHeroVisible(mobile.matches && [...blockedSections.values()].some(Boolean));
+    mobile.addEventListener('change', onBreakpointChange);
+
+    return () => {
+      pendingHeroObserver.disconnect();
+      intersectionObserver?.disconnect();
+      mobile.removeEventListener('change', onBreakpointChange);
+    };
+  }, [pathname]);
+
+  // Hide on admin pages.
+  if (pathname.startsWith('/admin')) return null;
+  // Keep the mobile hero photography and its Shop Now / call buttons unobstructed.
+  if (heroVisible) return null;
+
+  const href = `${STORE_WHATSAPP_HREF}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
 
   return (
     <a
@@ -92,7 +130,7 @@ function FloatingWhatsApp() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"
-      className="group fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] shadow-lg shadow-[#25D366]/30 transition-transform duration-300 hover:scale-110 active:scale-95 sm:bottom-6 sm:right-6"
+      className="group fixed bottom-5 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] shadow-lg shadow-[#25D366]/30 transition-transform duration-300 hover:scale-110 active:scale-95 sm:bottom-6 sm:right-6 sm:h-14 sm:w-14"
     >
       {/* Pulse ring */}
       <span className="absolute inset-0 animate-ping rounded-full bg-[#25D366] opacity-40" />

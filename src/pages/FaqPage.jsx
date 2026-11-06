@@ -65,7 +65,7 @@ export default function FaqPage() {
   return (
     <div>
       {/* ══════════════ HERO — Sunlit Gradient ══════════════ */}
-      <section className="relative isolate overflow-hidden bg-gold-500 text-white">
+      <section className="relative isolate overflow-hidden bg-forest-700 text-white">
         <PageHeroBg />
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:py-20">

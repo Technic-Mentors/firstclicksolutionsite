@@ -31,6 +31,11 @@
   --color-leaf-800: #465e1e;
   --color-leaf-900: #3b4f1d;
 
+  /* Deep forest green — the top contact strip and the headline's first line. */
+  --color-forest-500: #1a6b3c;
+  --color-forest-600: #14532d;
+  --color-forest-700: #0f3d21;
+
   /* Light-first neutrals. `cream` is the page, `cream-dark` the tinted band used to
      separate sections now that the dark bands are gone. */
   --color-cream: #ffffff;

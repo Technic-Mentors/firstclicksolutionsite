@@ -3,6 +3,7 @@ import Spinner from './Spinner';
 
 const VARIANTS = {
   primary: 'bg-charcoal text-cream hover:bg-charcoal-light disabled:bg-stone-300',
+  forest: 'bg-forest-700 text-white hover:bg-forest-600 disabled:bg-forest-500',
   gold: 'bg-gold-500 text-white hover:bg-gold-600 disabled:bg-gold-200',
   outline: 'border border-charcoal text-charcoal hover:bg-charcoal hover:text-cream disabled:opacity-40',
   ghost: 'text-charcoal hover:bg-stone-100 disabled:opacity-40',
@@ -35,7 +36,7 @@ export default function Button({
       )}
       {...props}
     >
-      {loading && <Spinner size="sm" light={variant === 'primary' || variant === 'gold' || variant === 'danger'} />}
+      {loading && <Spinner size="sm" light={variant === 'primary' || variant === 'forest' || variant === 'gold' || variant === 'danger'} />}
       {children}
     </button>
   );

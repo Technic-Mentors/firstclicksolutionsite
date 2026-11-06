@@ -6,7 +6,6 @@ import {
   animate,
   motion,
   useInView,
-  useMotionTemplate,
   useMotionValue,
   useScroll,
   useSpring,
@@ -49,12 +48,38 @@ const RETURN_DAYS = 14;
 
 const LINKS = { about: '/about', contact: '/contact', faq: '/faq', shop: '/onlineshop' };
 
+/* The hero runs itself: two photographs, each with the words that belong to it,
+   crossfading on a 3 second cycle. The mascot shot leads, the desk shot follows.
+   Each carries its own object-position because the subject sits at a different
+   height in the two frames. */
+const HERO_SHOTS = [
+  {
+    src: '/hero-greener.png',
+    position: '100% 70%',
+    badge: 'Refurbished, not replaced — kinder to the planet',
+    headline: 'A smarter choice',
+    accent: 'for a greener tomorrow.',
+    body: `Welcome to First Click Solutions in Burnley — shop tested refurbished computers, all backed by a ${WARRANTY_MONTHS} month warranty.`,
+  },
+  {
+    src: '/hero-workspace.png',
+    position: '100% 82%',
+    badge: 'Refurbished computers, tested in Burnley',
+    headline: 'Premium refurbished tech,',
+    accent: 'without the new-price shock.',
+    body: `Welcome to First Click Solutions in Burnley — shop tested refurbished computers, all backed by a ${WARRANTY_MONTHS} month warranty.`,
+  },
+];
+const HERO_SHOT_MS = 3000;
+
 const FOCUS =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-500';
 
-/* Section backgrounds — alternate warm / fresh so the page never reads as white. */
-const BG_WARM = 'bg-gradient-to-b from-gold-50 to-gold-100/70';
-const BG_FRESH = 'bg-gradient-to-b from-leaf-50 to-leaf-100/70';
+/* Section grounds. The page alternates plain white and a neutral off-white rather
+   than tinting every band — colour is reserved for actions (orange) and trust
+   marks (green), so the hardware and the photography carry the page. */
+const BG_WARM = 'bg-cream';
+const BG_FRESH = 'bg-cream-dark';
 
 const MARQUEE_ITEMS = [
   `Free UK delivery over ${FREE_DELIVERY_OVER}`,
@@ -69,19 +94,29 @@ const MARQUEE_ITEMS = [
 
 // Mirrors the brands carried in the catalogue (products.fabric holds the brand).
 const BRANDS = [
-  { name: 'Dell', note: 'OptiPlex · Latitude' },
-  { name: 'HP', note: 'EliteDesk · EliteBook' },
-  { name: 'Lenovo', note: 'ThinkCentre · ThinkPad' },
-  { name: 'Gaming PC', note: 'Custom builds' },
-  { name: 'Mixed Brands', note: 'Bundles · Monitors' },
-];
-
-// Alternating accent so the category grid reads as the logo's two colours.
-const CATEGORY_ACCENTS = [
-  'from-gold-400 to-gold-600',
-  'from-leaf-400 to-leaf-600',
-  'from-gold-500 to-gold-700',
-  'from-leaf-500 to-leaf-700',
+  {
+    name: 'Dell',
+    note: 'OptiPlex · Latitude',
+    art: 'tower',
+    cta: 'Shop Dell',
+    cats: ['refurbished-computers', 'sff-computers'],
+  },
+  { name: 'HP', note: 'EliteDesk · EliteBook', art: 'laptop', cta: 'Shop HP', cats: ['laptops'] },
+  {
+    name: 'Lenovo',
+    note: 'ThinkCentre · ThinkPad',
+    art: 'mini',
+    cta: 'Shop Lenovo',
+    cats: ['mini-computers', 'sff-computers'],
+  },
+  { name: 'Gaming PC', note: 'Custom builds', art: 'gaming', cta: 'Shop gaming', cats: ['gaming-pcs'] },
+  {
+    name: 'Mixed Brands',
+    note: 'Bundles · Monitors',
+    art: 'monitor',
+    cta: 'Shop bundles',
+    cats: ['lcds-leds', 'dual-screen-systems'],
+  },
 ];
 
 const GRADES = [
@@ -280,7 +315,7 @@ function WordReveal({ text, as: Tag = 'span', className = '', delay = 0 }) {
   );
 }
 
-function Magnetic({ children }) {
+function Magnetic({ children, className = '' }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const sx = useSpring(x, { stiffness: 220, damping: 16 });
@@ -297,46 +332,9 @@ function Magnetic({ children }) {
         x.set(0);
         y.set(0);
       }}
-      className="fc-btn inline-block"
+      className={`fc-btn inline-block ${className}`}
     >
       {children}
-    </motion.div>
-  );
-}
-
-function TiltCard({ children, max = 6 }) {
-  const px = useMotionValue(0);
-  const py = useMotionValue(0);
-  const hover = useMotionValue(0);
-  const rotateX = useSpring(useTransform(py, [-0.5, 0.5], [max, -max]), { stiffness: 200, damping: 20 });
-  const rotateY = useSpring(useTransform(px, [-0.5, 0.5], [-max, max]), { stiffness: 200, damping: 20 });
-  const gx = useTransform(px, [-0.5, 0.5], [0, 100]);
-  const gy = useTransform(py, [-0.5, 0.5], [0, 100]);
-  const glare = useMotionTemplate`radial-gradient(220px circle at ${gx}% ${gy}%, rgba(255,255,255,0.22), transparent 65%)`;
-  const glareOpacity = useSpring(hover, { stiffness: 160, damping: 22 });
-  return (
-    <motion.div
-      className="relative h-full rounded-2xl"
-      style={{ rotateX, rotateY, transformPerspective: 900 }}
-      whileHover={{ scale: 1.012 }}
-      onMouseEnter={() => hover.set(1)}
-      onMouseMove={(e) => {
-        const r = e.currentTarget.getBoundingClientRect();
-        px.set((e.clientX - r.left) / r.width - 0.5);
-        py.set((e.clientY - r.top) / r.height - 0.5);
-      }}
-      onMouseLeave={() => {
-        px.set(0);
-        py.set(0);
-        hover.set(0);
-      }}
-    >
-      {children}
-      <motion.span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-10 rounded-2xl"
-        style={{ background: glare, opacity: glareOpacity }}
-      />
     </motion.div>
   );
 }
@@ -410,64 +408,6 @@ function Particles({ count = 18, color }) {
   );
 }
 
-function PerspectiveGrid() {
-  const mask = 'linear-gradient(to top, black 0%, transparent 85%)';
-  return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute inset-x-0 bottom-0 h-[46%] overflow-hidden"
-      style={{ perspective: 600 }}
-    >
-      <div
-        className="fc-anim absolute inset-x-[-60%] bottom-[-30%] h-[160%] origin-bottom"
-        style={{
-          transform: 'rotateX(62deg)',
-          backgroundImage:
-            'linear-gradient(rgba(240,108,12,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(144,192,48,.22) 1px,transparent 1px)',
-          backgroundSize: '48px 48px',
-          maskImage: mask,
-          WebkitMaskImage: mask,
-          animation: 'fc-grid 4s linear infinite',
-        }}
-      />
-    </div>
-  );
-}
-
-/* Three parallax layers: far (rings), mid (floating shapes), near (nodes + lines). */
-function HeroDepth({ progress }) {
-  const lite = useLite();
-  const yMid = useTransform(progress, [0, 1], [0, lite ? 30 : 90]);
-  const shape = 'absolute border bg-white/20 backdrop-blur-[1px]';
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      <PerspectiveGrid />
-
-      {/* mid: floating geometry */}
-      <motion.div style={{ y: yMid }} className="fc-anim absolute inset-0">
-        <span
-          className={`${shape} left-[5%] top-[20%] h-10 w-10 rounded-lg border-gold-500/40`}
-          style={{ animation: 'fc-float 9s ease-in-out infinite' }}
-        />
-        <span
-          className={`${shape} right-[8%] top-[14%] h-7 w-7 rotate-45 rounded-md border-leaf-500/50`}
-          style={{ animation: 'fc-float 11s ease-in-out -3s infinite' }}
-        />
-        <span
-          className={`${shape} bottom-[24%] left-[44%] hidden h-12 w-12 rounded-xl border-leaf-500/40 md:block`}
-          style={{ animation: 'fc-float 13s ease-in-out -6s infinite' }}
-        />
-        <span
-          className={`${shape} bottom-[16%] right-[6%] hidden h-9 w-9 rounded-full border-gold-500/40 md:block`}
-          style={{ animation: 'fc-float 10s ease-in-out -2s infinite' }}
-        />
-      </motion.div>
-
-      <Particles count={16} />
-    </div>
-  );
-}
-
 /* ═══════════════ Icons ═══════════════ */
 const ICONS = {
   arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
@@ -528,6 +468,13 @@ const ICONS = {
     <>
       <path d="M4 20c0-8 5-14 16-15 0 10-5 15-12 15H4Z" />
       <path d="M8 18c2-4 5-7 9-9" />
+    </>
+  ),
+  cart: (
+    <>
+      <path d="M2.5 3.5h2.3l2.4 10.3h9.6l2.2-7.6H6.2" />
+      <circle cx="9.5" cy="19" r="1.6" />
+      <circle cx="16.5" cy="19" r="1.6" />
     </>
   ),
   phone: (
@@ -656,7 +603,7 @@ function BackToTop() {
           whileHover={{ y: -3 }}
           whileTap={{ scale: 0.92 }}
           transition={SPRING}
-          className={`fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-gold-600 text-white shadow-lg shadow-gold-600/30 ${FOCUS}`}
+          className={`fixed bottom-6 right-6 z-50 hidden h-12 w-12 items-center justify-center rounded-full bg-gold-600 text-white shadow-lg shadow-gold-600/30 sm:flex ${FOCUS}`}
         >
           <Icon name="arrow" className="h-5 w-5 -rotate-90" />
         </motion.button>
@@ -706,399 +653,333 @@ function Marquee({ items, speed = 40, reverse = false, light = false }) {
 }
 
 /* ═══════════════ Hero ═══════════════ */
-/* Faint circuit-board dot grid. */
-function CircuitBg() {
+
+/* Decorative leaf, used in the hero badge. */
+function Leaf({ className = '', style }) {
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      <div
-        className="absolute inset-0 opacity-60"
-        style={{
-          backgroundImage: 'radial-gradient(rgba(0,0,0,0.07) 1px, transparent 1px)',
-          backgroundSize: '22px 22px',
-          maskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 40%, transparent 100%)',
-        }}
-      />
-    </div>
+    <svg viewBox="0 0 24 24" className={className} style={style} aria-hidden fill="currentColor">
+      <path d="M21.5 2.5C10.6 3 3.8 8 3.8 16.2c0 1.8.4 3.4 1.2 4.9l1.9-1.1a8.6 8.6 0 0 1-.9-3.8c0-4.5 3-7.6 8.5-9-3.7 2-6.2 4.8-7.1 8.5 9.4 1.1 14.4-5.4 14.1-13.2Z" />
+    </svg>
   );
 }
 
-function HeroVideo() {
-  const videos = [
-    { src: '/laptop%20complet.mp4', label: 'Laptop ready to work', accent: 'from-gold-500/35' },
-    { src: '/HP%20ProBook%20440.mp4', label: 'HP ProBook 440', accent: 'from-leaf-500/35' },
-    { src: '/robot.mp4', label: 'Technology, renewed', accent: 'from-gold-500/35' },
-  ];
-
+/* Hand-drawn stroke under the second headline line. */
+function Underline({ className = '', color = 'text-gold-500', delay = 0.7 }) {
   return (
-    <div aria-label="Featured refurbished computers and technology" className="grid w-full grid-cols-3 items-center gap-2.5 sm:gap-4 lg:flex-1 lg:gap-3 xl:gap-4">
-      {videos.map((video, index) => (
-        <motion.div
-          key={video.src}
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: EASE, delay: 0.2 + index * 0.12 }}
-          className={`group relative overflow-hidden rounded-2xl border border-white/80 bg-charcoal shadow-[0_20px_54px_rgba(28,25,23,0.2)] ring-1 ring-charcoal/10 lg:aspect-auto ${
-            index === 1
-              ? 'aspect-[0.62] sm:aspect-[0.68] lg:h-[clamp(24rem,58svh,36rem)] lg:-translate-y-3'
-              : 'aspect-[0.7] sm:aspect-[0.76] lg:h-[clamp(22rem,54svh,34rem)]'
-          }`}
-        >
-          <video
-            src={video.src}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            tabIndex={-1}
-            aria-hidden="true"
-            onLoadedMetadata={(event) => {
-              event.currentTarget.playbackRate = 1;
-            }}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
-          <div
-            aria-hidden
-            className={`pointer-events-none absolute inset-0 bg-gradient-to-t ${video.accent} via-transparent to-charcoal/5`}
-          />
-          <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal/75 to-transparent px-2 pb-2.5 pt-8 text-center text-[10px] font-medium leading-tight text-white sm:px-3 sm:pb-3 sm:text-xs">
-            {video.label}
-          </span>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-const BENCH = ['Memory test', 'Storage health', 'Thermals under load', 'Windows 11 Pro activated', 'Drive wiped'];
-
-/* Hero centrepiece: floats in space, lid opens on load, bench test on screen, follows the mouse. */
-function LaptopMock() {
-  const px = useMotionValue(0);
-  const py = useMotionValue(0);
-  const rotateX = useSpring(useTransform(py, [-0.5, 0.5], [9, -9]), { stiffness: 120, damping: 18 });
-  const rotateY = useSpring(useTransform(px, [-0.5, 0.5], [-14, 14]), { stiffness: 120, damping: 18 });
-  const [step, setStep] = useState(0);
-  const ready = step > BENCH.length;
-
-  useEffect(() => {
-    const t = setTimeout(
-      () => setStep((s) => (s > BENCH.length ? 0 : s + 1)),
-      ready ? 2800 : step === 0 ? 1700 : 700
-    );
-    return () => clearTimeout(t);
-  }, [step, ready]);
-
-  const chip =
-    'absolute z-20 flex items-center gap-1.5 rounded-full border bg-white/95 px-3 py-1.5 text-xs font-medium shadow-lg backdrop-blur';
-  const holo = 'absolute z-20 hidden w-28 rounded-xl border bg-white/80 p-2.5 shadow-lg backdrop-blur sm:block';
-  const orb =
-    'absolute z-20 hidden h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-lg ring-1 backdrop-blur sm:flex';
-
-  return (
-    <div
-      className="pointer-events-auto relative mx-auto w-full max-w-[34rem] select-none"
-      style={{ perspective: 1300 }}
-      onMouseMove={(e) => {
-        const r = e.currentTarget.getBoundingClientRect();
-        px.set((e.clientX - r.left) / r.width - 0.5);
-        py.set((e.clientY - r.top) / r.height - 0.5);
-      }}
-      onMouseLeave={() => {
-        px.set(0);
-        py.set(0);
-      }}
+    <svg
+      viewBox="0 0 300 14"
+      preserveAspectRatio="none"
+      aria-hidden
+      className={`pointer-events-none ${color} ${className}`}
     >
-      {/* orbit rings under the machine */}
-      <svg
-        aria-hidden
-        viewBox="0 0 400 60"
-        className="fc-anim pointer-events-none absolute -bottom-10 left-1/2 hidden h-14 w-[110%] -translate-x-1/2 overflow-visible sm:block"
-      >
-        <ellipse
-          cx="200"
-          cy="30"
-          rx="190"
-          ry="24"
-          fill="none"
-          stroke="#f06c0c"
-          strokeOpacity=".4"
-          strokeDasharray="3 9"
-          style={{ animation: 'fc-dash 8s linear infinite' }}
-        />
-        <ellipse
-          cx="200"
-          cy="30"
-          rx="150"
-          ry="17"
-          fill="none"
-          stroke="#90c030"
-          strokeOpacity=".45"
-          strokeDasharray="2 7"
-          style={{ animation: 'fc-dash 6s linear infinite reverse' }}
-        />
-        <circle r="3.5" fill="#f06c0c">
-          <animateMotion dur="9s" repeatCount="indefinite" path="M10 30 a190 24 0 1 0 380 0 a190 24 0 1 0 -380 0" />
-        </circle>
-        <circle r="3" fill="#90c030">
-          <animateMotion dur="13s" repeatCount="indefinite" path="M50 30 a150 17 0 1 1 300 0 a150 17 0 1 1 -300 0" />
-        </circle>
-      </svg>
-
-      {/* glow under the machine */}
-      <motion.div
-        aria-hidden
-        className="absolute -bottom-6 left-1/2 h-10 w-4/5 -translate-x-1/2 rounded-full bg-gold-500/40 blur-2xl"
-        animate={{ opacity: [0.5, 0.9, 0.5], scaleX: [0.9, 1.05, 0.9] }}
-        transition={{ duration: 4, ease: 'easeInOut', repeat: Infinity }}
+      <motion.path
+        d="M3 10.5C62 4.5 150 2.8 297 5.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: 1 }}
+        transition={{ duration: 0.9, ease: EASE, delay }}
       />
-
-      {/* screen glow behind the lid */}
-      <span
-        aria-hidden
-        className="fc-anim pointer-events-none absolute left-1/2 top-[10%] h-3/5 w-4/5 -translate-x-1/2 rounded-full bg-emerald-400/25 blur-3xl"
-        style={{ animation: 'fc-glow 5s ease-in-out infinite' }}
-      />
-
-      {/* FLOAT WRAPPER */}
-      <motion.div
-        animate={{ y: [0, -12, 0], rotateZ: [-0.6, 0.6, -0.6] }}
-        transition={{ duration: 7, ease: 'easeInOut', repeat: Infinity }}
-        style={{ transformStyle: 'preserve-3d' }}
-      >
-        <motion.div style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }} className="relative">
-          {/* LID */}
-          <motion.div
-            initial={{ rotateX: -96 }}
-            animate={{ rotateX: 0 }}
-            transition={{ duration: 1.2, ease: EASE, delay: 0.3 }}
-            style={{ transformOrigin: '50% 100%', transformStyle: 'preserve-3d' }}
-            className="relative mx-auto w-[88%] rounded-t-2xl border-[7px] border-b-0 border-[#2b2f33] bg-[#2b2f33] shadow-2xl"
-          >
-            <div className="relative aspect-[16/10] overflow-hidden rounded-md bg-gradient-to-br from-[#0d1f17] via-[#10241b] to-[#1b1608] p-4 font-mono text-[11px] leading-relaxed text-emerald-300 sm:text-xs">
-              {/* webcam */}
-              <span className="absolute left-1/2 top-1.5 h-1 w-1 -translate-x-1/2 rounded-full bg-white/30" />
-
-              <p className="mb-2 flex items-center justify-between text-white/50">
-                <span>firstclick@burnley:~$ bench --full</span>
-                <span className="flex gap-1">
-                  <i className="h-1.5 w-1.5 rounded-full bg-gold-500" />
-                  <i className="h-1.5 w-1.5 rounded-full bg-leaf-400" />
-                </span>
-              </p>
-
-              <ul className="space-y-1">
-                {BENCH.map((b, i) => (
-                  <motion.li
-                    key={b}
-                    initial={false}
-                    animate={{ opacity: step > i ? 1 : 0, x: step > i ? 0 : -10 }}
-                    transition={{ duration: 0.25 }}
-                    className="flex items-center justify-between"
-                  >
-                    <span>{b}</span>
-                    <span className="text-leaf-400">PASS</span>
-                  </motion.li>
-                ))}
-              </ul>
-
-              {/* progress + verdict */}
-              <div className="absolute inset-x-4 bottom-4">
-                <div className="mb-1.5 flex items-center justify-between text-[10px]">
-                  <span className={ready ? 'text-gold-400' : 'text-white/50'}>
-                    {ready ? 'READY TO SHIP' : 'Testing…'}
-                    {!ready && (
-                      <motion.span animate={{ opacity: [1, 0, 1] }} transition={{ duration: 0.8, repeat: Infinity }}>
-                        ▌
-                      </motion.span>
-                    )}
-                  </span>
-                  <span className="text-white/50">
-                    {Math.min(step, BENCH.length)}/{BENCH.length}
-                  </span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-                  <motion.div
-                    className="h-full rounded-full bg-gradient-to-r from-leaf-400 to-gold-500"
-                    animate={{ width: `${(Math.min(step, BENCH.length) / BENCH.length) * 100}%` }}
-                    transition={{ duration: 0.4, ease: EASE }}
-                  />
-                </div>
-              </div>
-
-              {/* sweeping scan line */}
-              <motion.span
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-transparent via-emerald-300/10 to-transparent"
-                animate={{ y: ['-40px', '320px'] }}
-                transition={{ duration: 3.2, ease: 'linear', repeat: Infinity }}
-              />
-              {/* light passing across the lid */}
-              <span
-                aria-hidden
-                className="fc-anim pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-white/25 to-transparent"
-                style={{ animation: 'fc-sweep 7s ease-in-out 2s infinite' }}
-              />
-              {/* glass reflection */}
-              <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
-            </div>
-          </motion.div>
-
-          {/* BASE */}
-          <div className="relative mx-auto h-3.5 w-full rounded-b-[1.4rem] bg-gradient-to-b from-[#d9dcdf] to-[#aeb3b8] shadow-xl">
-            <span className="absolute left-1/2 top-0 h-1.5 w-24 -translate-x-1/2 rounded-b-lg bg-[#8b9095]" />
-          </div>
-        </motion.div>
-      </motion.div>
-
-      {/* connector lines from screen to holo panels */}
-      <svg
-        aria-hidden
-        viewBox="0 0 400 200"
-        className="fc-anim pointer-events-none absolute inset-x-0 -top-14 hidden h-40 w-full overflow-visible sm:block"
-      >
-        <path
-          d="M130 20 L150 80"
-          stroke="#90c030"
-          strokeOpacity=".5"
-          strokeDasharray="3 5"
-          fill="none"
-          style={{ animation: 'fc-dash 5s linear infinite' }}
-        />
-        <path
-          d="M290 8 L260 80"
-          stroke="#f06c0c"
-          strokeOpacity=".5"
-          strokeDasharray="3 5"
-          fill="none"
-          style={{ animation: 'fc-dash 6s linear infinite' }}
-        />
-        <circle className="fc-node" cx="150" cy="80" r="3" fill="#90c030" />
-        <circle className="fc-node" cx="260" cy="80" r="3" fill="#f06c0c" style={{ animationDelay: '1s' }} />
-      </svg>
-
-      {/* holographic panels rising from the screen */}
-      <motion.div
-        aria-hidden
-        className={`${holo} -top-8 left-[26%] border-leaf-500/30`}
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
-        transition={{
-          opacity: { delay: 1.5, duration: 0.8 },
-          scale: { delay: 1.5, duration: 0.8, ease: EASE },
-          y: { duration: 6, ease: 'easeInOut', repeat: Infinity, delay: 1.5 },
-        }}
-      >
-        <p className="font-mono text-[9px] text-leaf-700">CPU LOAD</p>
-        <div className="mt-1.5 flex h-8 items-end gap-1">
-          {[40, 70, 55, 90, 65, 80].map((h, i) => (
-            <motion.i
-              key={i}
-              className="block w-full rounded-sm bg-gradient-to-t from-leaf-500 to-gold-500"
-              animate={{ height: [`${h * 0.5}%`, `${h}%`, `${h * 0.5}%`] }}
-              transition={{ duration: 2.4 + i * 0.3, repeat: Infinity, ease: 'easeInOut' }}
-            />
-          ))}
-        </div>
-      </motion.div>
-      <motion.div
-        aria-hidden
-        className={`${holo} -top-12 right-[16%] border-gold-500/30`}
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1, y: [0, 9, 0] }}
-        transition={{
-          opacity: { delay: 1.8, duration: 0.8 },
-          scale: { delay: 1.8, duration: 0.8, ease: EASE },
-          y: { duration: 7, ease: 'easeInOut', repeat: Infinity, delay: 1.8 },
-        }}
-      >
-        <p className="font-mono text-[9px] text-gold-700">SSD HEALTH</p>
-        <svg viewBox="0 0 100 28" className="fc-anim mt-1.5 h-8 w-full">
-          <polyline
-            points="0,20 14,16 28,19 42,9 56,13 70,5 84,10 100,3"
-            fill="none"
-            stroke="#f06c0c"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeDasharray="6 4"
-            style={{ animation: 'fc-dash 4s linear infinite' }}
-          />
-        </svg>
-      </motion.div>
-
-      {/* floating component icons */}
-      <motion.span
-        aria-hidden
-        className={`${orb} left-[2%] top-[58%] text-gold-600 ring-gold-500/25`}
-        animate={{ y: [0, -9, 0] }}
-        transition={{ duration: 6, ease: 'easeInOut', repeat: Infinity }}
-      >
-        <Icon name="cpu" className="h-4 w-4" />
-      </motion.span>
-      <motion.span
-        aria-hidden
-        className={`${orb} bottom-[16%] right-[3%] text-leaf-700 ring-leaf-500/25`}
-        animate={{ y: [0, 8, 0] }}
-        transition={{ duration: 7, ease: 'easeInOut', repeat: Infinity, delay: 1 }}
-      >
-        <Icon name="monitor" className="h-4 w-4" />
-      </motion.span>
-
-      {/* floating chips (own depth layer so they drift against the laptop) */}
-      <motion.div
-        className={`${chip} -left-2 top-6 border-gold-500/30 text-gold-700 sm:-left-8`}
-        animate={{ y: [0, -8, 0] }}
-        transition={{ duration: 4.5, ease: 'easeInOut', repeat: Infinity }}
-      >
-        <Icon name="shield" className="h-4 w-4" /> {WARRANTY_MONTHS} month warranty
-      </motion.div>
-      <motion.div
-        className={`${chip} -right-2 top-1/3 border-leaf-500/30 text-leaf-700 sm:-right-6`}
-        animate={{ y: [0, 9, 0] }}
-        transition={{ duration: 5.2, ease: 'easeInOut', repeat: Infinity, delay: 0.6 }}
-      >
-        <Icon name="cpu" className="h-4 w-4" /> i5 · 16GB · SSD
-      </motion.div>
-      <motion.div
-        className={`${chip} bottom-4 left-4 border-gold-500/30 text-gold-700 sm:-left-2`}
-        animate={{ y: [0, -7, 0] }}
-        transition={{ duration: 5, ease: 'easeInOut', repeat: Infinity, delay: 1.2 }}
-      >
-        <Icon name="check" className="h-4 w-4" /> Grade A
-      </motion.div>
-    </div>
+    </svg>
   );
 }
 
-function Hero({ slides, active, setActive, shopLink }) {
+/* Shield-and-tick, the reassurance mark at the end of the quick-pick bar. */
+function ShieldTick({ className = 'h-7 w-7' }) {
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden>
+      <defs>
+        <linearGradient id="fcShield" x1="0.2" y1="0" x2="0.8" y2="1">
+          <stop offset="0%" stopColor="#8fd14a" />
+          <stop offset="45%" stopColor="#5faf2c" />
+          <stop offset="100%" stopColor="#3d7d1d" />
+        </linearGradient>
+      </defs>
+      <ellipse cx="24" cy="44.2" rx="11" ry="1.9" fill="#1c1917" opacity="0.14" />
+      <path
+        d="M24 3.4 41.4 10v12.2c0 9.7-7.1 17.8-17.4 20.4C13.7 40 6.6 31.9 6.6 22.2V10L24 3.4Z"
+        fill="url(#fcShield)"
+      />
+      <path d="M24 3.4 41.4 10v12.2c0 9.7-7.1 17.8-17.4 20.4V3.4Z" fill="#1c1917" opacity="0.08" />
+      <path
+        d="M24 6.2 38.8 11.8v10.4c0 5.1-2.4 9.7-6.3 13C27.8 31.4 24 23.6 24 6.2Z"
+        fill="#ffffff"
+        opacity="0.1"
+      />
+      <path
+        d="m15.8 23.6 5.6 5.6 10.8-11.6"
+        fill="none"
+        stroke="#ffffff"
+        strokeWidth="4.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/* Device glyphs for the quick-pick bar. Drawn with gradients, a glass glare and a
+   contact shadow so they read as little product shots rather than flat pictograms. */
+function PickIcon({ name, className = 'h-7 w-7' }) {
+  const glyphs = {
+    laptop: (
+      <>
+        <defs>
+          <linearGradient id="fcLapLid" x1="0" y1="0" x2="0.3" y2="1">
+            <stop offset="0%" stopColor="#555f6f" />
+            <stop offset="100%" stopColor="#242b37" />
+          </linearGradient>
+          <linearGradient id="fcLapGlass" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#8fcbff" />
+            <stop offset="52%" stopColor="#2f82e0" />
+            <stop offset="100%" stopColor="#1a58ae" />
+          </linearGradient>
+          <linearGradient id="fcLapBase" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#f1f4f8" />
+            <stop offset="55%" stopColor="#ccd4de" />
+            <stop offset="100%" stopColor="#9aa6b4" />
+          </linearGradient>
+          <clipPath id="fcLapScreen">
+            <rect x="9.8" y="8.8" width="28.4" height="18.4" rx="1.3" />
+          </clipPath>
+        </defs>
+        <ellipse cx="24" cy="40.6" rx="19.5" ry="2.3" fill="#1c1917" opacity="0.16" />
+        <rect x="8" y="7" width="32" height="22" rx="2.4" fill="url(#fcLapLid)" />
+        <rect x="9.8" y="8.8" width="28.4" height="18.4" rx="1.3" fill="url(#fcLapGlass)" />
+        <g clipPath="url(#fcLapScreen)">
+          <path d="M6 28 26 6h7L13 28Z" fill="#ffffff" opacity="0.16" />
+          <path d="M18 28 34 6h2.5L20.5 28Z" fill="#ffffff" opacity="0.12" />
+        </g>
+        <circle cx="24" cy="7.9" r="0.55" fill="#aab4c2" />
+        <path
+          d="M4.9 30.4h38.2l2.5 4.1a1.5 1.5 0 0 1-1.3 2.3H3.7a1.5 1.5 0 0 1-1.3-2.3l2.5-4.1Z"
+          fill="url(#fcLapBase)"
+        />
+        <rect x="19.2" y="31.5" width="9.6" height="1.5" rx="0.75" fill="#8d99a8" opacity="0.75" />
+        <path d="M2.9 35.4h42.2" stroke="#8795a5" strokeWidth="0.75" strokeLinecap="round" />
+      </>
+    ),
+    desktop: (
+      <>
+        <defs>
+          <linearGradient id="fcMonBezel" x1="0" y1="0" x2="0.25" y2="1">
+            <stop offset="0%" stopColor="#5a6476" />
+            <stop offset="100%" stopColor="#242b37" />
+          </linearGradient>
+          <linearGradient id="fcMonGlass" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#8fcbff" />
+            <stop offset="52%" stopColor="#2f82e0" />
+            <stop offset="100%" stopColor="#1a58ae" />
+          </linearGradient>
+          <linearGradient id="fcMonStand" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#aeb9c6" />
+            <stop offset="45%" stopColor="#eef1f5" />
+            <stop offset="100%" stopColor="#97a3b2" />
+          </linearGradient>
+          <clipPath id="fcMonScreen">
+            <rect x="4.6" y="6.6" width="38.8" height="22.8" rx="1.3" />
+          </clipPath>
+        </defs>
+        <ellipse cx="24" cy="43.2" rx="14" ry="2" fill="#1c1917" opacity="0.16" />
+        <rect x="2.6" y="4.6" width="42.8" height="26.8" rx="2.6" fill="url(#fcMonBezel)" />
+        <rect x="4.6" y="6.6" width="38.8" height="22.8" rx="1.3" fill="url(#fcMonGlass)" />
+        <g clipPath="url(#fcMonScreen)">
+          <path d="M0 32 24 2h8L8 32Z" fill="#ffffff" opacity="0.16" />
+          <path d="M16 32 36 2h3L19 32Z" fill="#ffffff" opacity="0.11" />
+        </g>
+        <path d="M20.2 31.4h7.6l1.1 6.4h-9.8l1.1-6.4Z" fill="url(#fcMonStand)" />
+        <rect x="14.4" y="37.4" width="19.2" height="3.2" rx="1.6" fill="url(#fcMonStand)" />
+      </>
+    ),
+    tablet: (
+      <>
+        <defs>
+          <linearGradient id="fcTabBody" x1="0" y1="0" x2="0.4" y2="1">
+            <stop offset="0%" stopColor="#5a6476" />
+            <stop offset="100%" stopColor="#222935" />
+          </linearGradient>
+          <linearGradient id="fcTabGlass" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#8fcbff" />
+            <stop offset="52%" stopColor="#2f82e0" />
+            <stop offset="100%" stopColor="#1a58ae" />
+          </linearGradient>
+          <clipPath id="fcTabScreen">
+            <rect x="13.8" y="7.6" width="20.4" height="30.4" rx="1.4" />
+          </clipPath>
+        </defs>
+        <ellipse cx="24" cy="44.4" rx="12" ry="1.8" fill="#1c1917" opacity="0.15" />
+        <g transform="rotate(-8 24 24)">
+          <rect x="11.6" y="3.6" width="24.8" height="40.8" rx="3.6" fill="url(#fcTabBody)" />
+          <rect x="13.8" y="7.6" width="20.4" height="30.4" rx="1.4" fill="url(#fcTabGlass)" />
+          <g clipPath="url(#fcTabScreen)">
+            <path d="M8 40 30 4h6L14 40Z" fill="#ffffff" opacity="0.16" />
+            <path d="M24 40 38 4h2.5L26.5 40Z" fill="#ffffff" opacity="0.11" />
+          </g>
+          <rect x="21.4" y="5.2" width="5.2" height="0.9" rx="0.45" fill="#8c98a8" />
+          <circle cx="24" cy="41" r="1.5" fill="none" stroke="#8c98a8" strokeWidth="0.9" />
+        </g>
+      </>
+    ),
+    headphones: (
+      <>
+        <defs>
+          <linearGradient id="fcHpBand" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#4d596b" />
+            <stop offset="100%" stopColor="#222935" />
+          </linearGradient>
+          <linearGradient id="fcHpCup" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#4d596b" />
+            <stop offset="60%" stopColor="#2a3240" />
+            <stop offset="100%" stopColor="#1a202a" />
+          </linearGradient>
+        </defs>
+        <ellipse cx="24" cy="44" rx="15" ry="1.8" fill="#1c1917" opacity="0.14" />
+        <path
+          d="M8.5 29V22a15.5 15.5 0 0 1 31 0v7"
+          fill="none"
+          stroke="url(#fcHpBand)"
+          strokeWidth="5"
+          strokeLinecap="round"
+        />
+        <path
+          d="M11 25.5V22A13 13 0 0 1 24 9"
+          fill="none"
+          stroke="#ffffff"
+          strokeOpacity="0.28"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <rect x="3.8" y="25.4" width="10.4" height="17" rx="5.2" fill="url(#fcHpCup)" />
+        <rect x="33.8" y="25.4" width="10.4" height="17" rx="5.2" fill="url(#fcHpCup)" />
+        <rect x="6.4" y="28.2" width="5.2" height="11.4" rx="2.6" fill="#657185" opacity="0.65" />
+        <rect x="36.4" y="28.2" width="5.2" height="11.4" rx="2.6" fill="#657185" opacity="0.65" />
+        <rect x="5.1" y="26.8" width="2" height="7" rx="1" fill="#ffffff" opacity="0.18" />
+        <rect x="35.1" y="26.8" width="2" height="7" rx="1" fill="#ffffff" opacity="0.18" />
+      </>
+    ),
+  };
+  return (
+    <svg viewBox="0 0 48 48" className={className} aria-hidden>
+      {glyphs[name]}
+    </svg>
+  );
+}
+
+/* The four quick picks from the mock. Each resolves to a real catalogue category
+   when one matches by name or slug, and falls back to a search otherwise. */
+const HERO_PICKS = [
+  { label: 'Laptops', icon: 'laptop', match: ['laptop'] },
+  { label: 'Desktops', icon: 'desktop', match: ['desktop', 'sff', 'refurbished-computer', 'gaming'] },
+  { label: 'Tablets', icon: 'tablet', match: ['tablet'] },
+  { label: 'Accessories', icon: 'headphones', match: ['accessor', 'lcd', 'monitor'] },
+];
+
+/* The quick-pick bar sitting on the hero's bottom edge. */
+function HeroCategoryStrip({ categories }) {
+  const linkFor = (pick) => {
+    const hit = (categories || []).find((c) =>
+      pick.match.some(
+        (m) => (c.slug || '').toLowerCase().includes(m) || (c.name || '').toLowerCase().includes(m)
+      )
+    );
+    return hit ? `${LINKS.shop}?category=${hit.slug}` : `/search?q=${encodeURIComponent(pick.label)}`;
+  };
+
+  return (
+    <motion.nav
+      aria-label="Shop by category"
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: EASE, delay: 0.9 }}
+      className="relative mx-auto w-full max-w-7xl px-3 pb-3 sm:px-6 sm:pb-4"
+    >
+      <div className="rounded-2xl bg-gradient-to-r from-gold-500/45 via-leaf-500/35 to-gold-500/45 p-px shadow-[0_12px_32px_rgba(28,25,23,0.12)] sm:rounded-full">
+        <ul className="grid grid-cols-2 items-stretch overflow-hidden rounded-[0.95rem] bg-white backdrop-blur sm:flex sm:flex-nowrap sm:rounded-full">
+          {HERO_PICKS.map((pick) => (
+            <li
+              key={pick.label}
+              className="min-w-0 border-b border-charcoal/10 even:border-l sm:flex-1 sm:border-b-0 sm:not-first:border-l"
+            >
+              <Link
+                to={linkFor(pick)}
+                className={`group flex h-full items-center justify-center gap-2 px-2 py-2.5 text-charcoal transition-colors hover:bg-gold-50/60 sm:gap-2.5 sm:px-3 ${FOCUS}`}
+              >
+                <PickIcon
+                  name={pick.icon}
+                  className="h-7 w-7 shrink-0 transition-transform group-hover:scale-110"
+                />
+                <span className="truncate text-[0.8rem] font-medium text-charcoal-light">{pick.label}</span>
+              </Link>
+            </li>
+          ))}
+          <li className="col-span-2 flex min-w-0 items-center justify-center gap-2 border-t border-charcoal/10 px-3 py-2.5 sm:flex-1 sm:border-l sm:border-t-0 sm:border-charcoal/10 sm:px-4">
+            <ShieldTick className="h-7 w-7 shrink-0" />
+            <span className="relative whitespace-nowrap text-[0.8rem] font-semibold text-charcoal">
+              Trusted. <span className="text-leaf-600">Tested.</span> Reliable.
+              <Underline className="absolute -bottom-1 left-0 h-2 w-full" color="text-leaf-500" delay={1.4} />
+            </span>
+          </li>
+        </ul>
+      </div>
+    </motion.nav>
+  );
+}
+
+function Hero({ slides, active, setActive, shopLink, categories }) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
   const glowY = useTransform(scrollYProgress, [0, 1], [0, 90]);
+
+  const [shot, setShot] = useState(0);
+  const copy = HERO_SHOTS[shot];
+
+  useEffect(() => {
+    const t = setInterval(() => setShot((i) => (i + 1) % HERO_SHOTS.length), HERO_SHOT_MS);
+    return () => clearInterval(t);
+  }, []);
 
   const hasBanners = slides.length > 0;
   const current = hasBanners ? slides[active % slides.length] : null;
   const bannerLink = current?.link_url?.startsWith('/') ? current.link_url : shopLink;
   const go = (n) => setActive((n + slides.length) % slides.length);
 
-  const trust = [
-    { icon: 'truck', text: `Free UK delivery over ${FREE_DELIVERY_OVER}` },
-    { icon: 'shield', text: `${WARRANTY_MONTHS} month warranty` },
-    { icon: 'check', text: 'Tested before dispatch' },
-  ];
-  const highlights = [
-    { label: 'From £20', accent: 'gold' },
-    { label: 'Grade A & B', accent: 'leaf' },
-    { label: 'Windows 11 Pro', accent: 'gold' },
+  const features = [
+    { icon: 'shield', top: `${WARRANTY_MONTHS} Month`, bottom: 'Warranty' },
+    { icon: 'recycle', top: 'Eco-Friendly', bottom: 'Choice' },
+    { icon: 'tag', top: 'Great', bottom: 'Value' },
   ];
 
   return (
     <section
       ref={ref}
-      className="relative isolate flex min-h-[78vh] flex-col overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(240,108,12,0.10),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(144,192,48,0.12),_transparent_32%),linear-gradient(135deg,_#fffaf5_0%,_#fff3e4_40%,_#f6fbf0_100%)] lg:min-h-[calc(100svh-230px)]"
+      id="home-hero"
+      className="relative isolate flex min-h-0 flex-col overflow-hidden bg-[#f3f8ec] sm:min-h-[82svh] lg:min-h-[calc(100svh-9.5rem)]"
     >
-      {hasBanners ? (
+      {/* The photographs are the hero. Both have a soft, near-empty left side, so the
+          copy sits straight on them — the wash below only deepens it. */}
+      {HERO_SHOTS.map((photo, i) => (
+        <motion.img
+          key={photo.src}
+          src={photo.src}
+          alt=""
+          aria-hidden
+          fetchPriority={i === 0 ? 'high' : 'low'}
+          style={{ objectPosition: photo.position }}
+          initial={false}
+          animate={{ opacity: i === shot ? 1 : 0 }}
+          transition={{ duration: 0.9, ease: EASE }}
+          className="pointer-events-none absolute inset-0 -z-30 hidden h-full w-full object-cover sm:block"
+        />
+      ))}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-20 hidden bg-[linear-gradient(to_bottom,rgba(246,251,234,0.92)_0%,rgba(246,251,234,0.72)_52%,rgba(246,251,234,0.55)_100%)] sm:block lg:bg-[linear-gradient(to_right,rgba(246,251,234,0.97)_0%,rgba(246,251,234,0.93)_30%,rgba(246,251,234,0.6)_46%,rgba(246,251,234,0.08)_60%,transparent_70%)]"
+      />
+
+      {/* Admin-uploaded hero banners still take over when any are set. */}
+      {hasBanners && (
         <>
           {slides.map((s, i) => (
             <motion.img
@@ -1106,137 +987,127 @@ function Hero({ slides, active, setActive, shopLink }) {
               src={assetUrl(s.image_path)}
               alt=""
               aria-hidden
-              className="pointer-events-none absolute inset-0 -z-20 h-full w-full object-cover object-center opacity-25 sm:object-right"
-              animate={{ opacity: i === active ? 0.25 : 0, scale: i === active ? 1 : 1.06 }}
+              className="pointer-events-none absolute inset-0 -z-20 hidden h-full w-full object-cover object-center sm:block sm:object-right"
+              animate={{ opacity: i === active ? 1 : 0, scale: i === active ? 1 : 1.06 }}
               transition={{ duration: 0.9, ease: EASE }}
             />
           ))}
-          <Link to={bannerLink} aria-label="View offer" className="absolute inset-0 -z-10" />
-          <div className="pointer-events-none absolute inset-0 -z-10 bg-gold-50/85 lg:hidden" />
+          <Link to={bannerLink} aria-label="View offer" className="absolute inset-0 -z-10 hidden sm:block" />
+          <div className="pointer-events-none absolute inset-0 -z-10 hidden bg-gold-50/85 sm:block lg:hidden" />
           <div className="pointer-events-none absolute inset-0 -z-10 hidden lg:block lg:bg-[linear-gradient(to_right,#fff3e4_0%,#fff3e4_34%,rgba(255,243,228,0.75)_46%,rgba(255,243,228,0)_60%)]" />
-        </>
-      ) : (
-        <>
-          <CircuitBg />
-          <HeroDepth progress={scrollYProgress} />
         </>
       )}
 
       <motion.div
         aria-hidden
         style={{ y: glowY }}
-        className="pointer-events-none absolute -left-24 top-10 -z-10 h-72 w-72 rounded-full bg-leaf-400/30 blur-3xl"
-      />
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute -right-10 bottom-0 -z-10 h-64 w-64 rounded-full bg-gold-400/35 blur-3xl"
-        animate={{ scale: [1, 1.12, 1] }}
-        transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
+        className="pointer-events-none absolute -left-24 top-10 -z-10 h-72 w-72 rounded-full bg-leaf-400/25 blur-3xl"
       />
 
-      <div className="relative mx-auto flex w-full max-w-7xl flex-1 flex-col justify-start gap-8 px-4 pb-12 pt-8 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:pb-8 lg:pt-8">
-        {/* Copy */}
-        <div className="max-w-2xl text-center lg:w-[51%] lg:max-w-[35rem] lg:shrink-0 lg:text-left xl:max-w-[38rem]">
-          <Badge accent="leaf">Refurbished computers, tested in Burnley</Badge>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: EASE, delay: 0.1 }}
-            className="mt-3 font-serif text-4xl leading-[0.98] tracking-[-0.04em] text-charcoal sm:text-5xl lg:text-[3.35rem]"
-          >
-            <span className="block">Premium refurbished tech,</span>
-            <span className="block bg-gradient-to-r from-gold-600 via-gold-500 to-leaf-600 bg-clip-text text-transparent drop-shadow-[0_8px_20px_rgba(240,108,12,0.18)]">
-              without the new-price shock.
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: EASE, delay: 0.35 }}
-            className="mx-auto mt-4 max-w-xl text-sm text-charcoal-light sm:text-base lg:mx-0"
-          >
-            Dell, HP and Lenovo hardware — cleaned, tested and rebuilt before it reaches you, with the same
-            reliability and a {WARRANTY_MONTHS} month back-up. 
-          </motion.p>
-
-          <motion.ul
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: EASE, delay: 0.5 }}
-            className="mt-5 flex flex-wrap justify-center gap-2 lg:justify-start"
-          >
-            {highlights.map((h) => (
-              <li
-                key={h.label}
-                className={`rounded-full border bg-white/90 px-3.5 py-1.5 font-serif text-sm shadow-sm backdrop-blur-sm ${
-                  h.accent === 'leaf' ? 'border-leaf-500/30 text-leaf-700' : 'border-gold-500/30 text-gold-700'
-                }`}
+      <div className="relative mx-auto flex w-full max-w-7xl flex-1 items-center px-4 py-6 sm:px-6 sm:py-7 lg:py-5">
+        <div className="max-w-2xl text-left lg:max-w-[42rem] lg:text-left xl:max-w-[46rem]">
+          {/* Words swap with the photograph. The reserved height keeps the buttons
+              below from hopping while one slide leaves and the next arrives. */}
+          <div className="min-h-0 sm:min-h-[14.5rem] lg:min-h-[14rem] xl:min-h-[15.5rem]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={copy.src}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.45, ease: EASE }}
               >
-                {h.label}
-              </li>
-            ))}
-          </motion.ul>
+                <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-leaf-500/25 bg-white/90 py-1.5 pl-3 pr-2 text-[11px] font-medium text-charcoal shadow-sm backdrop-blur-sm sm:text-sm">
+                  <Leaf className="h-4 w-4 shrink-0 text-leaf-600" />
+                  {copy.badge}
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gold-500 text-white">
+                    <Icon name="check" className="h-3.5 w-3.5" />
+                  </span>
+                </span>
 
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: EASE, delay: 0.65 }}
-            className="mt-5 flex flex-wrap items-center justify-center gap-3 lg:justify-start"
-          >
-            <Magnetic>
-              <Link to={shopLink}>
-                <Button variant="gold" size="lg" className="shimmer-sheen glow-card shadow-[0_16px_30px_rgba(240,108,12,0.25)] hover:-translate-y-0.5">
-                  Shop all computers
-                </Button>
-              </Link>
-            </Magnetic>
-            <a
-              href={STORE_PHONE_HREF}
-              className={`inline-flex items-center gap-2 rounded-full border border-charcoal/15 bg-white px-5 py-2.5 text-sm font-medium text-charcoal shadow-sm transition-all hover:-translate-y-0.5 hover:border-gold-500/50 hover:bg-gold-50 ${FOCUS}`}
-            >
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gold-500 text-white">
-                <Icon name="phone" className="h-3.5 w-3.5" />
-              </span>
-              Call {STORE_PHONE}
-            </a>
-          </motion.div>
+                <h1 className="mt-3 text-[1.8rem] font-bold leading-[1.08] tracking-[-0.03em] text-forest-600 sm:text-[2.3rem] sm:leading-[1.12] lg:text-[2.5rem] xl:text-[2.9rem]">
+                  <span className="block">{copy.headline}</span>
+                  <span className="relative inline-block text-gold-500">
+                    {copy.accent}
+                    <Underline className="absolute -bottom-1.5 left-[32%] h-3.5 w-[70%] sm:-bottom-2 sm:h-4" />
+                  </span>
+                </h1>
 
-          {/* Hardware carried, straight from the catalogue's brand list. */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: EASE, delay: 0.8 }}
-            className="mt-5 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 border-t border-charcoal/10 pt-4 lg:justify-start"
-          >
-            <span className="text-xs text-charcoal-light">We carry</span>
-            {BRANDS.map((b, i) => (
-              <span key={b.name} className="flex items-center gap-3">
-                {i > 0 && <span className="text-charcoal/25" aria-hidden="true">·</span>}
-                <span className="font-serif text-sm text-charcoal">{b.name}</span>
-              </span>
-            ))}
-          </motion.div>
+                <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-charcoal-light sm:mx-auto sm:mt-4 sm:text-[0.95rem] lg:mx-0">
+                  {copy.body}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
           <motion.ul
             variants={STAGGER}
             initial="hidden"
             animate="show"
-            transition={{ delayChildren: 0.95 }}
-            className="mt-3 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-charcoal-light lg:justify-start"
+            transition={{ delayChildren: 0.45 }}
+            className="mt-4 grid grid-cols-3 gap-2 sm:mt-5 sm:flex sm:flex-wrap sm:justify-center sm:gap-2.5 lg:justify-start"
           >
-            {trust.map((t, i) => (
-              <motion.li key={t.text} variants={ITEM} className="flex items-center gap-1.5">
-                <Icon name={t.icon} className={`h-4 w-4 ${i % 2 ? 'text-leaf-600' : 'text-gold-500'}`} />
-                {t.text}
+            {features.map((f) => (
+              <motion.li
+                key={f.bottom}
+                variants={ITEM}
+                className="flex min-w-0 flex-col items-center gap-1 rounded-xl border border-charcoal/10 bg-white/95 px-1.5 py-2 text-center shadow-sm backdrop-blur-sm sm:flex-row sm:gap-2.5 sm:rounded-full sm:py-2 sm:pl-3 sm:pr-5 sm:text-left"
+              >
+                <Icon name={f.icon} className="h-4.5 w-4.5 shrink-0 text-leaf-600 sm:h-6 sm:w-6" />
+                <span className="text-center text-[10px] leading-tight text-charcoal sm:text-left sm:text-xs lg:text-[0.82rem]">
+                  <span className="block font-semibold">{f.top}</span>
+                  <span className="block text-charcoal-light">{f.bottom}</span>
+                </span>
               </motion.li>
             ))}
           </motion.ul>
-        </div>
 
-        <HeroVideo />
+          <div className="relative -mx-4 mt-4 h-52 overflow-hidden bg-[#e6ece1] sm:hidden">
+            <motion.img
+              key={hasBanners ? current?.id ?? active : copy.src}
+              src={hasBanners && current?.image_path ? assetUrl(current.image_path) : copy.src}
+              alt=""
+              aria-hidden
+              initial={{ opacity: 0, scale: 1.03 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, ease: EASE }}
+              className="h-full w-full object-cover object-center"
+            />
+            <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: EASE, delay: 0.65 }}
+            className="mt-4 flex flex-col items-stretch gap-2.5 sm:mt-5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-3 lg:justify-start"
+          >
+            <Magnetic className="w-full sm:w-auto">
+              <Link
+                to={shopLink}
+                className={`shimmer-sheen group inline-flex w-full items-center justify-center gap-2.5 rounded-full bg-gold-500 py-3 pl-5 pr-3 text-sm font-semibold text-white shadow-[0_16px_30px_rgba(240,108,12,0.3)] transition-all hover:-translate-y-0.5 hover:bg-gold-600 sm:w-auto sm:justify-start sm:text-base ${FOCUS}`}
+              >
+                <Icon name="cart" className="h-5 w-5" />
+                Shop Now
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/25 transition-transform group-hover:translate-x-0.5">
+                  <Icon name="arrow" className="h-4 w-4" />
+                </span>
+              </Link>
+            </Magnetic>
+            <a
+              href={STORE_PHONE_HREF}
+              className={`inline-flex w-full items-center justify-center gap-2 rounded-full border border-charcoal/15 bg-white px-5 py-3 text-sm font-medium text-charcoal shadow-sm transition-all hover:-translate-y-0.5 hover:border-gold-500/50 hover:bg-gold-50 sm:w-auto sm:text-base ${FOCUS}`}
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gold-500 text-white">
+                <Icon name="phone" className="h-4 w-4" />
+              </span>
+              Call {STORE_PHONE}
+            </a>
+          </motion.div>
+        </div>
       </div>
+
+      <HeroCategoryStrip categories={categories} />
 
       {hasBanners && slides.length > 1 && (
         <>
@@ -1256,7 +1127,7 @@ function Hero({ slides, active, setActive, shopLink }) {
           >
             <Icon name="right" className="h-4 w-4" />
           </button>
-          <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 gap-2">
+          <div className="absolute bottom-1.5 left-1/2 z-20 flex -translate-x-1/2 gap-2">
             {slides.map((_, i) => (
               <button
                 key={i}
@@ -1285,63 +1156,78 @@ function Hero({ slides, active, setActive, shopLink }) {
 }
 
 /* ═══════════════ Categories ═══════════════ */
+
+/* One-line notes under each tile's name, used when a category has no description
+   of its own in the admin. Keyed by slug, so a new category simply falls back to
+   the hardware note below. */
+const CATEGORY_NOTES = {
+  'gaming-pcs': 'Custom builds',
+  laptops: 'Dell · HP · Lenovo',
+  'lcds-leds': '19" to 24" screens',
+  'mini-computers': 'Small, silent, powerful',
+  'refurbished-computers': 'OptiPlex · EliteDesk',
+  'sff-computers': 'Compact desktops',
+  'dual-screen-systems': 'Complete two-screen setups',
+};
+
+function categoryNote(cat) {
+  return cat.description || CATEGORY_NOTES[cat.slug] || 'Tested and ready to ship';
+}
+
 function Categories({ categories }) {
   if (!categories.length) return null;
+
   return (
-    <section id="categories" className={`scroll-mt-40 py-10 ${BG_FRESH}`}>
+    <section id="categories" className="scroll-mt-32 bg-cream py-7 sm:scroll-mt-40 sm:py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <SectionHeading
-          title="Shop by category"
-          subtitle="Desktops, laptops, screens and complete setups — all tested and ready to ship across the UK."
-        />
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <Reveal className="mx-auto mb-4 max-w-xl text-center sm:mb-7">
+          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-gold-600">
+            Browse the range
+          </p>
+          <h2 className="mt-2 text-3xl font-bold tracking-[-0.03em] text-forest-600 sm:text-[2.4rem]">
+            Shop by category
+          </h2>
+          <p className="mx-auto mt-2 max-w-lg text-sm text-charcoal-light">
+            Desktops, laptops, screens and complete setups — all tested and ready to ship across the UK.
+          </p>
+        </Reveal>
+
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
           {categories.map((cat, i) => (
-            <Reveal key={cat.slug} variant="scale" delay={i * 0.06}>
-              <TiltCard>
-                <Link
-                  to={`/onlineshop?category=${cat.slug}`}
-                  className={`group relative block aspect-[16/10] overflow-hidden rounded-2xl border border-charcoal/5 bg-cream-dark shadow-sm transition-shadow hover:shadow-xl ${FOCUS}`}
-                >
-                  {cat.banner_image ? (
-                    <>
+            <Reveal key={cat.slug} delay={0.05 * i}>
+              <Link
+                to={`${LINKS.shop}?category=${cat.slug}`}
+                className={`group flex h-full flex-col rounded-xl border border-charcoal/10 bg-white p-2 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-leaf-500/35 hover:shadow-xl sm:rounded-2xl sm:p-3 ${FOCUS}`}
+              >
+                <div className="relative overflow-hidden rounded-xl bg-[#f2f3f1]">
+                  <div className="flex aspect-[5/4] items-center justify-center p-2 sm:aspect-[4/3] sm:p-2.5">
+                    {cat.banner_image ? (
                       <img
                         src={assetUrl(cat.banner_image)}
                         alt=""
                         loading="lazy"
-                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                        className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
                       />
-                      <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-[900ms] ease-out group-hover:translate-x-full" />
-                    </>
-                  ) : (
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-br ${
-                        CATEGORY_ACCENTS[i % CATEGORY_ACCENTS.length]
-                      }`}
-                    >
-                      {/* Sheen that sweeps across the tile on hover. */}
-                      <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full" />
-                      <span className="absolute right-5 top-5 text-white/40 transition-all duration-500 ease-out group-hover:-translate-y-1 group-hover:scale-110 group-hover:text-white/70">
-                        <CategoryIcon slug={cat.slug} className="h-16 w-16" strokeWidth={1.2} />
-                      </span>
-                    </div>
-                  )}
-                  {/* Scrim kept to the lower third so the photograph reads as a photograph;
-                      it only has to carry the title and the one-line description. */}
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-charcoal/85 via-charcoal/25 via-45% to-transparent transition-opacity duration-500 group-hover:from-charcoal/90" />
-                  <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 sm:p-5">
-                    <div>
-                      <span className="mb-2 block h-1 w-8 rounded-full bg-gold-500 transition-all duration-500 group-hover:w-16" />
-                      <h3 className="font-serif text-xl text-white sm:text-2xl">{cat.name}</h3>
-                      {cat.description && (
-                        <p className="mt-1 line-clamp-2 max-w-xs text-xs text-white/90">{cat.description}</p>
-                      )}
-                    </div>
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-charcoal shadow-lg transition duration-300 group-hover:-rotate-45 group-hover:bg-gold-500 group-hover:text-white">
-                      <Icon name="arrow" className="h-4 w-4" />
-                    </span>
+                    ) : (
+                      <CategoryIcon
+                        slug={cat.slug}
+                        className="h-14 w-14 text-forest-600/30 transition-transform duration-500 group-hover:scale-110"
+                        strokeWidth={1.1}
+                      />
+                    )}
                   </div>
-                </Link>
-              </TiltCard>
+                </div>
+
+                <h3 className="mt-2.5 min-h-9 text-sm font-bold leading-snug text-forest-600 sm:mt-3 sm:min-h-0 sm:text-[0.95rem]">
+                  {cat.name}
+                </h3>
+                <p className="mt-1 line-clamp-2 text-xs text-charcoal-light">{categoryNote(cat)}</p>
+
+                <span className="mt-auto flex items-center gap-1.5 pt-3 text-xs font-semibold text-leaf-700">
+                  Shop now
+                  <Icon name="arrow" className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                </span>
+              </Link>
             </Reveal>
           ))}
         </div>
@@ -1351,6 +1237,29 @@ function Categories({ categories }) {
 }
 
 /* ═══════════════ Spotlight ═══════════════ */
+
+/* The catalogue has no structured spec columns — the build is written into the
+   product name ("… Intel Core i5-12500 16GB RAM 512GB NVMe … Windows 11 Pro"), so
+   the four tiles are read back out of the name and description. A spec that isn't
+   found is simply left out rather than guessed. */
+function readSpecs(product) {
+  const text = `${product.name || ''} ${product.meta_description || ''} ${product.description || ''}`;
+  const find = (re) => {
+    const m = text.match(re);
+    return m ? m[0].replace(/\s+/g, ' ').trim() : null;
+  };
+
+  return [
+    {
+      label: 'Processor',
+      value: find(/(?:Intel\s+Core\s+)?i[3579][- ]?\d{4,5}[A-Za-z]*|AMD\s+Ryzen\s+\d\s?\d{3,4}[A-Za-z]*|Intel\s+(?:Celeron|Pentium|Xeon)[\w- ]*/i),
+    },
+    { label: 'Memory', value: find(/\d+\s?GB(?:\s?DDR\d)?\s?RAM/i) },
+    { label: 'Storage', value: find(/\d+\s?(?:GB|TB)\s?(?:NVMe|SSD|HDD|eMMC)(?:\s?SSD)?/i) },
+    { label: 'System', value: find(/Windows\s?1[01](?:\s?(?:Pro|Home))?/i) },
+  ].filter((s) => s.value);
+}
+
 function Spotlight({ product }) {
   if (!product) return null;
 
@@ -1358,108 +1267,138 @@ function Spotlight({ product }) {
   const compareAt = product.compare_at_price ? Number(product.compare_at_price) : null;
   const saving = compareAt && compareAt > price ? compareAt - price : null;
   const inStock = Number(product.total_stock) > 0;
+  const specs = readSpecs(product);
+  const tags = [product.category_name, product.fabric].filter(Boolean);
 
   return (
-    <section className="bg-leaf-100/70 px-4 py-10 sm:px-6">
+    <section className="bg-cream-dark px-3 py-8 sm:px-6 sm:py-11">
       <Reveal variant="scale">
-        {/* Conic brand glow rotating behind the card, showing as a 2px ring.
-            It must be square and clipped: rotating a wide element sweeps its corners
-            outside the card, which bled a large diagonal wash across the page. */}
-        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl p-[2px]">
-          <motion.span
-            aria-hidden
-            className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[140%] -translate-x-1/2 -translate-y-1/2 opacity-70 [background:conic-gradient(from_0deg,#90c030,#f06c0c,#90c030)]"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 14, ease: 'linear', repeat: Infinity }}
-          />
-          <div className="relative grid overflow-hidden rounded-[calc(1.5rem-1px)] bg-gradient-to-br from-white via-gold-50 to-leaf-50 shadow-sm md:grid-cols-2">
-          <motion.span
-            aria-hidden
-            className="pointer-events-none absolute -left-16 -top-16 h-60 w-60 rounded-full bg-leaf-400/25 blur-3xl"
-            animate={{ scale: [1, 1.12, 1] }}
-            transition={{ duration: 9, ease: 'easeInOut', repeat: Infinity }}
-          />
-          <motion.span
-            aria-hidden
-            className="pointer-events-none absolute -bottom-16 -right-16 h-60 w-60 rounded-full bg-gold-400/25 blur-3xl"
-            animate={{ scale: [1, 1.15, 1] }}
-            transition={{ duration: 11, ease: 'easeInOut', repeat: Infinity }}
-          />
-
+        <div className="mx-auto grid max-w-7xl overflow-hidden rounded-2xl border border-charcoal/10 bg-white shadow-sm sm:rounded-3xl md:grid-cols-[0.95fr_1fr]">
           {/* Artwork */}
           <Link
             to={`/product/${product.slug}`}
-            className={`group relative order-1 flex min-h-[260px] items-center justify-center overflow-hidden p-8 md:order-2 ${FOCUS}`}
+            className={`group relative flex min-h-[14rem] items-center justify-center overflow-hidden bg-[#f2f3f1] p-5 sm:min-h-[18rem] sm:p-8 ${FOCUS}`}
           >
+            {/* Halo behind the machine, so a cut-out on grey still reads as a shot. */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-1/2 h-[78%] w-[78%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white"
+            />
+
+            <span className="absolute left-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-charcoal shadow-sm">
+              <Star className="h-3.5 w-3.5 fill-gold-500" />
+              Pick of the range
+            </span>
+
+            {saving && (
+              <span className="absolute right-4 top-4 z-10 rounded-full bg-gold-500 px-3 py-1.5 text-xs font-semibold text-white shadow-[0_6px_16px_rgba(240,108,12,0.35)]">
+                Save {formatCurrency(saving)}
+              </span>
+            )}
+
             {product.primary_image ? (
-              /* Product shots come in with a white background baked in, which floats
-                 oddly on the tinted card. Sitting it on a white panel makes that
-                 deliberate rather than accidental. */
-              <div className="relative flex h-56 w-full max-w-sm items-center justify-center rounded-2xl bg-white p-6 shadow-lg ring-1 ring-charcoal/5 transition-transform duration-500 group-hover:-translate-y-1">
-                <img
-                  src={assetUrl(product.primary_image)}
-                  alt={product.name}
-                  className="max-h-full w-auto object-contain transition-transform duration-700 group-hover:scale-105"
-                />
-              </div>
+              <img
+                src={assetUrl(product.primary_image)}
+                alt={product.name}
+                className="relative h-56 w-auto max-w-full object-contain transition-transform duration-700 group-hover:scale-105 sm:h-64"
+              />
             ) : (
-              <span className="relative flex flex-col items-center text-gold-500/70">
+              <span className="relative flex flex-col items-center text-forest-600/30">
                 <CategoryIcon slug={product.category_slug} className="h-28 w-28" strokeWidth={1} />
                 <span className="mt-3 text-[11px] font-medium uppercase tracking-[0.2em] text-charcoal-light/70">
                   {product.category_name}
                 </span>
               </span>
             )}
+
+            {tags.length > 0 && (
+              <div className="absolute inset-x-4 bottom-4 z-10 flex flex-wrap justify-center gap-2">
+                {tags.map((t) => (
+                  <span
+                    key={t}
+                    className="rounded-full border border-charcoal/10 bg-white px-3 py-1 text-[0.7rem] font-medium text-charcoal-light shadow-sm"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
           </Link>
 
           {/* Copy */}
-          <div className="relative order-2 flex flex-col justify-center p-6 sm:p-10 md:order-1">
-            <Badge accent="leaf">Pick of the range</Badge>
+          <div className="flex flex-col justify-center p-6 sm:p-8">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-gold-600">
+              {product.category_name || 'Refurbished'}
+            </p>
 
-            <h2 className="mt-3 font-serif text-2xl leading-tight text-charcoal sm:text-3xl">{product.name}</h2>
+            <h2 className="mt-1.5 text-2xl font-bold leading-tight tracking-[-0.02em] text-forest-600 sm:text-[1.9rem]">
+              {product.name}
+            </h2>
 
             {product.description && (
-              <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-charcoal-light">{product.description}</p>
+              <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-charcoal-light">
+                {product.description}
+              </p>
             )}
 
-            <div className="mt-4 flex flex-wrap items-baseline gap-3">
-              <span className="font-serif text-3xl text-charcoal">{formatCurrency(price)}</span>
+            {specs.length > 0 && (
+              <dl className="mt-4 grid grid-cols-2 gap-2 sm:mt-5 sm:gap-2.5">
+                {specs.map((s) => (
+                  <div key={s.label} className="rounded-xl bg-[#f4f5f3] px-3.5 py-2.5">
+                    <dt className="text-[0.7rem] text-charcoal-light">{s.label}</dt>
+                    <dd className="mt-0.5 text-sm font-semibold text-charcoal">{s.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+
+            <div className="mt-5 flex flex-wrap items-baseline gap-3">
+              <span className="text-3xl font-bold leading-none text-gold-600">{formatCurrency(price)}</span>
               {compareAt && compareAt > price && (
                 <span className="text-sm text-charcoal-light line-through">{formatCurrency(compareAt)}</span>
               )}
-              {saving && (
-                <span className="rounded-full bg-gold-500 px-2.5 py-1 text-xs font-medium text-white">
-                  Save {formatCurrency(saving)}
-                </span>
-              )}
+              <span
+                className={`flex items-center gap-1.5 text-xs font-medium ${
+                  inStock ? 'text-leaf-700' : 'text-charcoal-light'
+                }`}
+              >
+                <i className={`h-1.5 w-1.5 rounded-full ${inStock ? 'bg-leaf-500' : 'bg-stone-400'}`} />
+                {inStock ? 'In stock · ships in 48h' : 'Currently out of stock'}
+              </span>
             </div>
 
-            <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-charcoal-light">
+            <div className="mt-5 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:gap-3">
+              <Magnetic>
+                <Link
+                  to={`/product/${product.slug}`}
+                  className={`inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gold-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_26px_rgba(240,108,12,0.28)] transition-all hover:-translate-y-0.5 hover:bg-gold-600 sm:w-auto sm:px-6 ${FOCUS}`}
+                >
+                  <Icon name="cart" className="h-4.5 w-4.5" />
+                  Add to basket
+                </Link>
+              </Magnetic>
+              <Link
+                to={`/product/${product.slug}`}
+                className={`inline-flex w-full items-center justify-center rounded-xl border border-charcoal/15 bg-white px-5 py-3 text-sm font-semibold text-charcoal transition-all hover:-translate-y-0.5 hover:border-gold-500/50 hover:text-gold-600 sm:w-auto sm:px-6 ${FOCUS}`}
+              >
+                View full details
+              </Link>
+            </div>
+
+            <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-charcoal-light">
               <li className="flex items-center gap-1.5">
                 <Icon name="shield" className="h-4 w-4 text-leaf-600" />
                 {WARRANTY_MONTHS} month warranty
               </li>
               <li className="flex items-center gap-1.5">
                 <Icon name="check" className="h-4 w-4 text-leaf-600" />
-                Windows 11 Pro installed
+                Bench-tested
               </li>
               <li className="flex items-center gap-1.5">
-                <Icon name="truck" className="h-4 w-4 text-gold-500" />
-                {inStock ? 'In stock, ships in 48h' : 'Currently out of stock'}
+                <Icon name="recycle" className="h-4 w-4 text-leaf-600" />
+                {RETURN_DAYS}-day returns
               </li>
             </ul>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Magnetic>
-                <Link to={`/product/${product.slug}`}>
-                  <Button variant="gold" size="lg">View this machine</Button>
-                </Link>
-              </Magnetic>
-              <Link to={LINKS.shop}>
-                <Button variant="outline" size="lg">Compare the range</Button>
-              </Link>
-            </div>
-          </div>
           </div>
         </div>
       </Reveal>
@@ -1468,41 +1407,222 @@ function Spotlight({ product }) {
 }
 
 /* ═══════════════ Brands ═══════════════ */
-function Brands({ shopLink }) {
+
+/* Faint circuit traces behind the brand cards — the hardware itself now sits on the
+   cards, so the backdrop stays to texture only. */
+function BrandsBackdrop() {
   return (
-    <section className={`border-y border-gold-500/15 py-10 ${BG_WARM}`}>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <SectionHeading
-          badge="Trusted hardware"
-          badgeAccent="leaf"
-          title="The brands we carry"
-          subtitle="Ex-corporate hardware built to last, plus our own custom gaming builds."
+    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      <svg
+        viewBox="0 0 1440 420"
+        preserveAspectRatio="xMidYMid slice"
+        className="fc-anim absolute inset-0 h-full w-full"
+      >
+        <g fill="none" stroke="#1c1917" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6">
+          <path
+            d="M-20 96H180l36-36h214l34 34h252"
+            strokeOpacity="0.08"
+            strokeDasharray="6 10"
+            style={{ animation: 'fc-dash 9s linear infinite' }}
+          />
+          <path
+            d="M1460 150h-236l-40 40H960l-32-32H742"
+            strokeOpacity="0.08"
+            strokeDasharray="5 9"
+            style={{ animation: 'fc-dash 11s linear infinite reverse' }}
+          />
+          <path
+            d="M-20 330h300l44-44h300"
+            strokeOpacity="0.06"
+            strokeDasharray="4 10"
+            style={{ animation: 'fc-dash 13s linear infinite' }}
+          />
+          <path
+            d="M1460 372h-330l-40-40H880"
+            strokeOpacity="0.06"
+            strokeDasharray="4 10"
+            style={{ animation: 'fc-dash 10s linear infinite reverse' }}
+          />
+        </g>
+        <g fill="#1c1917">
+          <circle className="fc-node" cx="430" cy="60" r="3.2" fillOpacity="0.16" />
+          <circle className="fc-node" cx="716" cy="94" r="3.2" fillOpacity="0.14" style={{ animationDelay: '0.8s' }} />
+          <circle className="fc-node" cx="1184" cy="190" r="3.2" fillOpacity="0.16" style={{ animationDelay: '1.4s' }} />
+          <circle className="fc-node" cx="324" cy="286" r="3" fillOpacity="0.14" style={{ animationDelay: '2s' }} />
+          <circle className="fc-node" cx="1090" cy="332" r="3" fillOpacity="0.12" style={{ animationDelay: '0.4s' }} />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+/* A product render per brand, drawn in the same style as the quick-pick icons:
+   graphite hardware, lit screens, a contact shadow underneath. */
+function BrandArt({ shape, className = '' }) {
+  const shapes = {
+    tower: (
+      <>
+        <ellipse cx="60" cy="86" rx="26" ry="2.6" fill="#1c1917" opacity="0.16" />
+        <rect x="40" y="10" width="40" height="76" rx="4" fill="url(#fcBaBody)" />
+        <rect x="43" y="13" width="12" height="70" rx="2.5" fill="#ffffff" opacity="0.06" />
+        <rect x="46" y="18" width="28" height="1.6" rx="0.8" fill="#8f9bab" opacity="0.5" />
+        <circle cx="50" cy="26" r="2.4" fill="none" stroke="#9fb0c2" strokeWidth="1.2" />
+        <rect x="58" y="24.4" width="12" height="3.4" rx="1.7" fill="#2a323e" />
+        <rect x="46" y="36" width="28" height="4" rx="2" fill="#2a323e" />
+        <rect x="46" y="44" width="28" height="4" rx="2" fill="#2a323e" />
+        <circle cx="60" cy="66" r="9" fill="none" stroke="#8f9bab" strokeWidth="1.4" opacity="0.65" />
+        <circle cx="60" cy="66" r="3" fill="#8f9bab" opacity="0.5" />
+      </>
+    ),
+    laptop: (
+      <>
+        <ellipse cx="60" cy="81" rx="40" ry="2.8" fill="#1c1917" opacity="0.16" />
+        <rect x="24" y="16" width="72" height="48" rx="3.4" fill="url(#fcBaBody)" />
+        <rect x="27.5" y="19.5" width="65" height="41" rx="1.6" fill="url(#fcBaGlass)" />
+        <g clipPath="url(#fcBaLapScreen)">
+          <path d="M20 64 60 14h14L34 64Z" fill="#ffffff" opacity="0.15" />
+          <path d="M48 64 84 14h5L53 64Z" fill="#ffffff" opacity="0.1" />
+        </g>
+        <circle cx="60" cy="18" r="0.9" fill="#aab4c2" />
+        <path
+          d="M16 66h88l5 8.4a1.9 1.9 0 0 1-1.6 2.9H12.6a1.9 1.9 0 0 1-1.6-2.9L16 66Z"
+          fill="url(#fcBaMetal)"
         />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <rect x="50" y="68.4" width="20" height="2" rx="1" fill="#8d99a8" opacity="0.7" />
+      </>
+    ),
+    mini: (
+      <>
+        <ellipse cx="60" cy="72" rx="34" ry="2.6" fill="#1c1917" opacity="0.16" />
+        <rect x="26" y="36" width="68" height="32" rx="4" fill="url(#fcBaBody)" />
+        <rect x="26" y="36" width="68" height="7" rx="4" fill="#ffffff" opacity="0.07" />
+        <circle cx="36" cy="52" r="2.8" fill="none" stroke="#9fb0c2" strokeWidth="1.3" />
+        <rect x="45" y="50.4" width="13" height="3.4" rx="1.7" fill="#2a323e" />
+        <rect x="62" y="50.4" width="13" height="3.4" rx="1.7" fill="#2a323e" />
+        <rect x="79" y="48" width="9" height="8" rx="1.6" fill="#2a323e" />
+        <rect x="31" y="68" width="8" height="3" rx="1.5" fill="#6d7a8a" />
+        <rect x="81" y="68" width="8" height="3" rx="1.5" fill="#6d7a8a" />
+      </>
+    ),
+    gaming: (
+      <>
+        <ellipse cx="60" cy="86" rx="28" ry="2.6" fill="#1c1917" opacity="0.16" />
+        <rect x="36" y="8" width="48" height="78" rx="5" fill="url(#fcBaBody)" />
+        <rect x="39.5" y="11.5" width="26" height="71" rx="3" fill="#0e1218" opacity="0.55" />
+        <rect x="39.5" y="11.5" width="26" height="71" rx="3" fill="url(#fcBaGlassPanel)" opacity="0.35" />
+        <circle cx="74" cy="28" r="7.6" fill="none" stroke="#f3a05a" strokeWidth="2.6" opacity="0.85" />
+        <circle cx="74" cy="28" r="2.6" fill="#f06c0c" opacity="0.8" />
+        <circle cx="74" cy="52" r="7.6" fill="none" stroke="#f3a05a" strokeWidth="2.6" opacity="0.7" />
+        <circle cx="74" cy="52" r="2.6" fill="#f06c0c" opacity="0.65" />
+        <rect x="44" y="18" width="17" height="3" rx="1.5" fill="#8f9bab" opacity="0.45" />
+        <rect x="44" y="26" width="12" height="3" rx="1.5" fill="#8f9bab" opacity="0.3" />
+      </>
+    ),
+    monitor: (
+      <>
+        <ellipse cx="60" cy="84" rx="26" ry="2.6" fill="#1c1917" opacity="0.16" />
+        <rect x="10" y="10" width="100" height="58" rx="3.6" fill="url(#fcBaBody)" />
+        <rect x="13.5" y="13.5" width="93" height="48" rx="1.6" fill="url(#fcBaGlass)" />
+        <g clipPath="url(#fcBaMonScreen)">
+          <path d="M6 66 56 6h16L22 66Z" fill="#ffffff" opacity="0.15" />
+          <path d="M44 66 86 6h6L50 66Z" fill="#ffffff" opacity="0.1" />
+        </g>
+        <path d="M52 68h16l2.4 11H49.6L52 68Z" fill="url(#fcBaMetal)" />
+        <rect x="42" y="78" width="36" height="4.4" rx="2.2" fill="url(#fcBaMetal)" />
+      </>
+    ),
+  };
+
+  return (
+    <svg viewBox="0 0 120 92" className={className} aria-hidden>
+      <defs>
+        <linearGradient id="fcBaBody" x1="0" y1="0" x2="0.3" y2="1">
+          <stop offset="0%" stopColor="#59636f" />
+          <stop offset="100%" stopColor="#232a34" />
+        </linearGradient>
+        <linearGradient id="fcBaGlass" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#8fcbff" />
+          <stop offset="52%" stopColor="#2f82e0" />
+          <stop offset="100%" stopColor="#1a58ae" />
+        </linearGradient>
+        <linearGradient id="fcBaGlassPanel" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id="fcBaMetal" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#f1f4f8" />
+          <stop offset="55%" stopColor="#ccd4de" />
+          <stop offset="100%" stopColor="#9aa6b4" />
+        </linearGradient>
+        <clipPath id="fcBaLapScreen">
+          <rect x="27.5" y="19.5" width="65" height="41" rx="1.6" />
+        </clipPath>
+        <clipPath id="fcBaMonScreen">
+          <rect x="13.5" y="13.5" width="93" height="48" rx="1.6" />
+        </clipPath>
+      </defs>
+      {shapes[shape] || shapes.tower}
+    </svg>
+  );
+}
+
+function Brands({ categories }) {
+  /* Each card shows the picture of the category that best represents the brand,
+     falling back to the drawn render when that category has no image yet. */
+  const pictureFor = (brand) => {
+    for (const slug of brand.cats || []) {
+      const hit = (categories || []).find((c) => c.slug === slug && c.banner_image);
+      if (hit) return assetUrl(hit.banner_image);
+    }
+    return null;
+  };
+
+  return (
+    <section className={`relative isolate overflow-hidden border-y border-charcoal/8 py-8 sm:py-11 ${BG_WARM}`}>
+      <BrandsBackdrop />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <Reveal className="mb-6 max-w-xl">
+          <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-gold-600">
+            Trusted hardware
+          </p>
+          <h2 className="mt-1.5 text-3xl font-bold tracking-[-0.03em] text-forest-600 sm:text-[2.4rem]">
+            The brands we carry
+          </h2>
+          <p className="mt-2 text-sm text-charcoal-light">
+            Ex-corporate hardware built to last, plus our own custom gaming builds.
+          </p>
+        </Reveal>
+
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {BRANDS.map((b, i) => (
-            <Reveal key={b.name} variant="up" delay={i * 0.06}>
+            <Reveal key={b.name} delay={i * 0.05}>
               <Link
-                to={`${shopLink}?search=${encodeURIComponent(b.name)}`}
-                className={`group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-charcoal/5 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${FOCUS}`}
+                to={`/search?q=${encodeURIComponent(b.name)}`}
+                className={`group flex h-full flex-col rounded-2xl border border-charcoal/10 bg-white p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-gold-500/40 hover:shadow-xl ${FOCUS}`}
               >
-                {/* Brand colour floods up from the foot on hover. */}
-                <span
-                  aria-hidden
-                  className={`pointer-events-none absolute inset-0 translate-y-full bg-gradient-to-br transition-transform duration-500 ease-out group-hover:translate-y-0 ${
-                    i % 2 ? 'from-leaf-500 to-leaf-700' : 'from-gold-500 to-gold-700'
-                  }`}
-                />
-                <p className="relative font-serif text-2xl leading-none text-charcoal transition-colors duration-300 group-hover:text-white">
-                  {b.name}
-                </p>
-                <p className="relative mt-1.5 text-xs text-charcoal-light transition-colors duration-300 group-hover:text-white/85">
-                  {b.note}
-                </p>
-                <span
-                  className={`relative mt-4 h-1 w-8 rounded-full transition-all duration-500 group-hover:w-16 group-hover:bg-white ${
-                    i % 2 ? 'bg-leaf-500' : 'bg-gold-500'
-                  }`}
-                />
+                <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl bg-[#f2f3f1] p-2">
+                  {pictureFor(b) ? (
+                    <img
+                      src={pictureFor(b)}
+                      alt=""
+                      loading="lazy"
+                      className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-105"
+                    />
+                  ) : (
+                    <BrandArt
+                      shape={b.art}
+                      className="h-full w-full transition-transform duration-500 ease-out group-hover:scale-105"
+                    />
+                  )}
+                </div>
+
+                <h3 className="mt-3 text-base font-bold leading-snug text-forest-600">{b.name}</h3>
+                <p className="mt-0.5 text-xs text-charcoal-light">{b.note}</p>
+
+                <span className="mt-auto flex items-center gap-1.5 pt-3 text-xs font-semibold text-gold-600">
+                  {b.cta}
+                  <Icon name="arrow" className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                </span>
               </Link>
             </Reveal>
           ))}
@@ -1522,16 +1642,35 @@ function ProductsShowcase({ featured, featuredLoading, newArrivals, newArrivalsL
   const items = tab === 'featured' ? featured : newArrivals;
   const loading = tab === 'featured' ? featuredLoading : newArrivalsLoading;
   const skeletons = tab === 'featured' ? 12 : 8;
-  const grid = 'grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4';
+  const grid = 'grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4';
 
   return (
-    <section className={`py-10 ${BG_WARM}`}>
+    <section id="home-products" className="border-t border-charcoal/8 bg-cream py-8 sm:py-11">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <SectionHeading title="Ready to ship today" />
+          <Reveal>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-gold-600">
+              Popular right now
+            </p>
+            <h2 className="mt-1.5 text-3xl font-bold tracking-[-0.03em] text-forest-600 sm:text-[2.4rem]">
+              Ready to ship today
+            </h2>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <Link
+              to={viewAllLink}
+              className={`group inline-flex items-center gap-2 rounded-full border border-charcoal/15 bg-white px-5 py-2.5 text-sm font-medium text-charcoal shadow-sm transition-all hover:-translate-y-0.5 hover:border-gold-500/50 hover:text-gold-600 ${FOCUS}`}
+            >
+              View all products
+              <Icon name="arrow" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+          </Reveal>
+        </div>
+
+        <div className="mb-4">
           <div
             role="tablist"
-            className="mb-4 flex rounded-full border border-gold-500/20 bg-white p-1 shadow-sm"
+            className="inline-flex rounded-full border border-gold-500/20 bg-white p-1 shadow-sm"
           >
             {tabs.map((t) => (
               <button
@@ -1574,10 +1713,8 @@ function ProductsShowcase({ featured, featuredLoading, newArrivals, newArrivalsL
             ) : items?.length ? (
               <motion.div variants={STAGGER} initial="hidden" animate="show" className={grid}>
                 {items.map((product) => (
-                  <motion.div key={product.id} variants={ITEM} whileHover={{ y: -6, transition: SPRING }}>
-                    <TiltCard max={4}>
-                      <ProductCard product={product} />
-                    </TiltCard>
+                  <motion.div key={product.id} variants={ITEM}>
+                    <ProductCard product={product} />
                   </motion.div>
                 ))}
               </motion.div>
@@ -1587,13 +1724,45 @@ function ProductsShowcase({ featured, featuredLoading, newArrivals, newArrivalsL
           </motion.div>
         </AnimatePresence>
 
-        <Reveal className="mt-5 text-center">
-          <Link to={viewAllLink}>
-            <Button variant="outline" size="lg">
-              View all products
-            </Button>
-          </Link>
-        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function OffersShowcase({ offers, loading }) {
+  if (!loading && !offers.length) return null;
+
+  return (
+    <section id="home-offers" className={`border-y border-gold-500/15 py-8 sm:py-12 ${BG_FRESH}`}>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <Reveal>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-gold-700">
+              Limited-time savings
+            </p>
+            <h2 className="mt-1.5 font-serif text-3xl font-semibold tracking-tight text-forest-700 sm:text-4xl">
+              Special offers
+            </h2>
+            <p className="mt-1 text-sm text-charcoal-light">Great prices on tested, warranty-backed computers.</p>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <Link
+              to="/offers"
+              className={`inline-flex items-center gap-2 rounded-full border border-forest-700/15 bg-white px-5 py-2.5 text-sm font-semibold text-forest-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-gold-500/50 hover:shadow-md ${FOCUS}`}
+            >
+              View all offers <Icon name="arrow" className="h-4 w-4" />
+            </Link>
+          </Reveal>
+        </div>
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
+          {loading
+            ? Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)
+            : offers.map((product, i) => (
+                <motion.div key={product.id} variants={ITEM} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.15 }} transition={{ delay: i * 0.06 }}>
+                  <ProductCard product={product} />
+                </motion.div>
+              ))}
+        </div>
       </div>
     </section>
   );
@@ -1625,49 +1794,44 @@ function StatCounter({ value, suffix = '', label, accent, icon }) {
       viewport={{ once: true, amount: 0.5 }}
       transition={{ duration: 0.5, ease: EASE }}
       whileHover={{ y: -4 }}
-      className="group rounded-2xl border border-charcoal/5 bg-white px-3 py-5 text-center shadow-sm transition-shadow hover:shadow-lg"
+      className="group min-w-0 px-3 py-2 text-left sm:px-5 sm:py-3"
     >
       <span
-        className={`mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-110 ${
-          accent === 'leaf' ? 'bg-leaf-500/12 text-leaf-700' : 'bg-gold-500/12 text-gold-600'
-        }`}
+        className="mb-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-white/8 text-gold-400 transition-transform duration-300 group-hover:scale-110"
       >
-        <Icon name={icon} className="h-5 w-5" />
+        <Icon name={icon} className="h-4 w-4" />
       </span>
       {/* A small pop as the number settles, so the band does not just sit still. */}
       <motion.p
         animate={landed ? { scale: [1, 1.08, 1] } : undefined}
         transition={{ duration: 0.45, ease: EASE }}
-        className="font-serif text-3xl tabular-nums text-charcoal sm:text-4xl"
+        className="font-serif text-3xl font-semibold leading-none tabular-nums text-white sm:text-[2.15rem]"
       >
         {n.toLocaleString()}
-        <span className={accent === 'leaf' ? 'text-leaf-600' : 'text-gold-500'}>{suffix}</span>
+        <span className="text-gold-400">{suffix}</span>
       </motion.p>
-      <p className="mt-0.5 text-xs text-charcoal-light sm:text-sm">{label}</p>
+      <p className="mt-1 text-[11px] font-semibold leading-tight text-white sm:text-xs">{label}</p>
     </motion.div>
   );
 }
 
 function StatsSection() {
   return (
-    <section className="relative overflow-hidden border-y border-charcoal/5 bg-gradient-to-br from-leaf-100 via-cream-dark to-gold-100 py-10">
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute left-1/4 top-0 h-40 w-72 rounded-full bg-leaf-400/30 blur-3xl"
-        animate={{ x: [-40, 40, -40] }}
-        transition={{ duration: 12, ease: 'easeInOut', repeat: Infinity }}
-      />
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute right-1/4 bottom-0 h-40 w-72 rounded-full bg-gold-400/30 blur-3xl"
-        animate={{ x: [40, -40, 40] }}
-        transition={{ duration: 14, ease: 'easeInOut', repeat: Infinity }}
-      />
-      <Particles count={10} />
-      <div className="relative mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 sm:px-6 lg:grid-cols-4">
-        {STATS.map((s, i) => (
-          <StatCounter key={s.label} {...s} accent={i % 2 ? 'leaf' : 'gold'} />
-        ))}
+    <section className="bg-cream-dark px-3 py-4 sm:px-6 sm:py-6">
+      <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl bg-forest-700 shadow-sm">
+        <div className="grid grid-cols-2 divide-x divide-y divide-white/5 sm:grid-cols-4 sm:divide-y-0">
+          {STATS.map((s, i) => (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.45, delay: i * 0.08, ease: EASE }}
+            >
+              <StatCounter {...s} accent={i % 2 ? 'leaf' : 'gold'} />
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -1679,8 +1843,9 @@ function Grades({ link }) {
   const g = GRADES.find((x) => x.key === key);
 
   return (
-    <section className={`py-10 ${BG_WARM}`}>
-      <div className="mx-auto grid max-w-7xl items-center gap-6 px-4 sm:px-6 md:grid-cols-2">
+    <section className={`overflow-hidden py-10 sm:py-12 ${BG_WARM}`}>
+      <div className="mx-auto grid max-w-7xl items-center gap-5 px-3 sm:gap-6 sm:px-6 md:grid-cols-2">
+        <Reveal variant="left">
         <div>
           <SectionHeading
             badge="Buy with confidence"
@@ -1688,38 +1853,48 @@ function Grades({ link }) {
             subtitle="The grade describes how a machine looks, never how it performs. Everything is tested to the same standard."
           />
 
-          <div className="flex flex-wrap gap-2">
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.5 }}
+            variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
+            className="flex flex-wrap gap-2 rounded-xl bg-leaf-50/70 p-1.5 ring-1 ring-leaf-500/10"
+          >
             {GRADES.map((x) => (
-              <button
+              <motion.button
                 key={x.key}
                 type="button"
                 onClick={() => setKey(x.key)}
                 aria-pressed={key === x.key}
-                className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${FOCUS} ${
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }}
+                transition={{ duration: 0.25, ease: EASE }}
+                className={`rounded-full border px-4 py-2 text-sm font-medium transition-[color,background-color,border-color,box-shadow] duration-300 ${FOCUS} ${
                   key === x.key
-                    ? 'border-gold-500 bg-gold-500 text-white'
-                    : 'border-charcoal/15 bg-white text-charcoal hover:border-gold-500/50 hover:bg-gold-50'
+                    ? 'border-forest-700 bg-forest-700 text-white shadow-sm'
+                    : 'border-transparent bg-white/70 text-forest-700 hover:border-gold-400/50 hover:bg-gold-50'
                 }`}
               >
                 {x.label}
-              </button>
+              </motion.button>
             ))}
-          </div>
+          </motion.div>
 
           <AnimatePresence mode="wait">
             <motion.div
               key={key}
               initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.3, ease: EASE }}
-              className="mt-4"
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -8, filter: 'blur(3px)' }}
+              transition={{ duration: 0.35, ease: EASE }}
+              className="mt-4 rounded-r-xl border-l-2 border-gold-500 bg-white/70 py-3 pl-4 pr-3"
             >
-              <p className="text-sm text-charcoal-light">{g.text}</p>
+              <p className="text-sm leading-relaxed text-charcoal-light">{g.text}</p>
               <ul className="mt-3 space-y-1.5">
                 {g.points.map((p) => (
                   <li key={p} className="flex items-start gap-2 text-sm text-charcoal">
-                    <Icon name="check" className="mt-0.5 h-4 w-4 shrink-0 text-leaf-600" />
+                    <Icon name="check" className="mt-0.5 h-4 w-4 shrink-0 text-forest-600" />
                     {p}
                   </li>
                 ))}
@@ -1731,39 +1906,55 @@ function Grades({ link }) {
             <Button variant="gold">Browse the range</Button>
           </Link>
         </div>
+        </Reveal>
 
         <Reveal variant="right">
-          <div className="rounded-3xl border border-leaf-500/20 bg-white p-6 shadow-md">
-            <p className="text-xs font-medium uppercase tracking-wide text-gold-600">Cosmetic condition</p>
-            <p className="mt-1 font-serif text-3xl text-charcoal">{g.tone}</p>
+          <motion.div
+            whileHover={{ y: -4 }}
+            transition={{ duration: 0.3, ease: EASE }}
+            className="relative overflow-hidden rounded-2xl bg-forest-700 p-5 text-white shadow-lg shadow-forest-700/15 sm:rounded-3xl sm:p-7"
+          >
+            <motion.div
+              aria-hidden
+              className="pointer-events-none absolute -right-16 -top-20 h-52 w-52 rounded-full bg-gold-500/10 blur-2xl"
+              animate={{ scale: [1, 1.12, 1], opacity: [0.65, 1, 0.65] }}
+              transition={{ duration: 7, ease: 'easeInOut', repeat: Infinity }}
+            />
+            <div className="relative">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gold-300">Cosmetic condition</p>
+            <p className="mt-1 font-serif text-3xl text-white">{g.tone}</p>
 
-            <div className="mt-5 h-3 w-full overflow-hidden rounded-full bg-leaf-50 ring-1 ring-charcoal/8">
+            <div className="mt-5 h-2.5 w-full overflow-hidden rounded-full bg-white/15 ring-1 ring-white/10">
               <motion.div
                 key={key}
                 initial={{ width: 0 }}
                 animate={{ width: `${g.fill * 100}%` }}
-                transition={{ duration: 0.7, ease: EASE }}
-                className="h-full rounded-full bg-gradient-to-r from-leaf-500 to-gold-500"
+                transition={{ duration: 0.9, ease: EASE }}
+                className="h-full rounded-full bg-gradient-to-r from-gold-400 to-gold-300"
               />
             </div>
 
-            <dl className="mt-6 grid grid-cols-2 gap-4">
+            <dl className="mt-5 grid grid-cols-2 gap-2.5 sm:mt-6 sm:gap-4">
               {[
                 ['Warranty', `${WARRANTY_MONTHS} months`],
                 ['Returns', `${RETURN_DAYS} days`],
                 ['Operating system', 'Windows 11 Pro'],
                 ['Testing', 'Every unit'],
               ].map(([k, v], idx) => (
-                <div
+                <motion.div
                   key={k}
-                  className={`rounded-xl p-3 shadow-sm ${idx % 2 ? 'bg-leaf-50' : 'bg-gold-50'}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: idx * 0.06, ease: EASE }}
+                  className={`rounded-xl border border-white/10 p-2.5 sm:p-3 ${idx % 2 ? 'bg-white/8' : 'bg-gold-500/10'}`}
                 >
-                  <dt className="text-xs text-charcoal-light">{k}</dt>
-                  <dd className="font-serif text-xl text-charcoal">{v}</dd>
-                </div>
+                  <dt className="text-xs text-white/65">{k}</dt>
+                  <dd className="font-serif text-xl text-white">{v}</dd>
+                </motion.div>
               ))}
             </dl>
-          </div>
+            </div>
+          </motion.div>
         </Reveal>
       </div>
     </section>
@@ -1780,7 +1971,7 @@ function Tile({ className = '', delay = 0, children }) {
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.55, ease: EASE, delay }}
       whileHover={{ y: -4 }}
-      className={`relative overflow-hidden rounded-2xl p-5 ${className}`}
+      className={`relative overflow-hidden rounded-2xl p-4 sm:p-5 ${className}`}
     >
       {children}
     </motion.div>
@@ -1789,7 +1980,7 @@ function Tile({ className = '', delay = 0, children }) {
 
 function Why() {
   return (
-    <section className={`border-y border-leaf-500/15 py-10 ${BG_FRESH}`}>
+    <section className={`border-y border-charcoal/8 py-10 ${BG_FRESH}`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHeading
           badge="The case for refurbished"
@@ -1797,11 +1988,14 @@ function Why() {
           title="Why buy refurbished"
           subtitle="Corporate hardware is built to a higher standard than consumer kit — and costs a fraction of new."
         />
-        <div className="grid gap-3 md:grid-cols-6">
-          <Tile className="border border-charcoal/5 bg-white shadow-sm md:col-span-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-6">
+          <Tile className="col-span-2 border border-white/10 bg-forest-700 text-white shadow-lg shadow-forest-700/10 md:col-span-4">
             <div className="relative z-10 max-w-sm pr-0 sm:pr-24">
-              <h3 className="font-serif text-lg text-charcoal sm:text-xl">Every machine is bench-tested</h3>
-              <p className="mt-1 text-sm text-charcoal-light">
+              <span className="mb-2 inline-flex items-center gap-2 rounded-full border border-gold-300/20 bg-white/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-300">
+                <Icon name="check" className="h-3.5 w-3.5" /> Tested before dispatch
+              </span>
+              <h3 className="font-serif text-lg text-white sm:text-xl">Every machine is bench-tested</h3>
+              <p className="mt-1 text-sm leading-relaxed text-white/75">
                 Memory, storage health, thermals and ports are all checked under load before a machine is listed.
                 Anything that fails is repaired or stripped for parts rather than sold on.
               </p>
@@ -1818,38 +2012,42 @@ function Why() {
                   transition={{ duration: 6 + i * 3, ease: 'linear', repeat: Infinity }}
                 />
               ))}
-              <span className="absolute inset-[48px] rounded-full bg-gold-500/15" />
+                  <motion.span
+                    className="absolute inset-[48px] rounded-full bg-gold-400/20"
+                    animate={{ scale: [0.9, 1.08, 0.9], opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 3, ease: 'easeInOut', repeat: Infinity }}
+                  />
             </div>
           </Tile>
 
-          <Tile delay={0.08} className="bg-gradient-to-br from-gold-500 to-gold-600 text-white shadow-sm md:col-span-2">
+          <Tile delay={0.08} className="col-span-2 bg-gradient-to-br from-gold-400 to-gold-500 text-black shadow-md md:col-span-2">
             <motion.span
               aria-hidden
               className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/20"
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 3.5, ease: 'easeInOut', repeat: Infinity }}
             />
-            <p className="relative font-serif text-5xl leading-none">{WARRANTY_MONTHS}</p>
-            <p className="relative mt-0.5 font-serif text-base">month warranty as standard</p>
-            <p className="relative mt-0.5 text-xs text-white/85">Return-to-base cover on every machine we sell.</p>
+            <p className="relative font-serif text-5xl font-semibold leading-none text-black">{WARRANTY_MONTHS}</p>
+            <p className="relative mt-0.5 font-serif text-base text-black">month warranty as standard</p>
+            <p className="relative mt-1 text-xs text-black/75">Return-to-base cover on every machine we sell.</p>
           </Tile>
 
           {WHY.map((w, i) => (
             <Tile
               key={w.title}
               delay={0.05 + i * 0.05}
-              className="border border-charcoal/5 bg-white shadow-sm md:col-span-3"
+              className="border border-forest-700/10 bg-white shadow-sm transition-shadow hover:shadow-lg md:col-span-3"
             >
               <div className="flex items-start gap-3">
                 <span
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-                    w.accent === 'leaf' ? 'bg-leaf-500/12 text-leaf-700' : 'bg-gold-500/12 text-gold-600'
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                    w.accent === 'leaf' ? 'bg-forest-700 text-white' : 'bg-gold-400/20 text-forest-700'
                   }`}
                 >
                   <Icon name={w.icon} className="h-4.5 w-4.5" />
                 </span>
                 <div>
-                  <h3 className="font-serif text-base text-charcoal">{w.title}</h3>
+                  <h3 className="font-serif text-base text-forest-700">{w.title}</h3>
                   <p className="mt-0.5 text-xs text-charcoal-light sm:text-sm">{w.text}</p>
                 </div>
               </div>
@@ -1864,32 +2062,34 @@ function Why() {
 /* ═══════════════ Services ═══════════════ */
 function Services() {
   return (
-    <section className={`py-10 ${BG_WARM}`}>
+    <section className={`py-8 sm:py-12 ${BG_WARM}`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHeading
           badge="More than a shop"
           title="What else we do"
           subtitle="We are a workshop as well as a store — come to us with the machine you already own."
         />
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid items-stretch gap-4 sm:grid-cols-3">
           {SERVICES.map((s, i) => (
             <Reveal key={s.title} variant="up" delay={i * 0.08}>
               <div
-                className={`h-full rounded-2xl border bg-white p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg ${
-                  s.accent === 'leaf' ? 'border-leaf-500/25' : 'border-gold-500/25'
+                className={`flex h-full min-h-0 flex-row items-start gap-3 rounded-2xl border bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg sm:min-h-48 sm:flex-col sm:gap-0 sm:p-5 ${
+                  s.accent === 'leaf' ? 'border-forest-700/15' : 'border-gold-500/30'
                 }`}
               >
                 <motion.span
                   whileHover={{ rotate: -8, scale: 1.12 }}
                   transition={SPRING}
-                  className={`flex h-11 w-11 items-center justify-center rounded-full text-white ${
-                    s.accent === 'leaf' ? 'bg-leaf-500' : 'bg-gold-500'
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white sm:mt-0 sm:h-11 sm:w-11 ${
+                    s.accent === 'leaf' ? 'bg-forest-700' : 'bg-gold-500'
                   }`}
                 >
                   <Icon name={s.icon} className="h-5 w-5" />
                 </motion.span>
-                <h3 className="mt-3 font-serif text-lg text-charcoal">{s.title}</h3>
-                <p className="mt-1 text-sm text-charcoal-light">{s.text}</p>
+                <div className="min-w-0">
+                  <h3 className="font-serif text-base text-forest-700 sm:mt-3 sm:text-lg">{s.title}</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-charcoal-light sm:flex-1 sm:text-sm">{s.text}</p>
+                </div>
               </div>
             </Reveal>
           ))}
@@ -1968,18 +2168,19 @@ function Visit() {
   }, [step]);
 
   return (
-    <section className={`border-y border-leaf-500/15 py-10 ${BG_FRESH}`}>
-      <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 sm:px-6 md:grid-cols-2">
-        <div>
+    <section className={`border-y border-charcoal/8 py-8 sm:py-12 ${BG_FRESH}`}>
+      <div className="mx-auto grid max-w-7xl items-stretch gap-5 px-3 sm:gap-6 sm:px-6 md:grid-cols-2">
+        <Reveal variant="left">
+        <div className="flex h-full flex-col justify-center">
           <SectionHeading
             badge="Find us"
             badgeAccent="leaf"
             title="Visit the Burnley unit"
             subtitle="Come and see a machine before you buy, collect an online order, or bring something in for repair."
           />
-          <ul className="space-y-3">
+          <ul className="space-y-3 rounded-2xl border border-forest-700/10 bg-white/85 p-4 shadow-sm sm:p-5">
             <li className="flex items-start gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-500/15 text-gold-600">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-forest-700/8 text-forest-700">
                 <Icon name="pin" className="h-4.5 w-4.5" />
               </span>
               <span className="text-sm text-charcoal">
@@ -1991,7 +2192,7 @@ function Visit() {
               </span>
             </li>
             <li className="flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-leaf-500/20 text-leaf-700">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-forest-700/8 text-forest-700">
                 <Icon name="phone" className="h-4.5 w-4.5" />
               </span>
               <a href={STORE_PHONE_HREF} className={`text-sm font-medium text-charcoal hover:underline ${FOCUS}`}>
@@ -1999,7 +2200,7 @@ function Visit() {
               </a>
             </li>
             <li className="flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-500/15 text-gold-600">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-forest-700/8 text-forest-700">
                 <Icon name="mail" className="h-4.5 w-4.5" />
               </span>
               <a href={STORE_EMAIL_HREF} className={`text-sm font-medium text-charcoal hover:underline ${FOCUS}`}>
@@ -2009,18 +2210,19 @@ function Visit() {
           </ul>
           <div className="mt-5 flex flex-wrap gap-3">
             <a href={STORE_MAP_URL} target="_blank" rel="noopener noreferrer">
-              <Button variant="gold">Get directions</Button>
+              <Button variant="forest">Get directions</Button>
             </a>
             <Link to={LINKS.contact}>
-              <Button variant="outline">Contact us</Button>
+              <Button variant="outline" className="border-forest-700 text-forest-700 hover:bg-forest-700 hover:text-white">Contact us</Button>
             </Link>
           </div>
         </div>
+        </Reveal>
 
         <Reveal variant="right">
-          <Win title="maps · firstclick-burnley">
+          <Win title="maps · firstclick-burnley" className="h-full">
             {/* map */}
-            <div className="relative h-52 overflow-hidden bg-leaf-50 sm:h-60">
+            <div className="relative h-48 overflow-hidden bg-leaf-50 sm:h-64">
               <svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" className="absolute inset-0 h-full w-full">
                 <defs>
                   <pattern id="mapgrid" width="24" height="24" patternUnits="userSpaceOnUse">
@@ -2031,13 +2233,13 @@ function Visit() {
                 <path d="M-10 170 C80 150 120 90 220 110 S360 60 420 40" fill="none" stroke="white" strokeWidth="14" />
                 <path d="M200 -10 C190 60 210 160 180 250" fill="none" stroke="white" strokeWidth="10" />
                 <path d="M-10 60 H420" fill="none" stroke="white" strokeWidth="6" />
-                <path d="M-10 170 C80 150 120 90 220 110 S360 60 420 40" fill="none" className="stroke-gold-500/60" strokeWidth="1.5" strokeDasharray="6 8" />
+                <path d="M-10 170 C80 150 120 90 220 110 S360 60 420 40" fill="none" className="stroke-forest-600/65" strokeWidth="1.5" strokeDasharray="6 8" />
               </svg>
 
               {/* delivery dot driving along the main road */}
               <motion.span
                 aria-hidden
-                className="absolute h-2.5 w-2.5 rounded-full bg-leaf-600 ring-4 ring-leaf-500/25"
+                className="absolute h-2.5 w-2.5 rounded-full bg-forest-700 ring-4 ring-forest-600/20"
                 initial={{ left: '-3%', top: '70%' }}
                 animate={{ left: ['-3%', '30%', '55%', '103%'], top: ['70%', '55%', '46%', '17%'] }}
                 transition={{ duration: 7, ease: 'linear', repeat: Infinity }}
@@ -2049,7 +2251,7 @@ function Visit() {
                   <motion.span
                     key={i}
                     aria-hidden
-                    className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-gold-500"
+                    className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-forest-600"
                     initial={{ scale: 0.2, opacity: 0.8 }}
                     animate={{ scale: 1.6, opacity: 0 }}
                     transition={{ duration: 2.4, ease: 'easeOut', repeat: Infinity, delay: i * 1.2 }}
@@ -2058,7 +2260,7 @@ function Visit() {
                 <motion.span
                   animate={{ y: [0, -6, 0] }}
                   transition={{ duration: 1.6, ease: 'easeInOut', repeat: Infinity }}
-                  className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gold-500 text-white shadow-lg"
+                  className="relative flex h-10 w-10 items-center justify-center rounded-full bg-forest-700 text-white shadow-lg"
                 >
                   <Icon name="pin" className="h-5 w-5" />
                 </motion.span>
@@ -2082,7 +2284,7 @@ function Visit() {
                     <li key={s} className="text-center">
                       <div className="relative mx-auto mb-2 h-1.5 overflow-hidden rounded-full bg-charcoal/10">
                         <motion.span
-                          className="absolute inset-0 origin-left rounded-full bg-gradient-to-r from-leaf-500 to-gold-500"
+                          className="absolute inset-0 origin-left rounded-full bg-gradient-to-r from-forest-600 to-leaf-500"
                           initial={false}
                           animate={{ scaleX: done ? 1 : 0 }}
                           transition={{ duration: 0.5, ease: EASE }}
@@ -2090,7 +2292,7 @@ function Visit() {
                       </div>
                       <motion.span
                         animate={{ color: done ? '#1f2a24' : '#8a928d' }}
-                        className="flex items-center justify-center gap-1 text-[11px] font-medium sm:text-xs"
+                        className="flex items-center justify-center gap-1 text-[9px] font-medium leading-tight sm:text-xs"
                       >
                         {done && <Icon name="check" className="h-3.5 w-3.5 text-leaf-600" />}
                         {s}
@@ -2123,34 +2325,34 @@ function Testimonials() {
   const done = typed.length >= t.quote.length;
 
   return (
-    <section className={`py-10 ${BG_WARM}`} onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+    <section className={`py-7 sm:py-12 ${BG_WARM}`} onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHeading
           title="What our customers say"
           subtitle="Homes, offices and schools across the North West on buying refurbished from us."
         />
 
-        <Reveal variant="scale">
-          <Win title={`inbox · ${TESTIMONIALS.length} customer reviews`}>
+        <Reveal variant="up">
+          <Win title={`inbox · ${TESTIMONIALS.length} customer reviews`} className="border-forest-700/15 shadow-lg shadow-forest-700/5">
             <div className="grid md:grid-cols-[15rem_1fr]">
               {/* message list */}
-              <div className="flex gap-1 overflow-x-auto border-b border-leaf-700/30 bg-leaf-600 p-2 md:flex-col md:border-b-0 md:border-r">
+              <div className="flex gap-1 border-b border-white/10 bg-forest-700 p-1.5 sm:gap-1.5 sm:p-2 md:flex-col md:border-b-0 md:border-r">
                 {TESTIMONIALS.map((x, idx) => (
                   <button
                     key={x.name}
                     type="button"
                     onClick={() => setI(idx)}
                     aria-current={idx === i}
-                    className={`relative flex min-w-[11rem] items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-left transition-colors md:min-w-0 ${FOCUS} ${
-                      idx === i ? 'bg-white/20 shadow-sm ring-1 ring-white/40' : 'hover:bg-white/10'
+                    className={`relative flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden rounded-xl px-1.5 py-2 text-left transition-colors sm:gap-2 sm:px-2.5 sm:py-2.5 md:min-w-0 md:flex-none md:gap-3 md:px-3 ${FOCUS} ${
+                      idx === i ? 'bg-white/15 shadow-sm ring-1 ring-white/25' : 'hover:bg-white/8'
                     }`}
                   >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold-500 font-serif text-sm font-semibold text-white shadow-sm">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold-400 font-serif text-xs font-semibold text-black shadow-sm sm:h-9 sm:w-9 sm:text-sm">
                       {x.name[0]}
                     </span>
                     <span className="min-w-0">
-                      <span className="block truncate text-sm font-semibold text-white">{x.name}</span>
-                      <span className="block truncate text-xs text-white/75">{x.location} · 5 stars</span>
+                      <span className="block truncate text-[11px] font-semibold text-white sm:text-sm">{x.name}</span>
+                      <span className="block truncate text-[9px] text-white/75 sm:text-xs">{x.location} · 5 stars</span>
                     </span>
                     {idx === i && !paused && (
                       <motion.span
@@ -2166,7 +2368,7 @@ function Testimonials() {
               </div>
 
               {/* reading pane */}
-              <div className="relative min-h-[260px] bg-gradient-to-br from-gold-50 via-white to-leaf-50 p-5 sm:p-7">
+              <div className="relative min-h-[220px] bg-gradient-to-br from-gold-50 via-white to-leaf-50 p-3.5 sm:min-h-[260px] sm:p-7">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={i}
@@ -2175,7 +2377,7 @@ function Testimonials() {
                     exit={{ opacity: 0, x: -18 }}
                     transition={{ duration: 0.3, ease: EASE }}
                   >
-                    <div className="flex items-start justify-between gap-3 border-b border-charcoal/8 pb-3">
+                    <div className="flex flex-col gap-2 border-b border-charcoal/8 pb-3 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                       <div>
                         <p className="font-serif text-lg text-charcoal">Review from {t.name}</p>
                         <p className="font-mono text-[11px] text-charcoal-light">
@@ -2196,7 +2398,7 @@ function Testimonials() {
                       </div>
                     </div>
 
-                    <p className="mt-4 min-h-[7.5rem] font-serif text-lg leading-relaxed text-charcoal sm:text-xl">
+                    <p className="mt-4 min-h-[7.5rem] font-serif text-base leading-relaxed text-charcoal sm:text-xl">
                       {typed}
                       {!done && <Caret className="bg-gold-500" />}
                     </p>
@@ -2204,7 +2406,7 @@ function Testimonials() {
                     <motion.p
                       initial={false}
                       animate={{ opacity: done ? 1 : 0, y: done ? 0 : 6 }}
-                      className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-leaf-500/12 px-3 py-1 text-xs font-medium text-leaf-700"
+                      className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-forest-700/10 px-3 py-1 text-xs font-medium text-forest-700"
                     >
                       <Icon name="check" className="h-3.5 w-3.5" /> Would buy again
                     </motion.p>
@@ -2241,34 +2443,34 @@ function FaqAnswer({ text }) {
 function FAQ() {
   const [open, setOpen] = useState(0);
   return (
-    <section className={`border-t border-leaf-500/15 py-10 ${BG_FRESH}`}>
-      <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:grid-cols-[1fr_1.7fr]">
+    <section className={`border-t border-charcoal/8 py-8 sm:py-12 ${BG_FRESH}`}>
+      <div className="mx-auto grid max-w-7xl gap-5 px-3 sm:gap-6 sm:px-6 lg:grid-cols-[1fr_1.7fr]">
         <div>
           <SectionHeading title="Questions, answered" subtitle="The essentials before you order." />
           <Reveal delay={0.1}>
-            <div className="relative overflow-hidden rounded-2xl border border-leaf-500/20 bg-white p-4 shadow-sm">
+            <div className="relative flex h-full flex-col items-start overflow-hidden rounded-2xl border border-white/10 bg-forest-700 p-5 text-white shadow-lg shadow-forest-700/10">
               <motion.span
                 aria-hidden
                 className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gold-400/25 blur-xl"
                 animate={{ scale: [1, 1.3, 1] }}
                 transition={{ duration: 4, ease: 'easeInOut', repeat: Infinity }}
               />
-              <p className="relative font-serif text-base text-charcoal">Need a hand choosing?</p>
-              <p className="relative mt-0.5 text-xs text-charcoal-light">
+              <p className="relative font-serif text-lg text-white">Need a hand choosing?</p>
+              <p className="relative mt-1 text-sm leading-relaxed text-white/75">
                 Tell us what you need the machine for and we will point you at the right spec.
               </p>
               <a
                 href={STORE_PHONE_HREF}
-                className={`relative mt-3 inline-flex items-center gap-2 rounded-full bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-600 ${FOCUS}`}
+                className={`relative mt-4 inline-flex items-center gap-2 rounded-full bg-gold-400 px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-gold-300 ${FOCUS}`}
               >
                 <Icon name="phone" className="h-4 w-4" />
                 {STORE_PHONE}
               </a>
               <div className="relative mt-3 flex flex-wrap gap-4 text-sm">
-                <Link to={LINKS.contact} className="font-medium text-leaf-700 hover:underline">
+                <Link to={LINKS.contact} className="font-medium text-gold-300 hover:text-white hover:underline">
                   Contact us
                 </Link>
-                <Link to={LINKS.faq} className="font-medium text-leaf-700 hover:underline">
+                <Link to={LINKS.faq} className="font-medium text-gold-300 hover:text-white hover:underline">
                   All FAQs
                 </Link>
               </div>
@@ -2393,10 +2595,10 @@ function FinalCta({ promoBanner, link }) {
   ];
 
   return (
-    <section className={`px-4 py-10 sm:px-6 ${BG_WARM}`}>
+    <section className={`px-3 py-8 sm:px-6 sm:py-12 ${BG_WARM}`}>
       <Reveal
         variant="scale"
-        className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-gradient-to-br from-gold-500 via-gold-500 to-leaf-500 px-5 py-10 sm:px-10 lg:py-14"
+        className="relative mx-auto max-w-7xl overflow-hidden rounded-2xl bg-gradient-to-br from-forest-700 via-forest-600 to-forest-700 px-4 py-8 sm:rounded-3xl sm:px-10 sm:py-10 lg:py-14"
       >
         <Particles count={12} color="#ffffff" />
         {/* moving sheen */}
@@ -2424,7 +2626,7 @@ function FinalCta({ promoBanner, link }) {
           </motion.span>
         ))}
 
-        <div className="relative grid items-center gap-8 lg:grid-cols-[1.1fr_1fr]">
+        <div className="relative grid items-center gap-6 sm:gap-8 lg:grid-cols-[1.1fr_1fr]">
           <div className="text-center lg:text-left">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/25 px-3 py-1 text-xs font-medium text-white">
               <Icon name="truck" className="h-3.5 w-3.5" />
@@ -2438,16 +2640,16 @@ function FinalCta({ promoBanner, link }) {
               {WARRANTY_MONTHS} month warranty, all ready to ship from Burnley.
             </p>
 
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
+            <div className="mt-5 flex flex-col items-stretch justify-center gap-3 sm:mt-6 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4 lg:justify-start">
               {/* keycap button: presses itself every few seconds, presses for real on click */}
-              <Magnetic>
+              <Magnetic className="w-full sm:w-auto">
                 <motion.div
                   animate={{ y: [0, 4, 0] }}
                   transition={{ duration: 0.4, repeat: Infinity, repeatDelay: 3.6 }}
                 >
                   <Link
                     to={target}
-                    className={`inline-flex items-center gap-3 rounded-2xl border-b-[5px] border-charcoal/25 bg-white px-6 py-3.5 text-sm font-semibold text-charcoal shadow-xl transition-all hover:bg-cream-dark active:translate-y-1 active:border-b-[1px] ${FOCUS}`}
+                    className={`inline-flex w-full items-center justify-center gap-3 rounded-2xl border-b-[5px] border-charcoal/25 bg-white px-5 py-3 text-sm font-semibold text-charcoal shadow-xl transition-all hover:bg-cream-dark active:translate-y-1 active:border-b-[1px] sm:w-auto sm:px-6 sm:py-3.5 ${FOCUS}`}
                   >
                     Shop the range
                     <span className="flex h-6 items-center rounded-md bg-charcoal px-2 font-mono text-[10px] text-white">
@@ -2458,7 +2660,7 @@ function FinalCta({ promoBanner, link }) {
               </Magnetic>
               <a
                 href={STORE_PHONE_HREF}
-                className={`inline-flex items-center gap-2 rounded-2xl border border-white/50 px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/15 ${FOCUS}`}
+                className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/50 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/15 sm:w-auto sm:px-6 sm:py-3.5 ${FOCUS}`}
               >
                 <Icon name="phone" className="h-4 w-4" />
                 {STORE_PHONE}
@@ -2497,8 +2699,12 @@ export default function Home() {
     const { data } = await getProducts({ limit: 8, sort: 'newest' });
     return data;
   }, []);
+  const { data: offersData, loading: offersLoading } = useAsync(() => getProducts({ pageSize: 40 }), []);
   const { data: categories } = useAsync(() => getCategories(), []);
   const promoBanner = promoBanners?.[0];
+  const offers = (offersData?.data || [])
+    .filter((product) => Number(product.compare_at_price) > Number(product.min_price))
+    .slice(0, 4);
 
   const slides = [...(heroBanners || []), ...(secondaryBanners || [])].filter((b) => b.image_path);
   const [activeSlide, setActiveSlide] = useState(0);
@@ -2518,7 +2724,13 @@ export default function Home() {
         <ScrollProgress />
         <BackToTop />
 
-        <Hero slides={slides} active={activeSlide} setActive={setActiveSlide} shopLink={LINKS.shop} />
+        <Hero
+          slides={slides}
+          active={activeSlide}
+          setActive={setActiveSlide}
+          shopLink={LINKS.shop}
+          categories={topCategories}
+        />
 
         {/* Solid brand strip right under the hero */}
         <section className="border-y border-gold-600/30 bg-gold-500 py-2.5">
@@ -2537,9 +2749,11 @@ export default function Home() {
           viewAllLink={LINKS.shop}
         />
 
+        <OffersShowcase offers={offers} loading={offersLoading} />
+
         <Spotlight product={featured?.[0]} />
 
-        <Brands shopLink={LINKS.shop} />
+        <Brands categories={topCategories} />
         <StatsSection />
         <Grades link={LINKS.shop} />
         <Why />

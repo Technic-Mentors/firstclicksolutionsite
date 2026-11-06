@@ -21,7 +21,7 @@ export default function BlogPostPage() {
 
   return (
     <article className="mx-auto max-w-2xl px-4 py-14 sm:px-6">
-      <p className="text-xs uppercase tracking-wider text-gold-600">{post.category_name}</p>
+      <p className="text-xs uppercase tracking-wider text-forest-700">{post.category_name}</p>
       <h1 className="mt-2 font-serif text-3xl text-charcoal">{post.title}</h1>
       <p className="mt-2 text-sm text-stone-400">{formatDate(post.published_at)}</p>
       {post.featured_image && (

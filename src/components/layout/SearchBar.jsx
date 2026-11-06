@@ -67,6 +67,8 @@ export default function SearchBar({ inputClassName, iconClassName, placeholder =
         <div className="relative">
           <SearchIcon className={cn('pointer-events-none absolute top-1/2 -translate-y-1/2 text-stone-400', iconClassName)} />
           <input
+            type="search"
+            aria-label="Search products"
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);

@@ -25,7 +25,7 @@ import Spinner from '../components/ui/Spinner';
 import ErrorState from '../components/ui/ErrorState';
 import { TruckIcon, ReturnIcon, BadgeIcon, LockIcon } from '../components/icons/TrustIcons';
 import { formatCurrency } from '../utils/format';
-import { BRAND_NAME } from '../config/site.js';
+import { BRAND_NAME, STORE_WHATSAPP_HREF } from '../config/site.js';
 
 export default function ProductPage() {
   const { slug } = useParams();
@@ -96,6 +96,7 @@ export default function ProductPage() {
     product.compare_at_price && Number(product.compare_at_price) > Number(price)
       ? Math.round((1 - Number(price) / Number(product.compare_at_price)) * 100)
       : 0;
+  const productHelpHref = `${STORE_WHATSAPP_HREF}?text=${encodeURIComponent(`Hi, I have a question about ${product.name}.`)}`;
 
   const alreadyInCart = selectedVariant
     ? cartItems.find((item) => item.variantId === selectedVariant.id)?.quantity ?? 0
@@ -169,7 +170,7 @@ export default function ProductPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto max-w-6xl px-3 py-4 sm:px-6 sm:py-8">
       <nav aria-label="Breadcrumb" className="mb-5 flex flex-wrap items-center gap-1.5 text-xs text-charcoal-light">
         <Link to="/" className="hover:text-gold-600">Home</Link>
         <span className="text-stone-300">/</span>
@@ -185,10 +186,10 @@ export default function ProductPage() {
         className="grid items-start gap-6 md:grid-cols-2 lg:gap-10"
       >
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <ProductGallery ref={galleryRef} images={product.images} />
+          <ProductGallery ref={galleryRef} images={product.images} alt={product.name} />
         </div>
 
-        <div className="rounded-xl border border-gold-500/15 bg-white p-5 shadow-sm sm:p-6">
+        <div className="rounded-xl border border-gold-500/15 bg-white p-4 shadow-sm sm:p-6">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-600">{product.category_name}</span>
             <StockBadge allOutOfStock={allOutOfStock} variant={selectedVariant} />
@@ -201,7 +202,7 @@ export default function ProductPage() {
               <WhatsAppShareIcon />
             </button>
           </div>
-          <h1 className="mt-2 font-serif text-3xl leading-tight text-charcoal sm:text-[2rem]">{product.name}</h1>
+          <h1 className="mt-2 font-serif text-2xl leading-tight text-charcoal sm:text-[2rem]">{product.name}</h1>
           <div className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span className="text-2xl font-semibold text-gold-700">{formatCurrency(price)}</span>
             {product.compare_at_price && (
@@ -246,7 +247,7 @@ export default function ProductPage() {
                   <button
                     aria-label="Decrease quantity"
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="flex h-9 w-9 items-center justify-center rounded-full text-charcoal-light transition-colors hover:bg-gold-50 hover:text-gold-700"
+                    className="flex h-11 w-11 items-center justify-center rounded-full text-charcoal-light transition-colors hover:bg-gold-50 hover:text-gold-700"
                   >
                     −
                   </button>
@@ -255,7 +256,7 @@ export default function ProductPage() {
                     aria-label="Increase quantity"
                     onClick={() => setQuantity((q) => Math.min(remainingStock, q + 1))}
                     disabled={quantity >= remainingStock}
-                    className="flex h-9 w-9 items-center justify-center rounded-full text-charcoal-light transition-colors hover:bg-gold-50 hover:text-gold-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
+                    className="flex h-11 w-11 items-center justify-center rounded-full text-charcoal-light transition-colors hover:bg-gold-50 hover:text-gold-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent"
                   >
                     +
                   </button>
@@ -264,7 +265,7 @@ export default function ProductPage() {
                   <Button
                     onClick={handleAddToCart}
                     disabled={!selectedVariant || remainingStock <= 0}
-                    className="flex-1 overflow-hidden"
+                    className="min-h-12 flex-1 overflow-hidden"
                   >
                     <AnimatePresence mode="wait" initial={false}>
                       {justAdded ? (
@@ -302,7 +303,7 @@ export default function ProductPage() {
                     variant="outline"
                     onClick={handleWishlistToggle}
                     aria-pressed={isWishlisted}
-                    className="shrink-0 overflow-hidden"
+                    className="min-h-12 shrink-0 overflow-hidden"
                   >
                     <motion.span
                       key={isWishlisted}
@@ -327,8 +328,18 @@ export default function ProductPage() {
             </div>
           )}
 
-          <div className="mt-6 grid grid-cols-2 gap-3 rounded-xl border border-gold-500/15 bg-gold-50/40 p-4 sm:grid-cols-4">
-            <TrustPoint icon={<TruckIcon />} label="Free UK Delivery" />
+          <a
+            href={productHelpHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#e9f8ef] px-3 py-2 text-center text-sm font-medium text-[#167a3d] transition-colors hover:bg-[#d9f2e3]"
+          >
+            <WhatsAppShareIcon />
+            Questions about this machine? Chat with us
+          </a>
+
+          <div className="mt-5 grid grid-cols-2 gap-2.5 rounded-xl border border-gold-500/15 bg-gold-50/40 p-3 sm:mt-6 sm:grid-cols-4 sm:gap-3 sm:p-4">
+            <TrustPoint icon={<TruckIcon />} label="UK Delivery" />
             <TrustPoint icon={<ReturnIcon />} label="14 Day Returns" />
             <TrustPoint icon={<BadgeIcon />} label="12 Month Warranty" />
             <TrustPoint icon={<LockIcon />} label="Secure Checkout" />
@@ -429,7 +440,7 @@ function TrustPoint({ icon, label }) {
       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white text-gold-600 shadow-sm">
         {icon}
       </span>
-      <span className="text-xs font-medium text-charcoal-light">{label}</span>
+      <span className="text-[11px] font-medium leading-tight text-charcoal-light sm:text-xs">{label}</span>
     </div>
   );
 }

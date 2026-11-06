@@ -180,7 +180,7 @@ export default function BenefitsPage() {
   return (
     <div className="relative">
       {/* ══════════════ HERO ══════════════ */}
-      <section className="relative overflow-hidden bg-gold-500 text-white">
+      <section className="relative overflow-hidden bg-forest-700 text-white">
         <motion.div
           aria-hidden
           initial={{ opacity: 0, scale: 1.15 }}

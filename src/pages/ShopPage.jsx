@@ -65,16 +65,17 @@ export default function ShopPage() {
     setPriceRange([PRICE_MIN, priceMax]);
     setSort('newest');
     setPage(1);
+    setSearchParams({});
   }
 
-  const hasActiveFilters = priceRange[0] > PRICE_MIN || priceRange[1] < priceMax || sort !== 'newest';
+  const hasActiveFilters = Boolean(slug) || priceRange[0] > PRICE_MIN || priceRange[1] < priceMax || sort !== 'newest';
 
   return (
     <div>
       {/* Shop hero uses the same orange as the site header. */}
-      <section className="relative isolate overflow-hidden bg-gold-500 text-white">
+      <section className="relative isolate overflow-hidden bg-forest-700 text-white">
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_20%,rgba(255,255,255,0.12),transparent_28%),radial-gradient(circle_at_85%_100%,rgba(0,0,0,0.08),transparent_34%)]" />
-        <div className="relative mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:py-20">
+        <div className="relative mx-auto max-w-7xl px-4 py-10 text-center sm:px-6 sm:py-16 lg:py-20">
           {/* Breadcrumb */}
           <nav className="mb-4 flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.2em] text-white/75">
             <Link to="/" className="transition-colors hover:text-white">Home</Link>
@@ -98,7 +99,7 @@ export default function ShopPage() {
 
           {/* Subtitle */}
           <p className="mx-auto mt-4 max-w-lg text-sm text-white/85 sm:text-base">
-            Premium gear crafted with care — thoughtfully engineered for training, competition, and everyday performance.
+            Shop tested refurbished laptops, desktops and monitors from trusted brands, backed by our 12-month warranty.
           </p>
 
           {/* Underline */}
@@ -107,21 +108,27 @@ export default function ShopPage() {
       </section>
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-        <div className="mb-5 flex justify-end">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <p className="text-sm text-charcoal-light">
+            {loading ? 'Loading products...' : `${data?.meta?.total ?? 0} product${data?.meta?.total === 1 ? '' : 's'}`}
+          </p>
           <button
             type="button"
             onClick={() => setFiltersOpen((v) => !v)}
-            className="relative flex items-center gap-2 rounded-md border border-gold-500/30 bg-white px-3.5 py-2 text-sm font-medium text-charcoal shadow-sm transition-colors hover:border-gold-500/60 hover:bg-gold-50 lg:hidden"
+            aria-expanded={filtersOpen}
+            aria-controls="shop-filters"
+            className="relative flex min-h-11 items-center gap-2 rounded-xl border border-gold-500/30 bg-white px-4 py-2 text-sm font-semibold text-charcoal shadow-sm transition-colors hover:border-gold-500/60 hover:bg-gold-50 lg:hidden"
           >
-            <FilterIcon className="h-4 w-4 text-gold-600" /> Filters
+            <FilterIcon className="h-4 w-4 text-gold-600" /> Filters &amp; sort
             {hasActiveFilters && (
-              <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-gold-500" />
+              <span className="rounded-full bg-gold-100 px-2 py-0.5 text-[10px] font-bold text-gold-700">Active</span>
             )}
           </button>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
           <aside
+            id="shop-filters"
             className={cn(
               'flex-col overflow-hidden rounded-xl border border-gold-500/15 bg-white shadow-sm lg:sticky lg:top-16 lg:h-fit',
               filtersOpen ? 'flex' : 'hidden lg:flex',
@@ -185,6 +192,13 @@ export default function ShopPage() {
                   Clear all filters
                 </button>
               )}
+              <button
+                type="button"
+                onClick={() => setFiltersOpen(false)}
+                className="mt-4 min-h-11 w-full rounded-lg bg-forest-700 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-forest-600 lg:hidden"
+              >
+                Show {data?.meta?.total ?? 0} products
+              </button>
             </div>
           </aside>
 
@@ -213,14 +227,14 @@ export default function ShopPage() {
                   ))}
                 </div>
                 {data.meta.totalPages > 1 && (
-                  <div className="mt-8 flex justify-center gap-3">
-                    <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                  <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                    <Button variant="outline" size="sm" className="min-h-11" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
                       Previous
                     </Button>
                     <span className="flex items-center text-sm text-charcoal-light">
                       Page {data.meta.page} of {data.meta.totalPages}
                     </span>
-                    <Button variant="outline" size="sm" disabled={page >= data.meta.totalPages} onClick={() => setPage((p) => p + 1)}>
+                    <Button variant="outline" size="sm" className="min-h-11" disabled={page >= data.meta.totalPages} onClick={() => setPage((p) => p + 1)}>
                       Next
                     </Button>
                   </div>

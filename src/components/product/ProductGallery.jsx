@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '../../utils/cn';
 import { assetUrl } from '../../utils/media';
 
-const ProductGallery = forwardRef(function ProductGallery({ images = [] }, ref) {
+const ProductGallery = forwardRef(function ProductGallery({ images = [], alt = 'Product' }, ref) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [zooming, setZooming] = useState(false);
   const [zoomOrigin, setZoomOrigin] = useState('50% 50%');
@@ -33,7 +33,7 @@ const ProductGallery = forwardRef(function ProductGallery({ images = [] }, ref) 
           <motion.img
             key={active.id}
             src={assetUrl(active.image_path)}
-            alt=""
+            alt={`${alt}, image ${activeIndex + 1}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -75,7 +75,8 @@ const ProductGallery = forwardRef(function ProductGallery({ images = [] }, ref) 
           {images.map((img, i) => (
             <button
               key={img.id}
-              aria-label={`View image ${i + 1}`}
+              type="button"
+              aria-label={`View ${alt} image ${i + 1}`}
               onClick={() => setActiveIndex(i)}
               className={cn(
                 'h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 bg-white transition-colors',

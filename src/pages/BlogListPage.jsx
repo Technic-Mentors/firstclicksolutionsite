@@ -16,7 +16,7 @@ export default function BlogListPage() {
   return (
     <div>
       {/* ══════════════ HERO — Sunlit Gradient ══════════════ */}
-      <section className="relative isolate overflow-hidden bg-gold-500 text-white">
+      <section className="relative isolate overflow-hidden bg-forest-700 text-white">
         <PageHeroBg />
 
         <div className="relative mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:py-20">
@@ -70,7 +70,7 @@ export default function BlogListPage() {
                       />
                     )}
                   </div>
-                  <p className="text-xs uppercase tracking-wider text-gold-600">{post.category_name}</p>
+                  <p className="text-xs uppercase tracking-wider text-forest-700">{post.category_name}</p>
                   <h2 className="mt-1 font-serif text-lg text-charcoal">{post.title}</h2>
                   <p className="mt-1 text-xs text-stone-400">{formatDate(post.published_at)}</p>
                 </Link>

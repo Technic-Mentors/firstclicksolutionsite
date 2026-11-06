@@ -511,7 +511,7 @@ export default function AboutPage() {
       <ScrollProgressBar />
 
       {/* ══════════════ HERO — Sunlit Gradient ══════════════ */}
-      <section ref={heroRef} className="relative overflow-hidden bg-gold-500 text-white">
+      <section ref={heroRef} className="relative overflow-hidden bg-forest-700 text-white">
         <motion.div
           style={reduce ? {} : { scale: heroExitScale, opacity: heroExitOpacity, y: heroExitY }}
           className="absolute inset-0"

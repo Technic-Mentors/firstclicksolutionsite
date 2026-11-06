@@ -17,7 +17,7 @@ import {
   STORE_PHONE,
   STORE_PHONE_HREF,
   STORE_PHONE_SECONDARY,
-  STORE_PHONE_SECONDARY_HREF,
+  STORE_WHATSAPP_HREF,
   STORE_EMAIL,
   STORE_EMAIL_HREF,
   SOCIAL_LINKS,
@@ -34,7 +34,6 @@ const NAV_LINKS = [
 const Header = React.forwardRef(function Header(_, ref) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [mobileMenuTop, setMobileMenuTop] = useState(0);
   const headerElementRef = useRef(null);
   const mobileMenuRef = useRef(null);
@@ -92,10 +91,10 @@ const Header = React.forwardRef(function Header(_, ref) {
       className="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur md:bg-cream/95"
     >
       {/* ══════════════ TOP ANNOUNCEMENT STRIP ══════════════ */}
-      {/* Solid orange band in the logo's accent, white text throughout, carrying the
-          social accounts on the left and both contact numbers on the right. */}
-      <div className="bg-gold-500 text-white">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-1.5 px-4 py-2 sm:px-6">
+      {/* Solid forest-green band, white text throughout, carrying the social accounts
+          on the left and both contact numbers plus the inbox on the right. */}
+      <div className="bg-forest-600 text-white">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-1.5 px-4 py-1.5 sm:px-6">
           {/* Left: social accounts */}
           <div className="flex items-center gap-1.5">
             {SOCIAL_LINKS.map((social) => (
@@ -106,7 +105,7 @@ const Header = React.forwardRef(function Header(_, ref) {
                 rel="noreferrer noopener"
                 aria-label={social.name}
                 title={social.name}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-gold-600 shadow-sm transition-transform duration-200 hover:scale-110 hover:text-gold-700"
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-forest-600 shadow-sm transition-transform duration-200 hover:scale-110 hover:text-forest-700"
               >
                 <SocialIcon name={social.name} className="h-[1.1rem] w-[1.1rem]" />
               </a>
@@ -120,21 +119,28 @@ const Header = React.forwardRef(function Header(_, ref) {
           <div className="flex items-center gap-x-3 gap-y-1">
             <a
               href={STORE_PHONE_HREF}
-              className="text-[11px] font-semibold text-white transition-opacity hover:opacity-80 sm:text-xs"
+              className="flex items-center gap-1.5 text-[11px] font-semibold text-white transition-opacity hover:opacity-80 sm:text-xs"
             >
+              <PhoneIcon className="h-3.5 w-3.5 shrink-0" />
               {STORE_PHONE}
             </a>
             <span className="text-white/40" aria-hidden="true">|</span>
             <a
-              href={STORE_PHONE_SECONDARY_HREF}
-              className="text-[11px] font-semibold text-white transition-opacity hover:opacity-80 sm:text-xs"
+              href={STORE_WHATSAPP_HREF}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Chat with us on WhatsApp"
+              className="flex items-center gap-1.5 text-[11px] font-semibold text-white transition-opacity hover:opacity-80 sm:text-xs"
             >
+              <WhatsAppIcon className="h-3.5 w-3.5 shrink-0" />
               {STORE_PHONE_SECONDARY}
             </a>
+            <span className="hidden text-white/40 md:inline" aria-hidden="true">|</span>
             <a
               href={STORE_EMAIL_HREF}
-              className="hidden text-[11px] font-medium text-white/90 transition-opacity hover:opacity-80 md:inline md:text-xs"
+              className="hidden items-center gap-1.5 text-[11px] font-medium text-white/90 transition-opacity hover:opacity-80 md:flex md:text-xs"
             >
+              <MailIcon className="h-3.5 w-3.5 shrink-0" />
               {STORE_EMAIL}
             </a>
           </div>
@@ -144,27 +150,15 @@ const Header = React.forwardRef(function Header(_, ref) {
       {/* ══════════════ MAIN HEADER ══════════════ */}
       {/* Equal-width side columns on wide screens keep the nav group (Home · Categories · …)
           centred relative to the page instead of centred inside the leftover middle space. */}
-      <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-2.5 sm:px-6 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+      <div className="mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-2 sm:px-6 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
         <div className="flex shrink-0 items-center gap-2.5">
-          {!mobileSearchOpen && (
-            <Link to="/" className="flex items-center gap-2.5">
-              <img src="/logo.png" alt={BRAND_NAME} className="h-12 w-auto sm:h-16" />
-            </Link>
-          )}
+          <Link to="/" className="flex items-center gap-2.5">
+            <img src="/logo.png" alt={BRAND_NAME} className="h-11 w-auto sm:h-14" />
+          </Link>
         </div>
 
         <div className="min-w-0">
-          {mobileSearchOpen ? (
-            <div className="md:hidden">
-              <SearchBar
-                placeholder="Search..."
-                iconClassName="left-2.5"
-                inputClassName="w-full rounded-full border border-stone-300 bg-white py-1.5 pl-8 pr-3 text-sm focus:border-gold-400 focus:outline-none"
-                onNavigate={() => setMobileSearchOpen(false)}
-              />
-            </div>
-          ) : (
-            <nav className="hidden items-center justify-center gap-6 md:flex">
+          <nav className="hidden items-center justify-center gap-0.5 md:flex lg:gap-1">
               <NavLink
                 to="/"
                 end
@@ -194,30 +188,18 @@ const Header = React.forwardRef(function Header(_, ref) {
                   {link.label}
                 </NavLink>
               ))}
-            </nav>
-          )}
+          </nav>
         </div>
 
         <div className="flex items-center justify-end gap-4">
-          <div className="hidden lg:block lg:w-44 xl:w-56">
+          <div className="hidden lg:block lg:w-52 xl:w-64">
             <SearchBar
-              placeholder="Search..."
-              iconClassName="left-2.5"
-              inputClassName="w-full rounded-full border border-stone-300 bg-white py-1.5 pl-8 pr-3 text-sm focus:border-gold-400 focus:outline-none"
+              placeholder="Search products..."
+              iconClassName="left-3.5"
+              inputClassName="w-full rounded-full border border-stone-300 bg-white py-2 pl-10 pr-3.5 text-sm focus:border-gold-400 focus:outline-none"
             />
           </div>
 
-          <button
-            type="button"
-            onClick={() => setMobileSearchOpen((v) => !v)}
-            aria-label={mobileSearchOpen ? 'Close search' : 'Search'}
-            className="flex h-[19px] w-[19px] shrink-0 items-center justify-center text-charcoal-light hover:text-gold-600 lg:hidden"
-          >
-            {mobileSearchOpen ? <CloseIcon /> : <SearchIcon />}
-          </button>
-
-          {!mobileSearchOpen && (
-            <>
               <div className="flex items-center gap-3.5">
                 {customer && <CustomerNotificationBell />}
 
@@ -283,9 +265,15 @@ const Header = React.forwardRef(function Header(_, ref) {
               >
                 <MenuIcon />
               </button>
-            </>
-          )}
         </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-4 pb-2.5 md:hidden">
+        <SearchBar
+          placeholder="Search laptops, desktops and more"
+          iconClassName="left-3"
+          inputClassName="min-h-11 w-full rounded-full border border-stone-300 bg-white py-2 pl-10 pr-4 text-sm shadow-sm transition focus:border-forest-500 focus:outline-none focus:ring-2 focus:ring-forest-500/15"
+        />
       </div>
 
       {createPortal(
@@ -312,13 +300,6 @@ const Header = React.forwardRef(function Header(_, ref) {
                   <CloseIcon className="h-5 w-5" />
                 </button>
               </div>
-
-              <SearchBar
-                placeholder="Search products..."
-                iconClassName="left-3"
-                inputClassName="w-full rounded-full border border-stone-300 py-2 pl-9 pr-3 text-sm focus:border-gold-400 focus:outline-none"
-                onNavigate={() => setMobileMenuOpen(false)}
-              />
 
               <NavLink
                 to="/"
@@ -411,21 +392,27 @@ const Header = React.forwardRef(function Header(_, ref) {
               <div className="mt-2 flex flex-col gap-2 border-t border-stone-200 pt-3">
                 <a
                   href={STORE_PHONE_HREF}
-                  className="text-sm font-medium text-gold-600 transition-colors hover:text-gold-700"
+                  className="flex min-h-11 items-center gap-2 text-sm font-medium text-charcoal transition-colors hover:text-forest-700"
                 >
-                  {STORE_PHONE}
+                  <PhoneIcon className="h-4 w-4 text-forest-600" />
+                  Call us: {STORE_PHONE}
                 </a>
                 <a
-                  href={STORE_PHONE_SECONDARY_HREF}
-                  className="text-sm font-medium text-gold-600 transition-colors hover:text-gold-700"
+                  href={STORE_WHATSAPP_HREF}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Chat with us on WhatsApp at ${STORE_PHONE_SECONDARY}`}
+                  className="flex min-h-11 items-center gap-2 rounded-xl bg-[#e9f8ef] px-3 text-sm font-semibold text-[#167a3d] transition-colors hover:bg-[#d9f2e3]"
                 >
-                  {STORE_PHONE_SECONDARY}
+                  <WhatsAppIcon className="h-5 w-5 shrink-0" />
+                  <span>Chat on WhatsApp <span className="font-normal">· {STORE_PHONE_SECONDARY}</span></span>
                 </a>
                 <a
                   href={STORE_EMAIL_HREF}
-                  className="text-sm font-medium text-gold-600 transition-colors hover:text-gold-700"
+                  className="flex min-h-11 items-center gap-2 text-sm font-medium text-charcoal transition-colors hover:text-forest-700"
                 >
-                  {STORE_EMAIL}
+                  <MailIcon className="h-4 w-4 text-forest-600" />
+                  Email support: {STORE_EMAIL}
                 </a>
                 <div className="flex items-center gap-2 pt-1">
                   {SOCIAL_LINKS.map((social) => (
@@ -487,11 +474,48 @@ function SocialIcon({ name, className }) {
   );
 }
 
+/* Pill-shaped nav item: the current page sits in a solid orange capsule, the rest
+   stay plain until hovered. */
+/* Contact glyphs for the top strip. */
+function PhoneIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+      <path d="M6.6 3h3.1l1.6 4-2 1.2a11.5 11.5 0 0 0 5.5 5.5l1.2-2 4 1.6v3.1a2 2 0 0 1-2.2 2A17 17 0 0 1 4.6 5.2 2 2 0 0 1 6.6 3Z" />
+    </svg>
+  );
+}
+
+function WhatsAppIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+      <path d="M12.04 2C6.6 2 2.2 6.4 2.2 11.84c0 1.86.5 3.6 1.4 5.1L2 22l5.2-1.55a9.8 9.8 0 0 0 4.84 1.26h.01c5.43 0 9.84-4.4 9.84-9.84C21.89 6.4 17.48 2 12.04 2Zm0 17.86h-.01a8.2 8.2 0 0 1-4.17-1.14l-.3-.18-3.1.92.93-3.02-.2-.31a8.14 8.14 0 0 1-1.25-4.34c0-4.52 3.68-8.2 8.2-8.2 2.2 0 4.26.86 5.8 2.4a8.15 8.15 0 0 1 2.4 5.8c0 4.52-3.68 8.2-8.3 8.2Zm4.5-6.14c-.25-.13-1.46-.72-1.69-.8-.22-.08-.39-.13-.55.13-.17.24-.63.79-.78.96-.14.16-.28.18-.53.06a6.7 6.7 0 0 1-1.97-1.22 7.4 7.4 0 0 1-1.36-1.7c-.14-.24-.01-.37.11-.5.11-.1.25-.29.37-.43.12-.15.16-.25.25-.41.08-.17.04-.31-.02-.44-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.55-.42h-.47a.9.9 0 0 0-.65.3c-.22.25-.85.84-.85 2.03 0 1.2.87 2.35.99 2.51.12.17 1.71 2.62 4.15 3.67.58.25 1.03.4 1.39.52.58.18 1.11.15 1.53.1.47-.07 1.46-.6 1.66-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.29Z" />
+    </svg>
+  );
+}
+
+function MailIcon({ className }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
+      <rect x="2.5" y="4.5" width="19" height="15" rx="2.5" />
+      <path d="m3.5 6.5 8.5 6.5 8.5-6.5" />
+    </svg>
+  );
+}
+
 function navLinkClass(isActive) {
-  return `text-sm font-medium tracking-wide transition-colors ${
+  return `rounded-full px-3.5 py-1.5 text-sm font-medium tracking-wide transition-colors ${
     isActive
-      ? 'text-gold-600'
-      : 'text-charcoal-light hover:text-gold-600'
+      ? 'bg-gold-500 text-white shadow-sm'
+      : 'text-charcoal hover:bg-gold-50 hover:text-gold-600'
   }`;
 }
 
@@ -535,7 +559,7 @@ function CategoriesDropdown({ topCategories, subcategoriesOf }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1 text-sm font-medium tracking-wide text-charcoal-light transition-colors hover:text-gold-600"
+        className="flex items-center gap-1 rounded-full px-3.5 py-1.5 text-sm font-medium tracking-wide text-charcoal transition-colors hover:bg-gold-50 hover:text-gold-600"
       >
         Categories
         <ChevronIcon open={open} />
@@ -630,23 +654,6 @@ function ChevronIcon({ open }) {
       className={cn('transition-transform', open && 'rotate-180')}
     >
       <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
-
-function SearchIcon(props) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      {...props}
-    >
-      <circle cx="11" cy="11" r="7" />
-      <path d="m21 21-4.3-4.3" />
     </svg>
   );
 }
