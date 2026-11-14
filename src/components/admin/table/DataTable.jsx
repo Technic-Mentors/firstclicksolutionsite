@@ -143,9 +143,11 @@ export default function DataTable({
                     key={col.key}
                     className={cn(
                       'px-3 py-2.5 align-middle text-charcoal',
-                      // Only columns that opt out of truncation keep their full width; the
-                      // rest give way so the row as a whole fits the panel.
-                      col.wrap ? 'whitespace-normal' : 'truncate whitespace-nowrap',
+                      // Truncation is for text. A cell holding a control must never get it:
+                      // if the control is even a pixel wider than its column the browser
+                      // draws an ellipsis beside it, which reads as a second menu.
+                      col.wrap || col.actions ? 'whitespace-nowrap' : 'truncate whitespace-nowrap',
+                      col.wrap && 'whitespace-normal',
                       col.actions && 'text-right',
                       col.align === 'right' && 'text-right',
                     )}

@@ -211,7 +211,7 @@ export default function ProductsList() {
               primary: true,
               // The widths add up to 100%, so the row always fits the panel instead of
               // pushing it into a sidescroll.
-              width: '34%',
+              width: '32%',
               render: (row) => (
                 <div className="flex min-w-0 items-center gap-3">
                   {row.primary_image ? (
@@ -315,7 +315,7 @@ export default function ProductsList() {
               key: 'actions',
               label: 'Actions',
               actions: true,
-              width: '5%',
+              width: '7%',
               render: (row) => (
                 <ActionMenu
                   items={[
