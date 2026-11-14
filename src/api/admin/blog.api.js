@@ -33,3 +33,9 @@ export function uploadBlogPostImage(id, file) {
   formData.append('image', file);
   return unwrap(adminApi.post(`/blog/posts/${id}/image`, formData));
 }
+
+// Counts for the page tiles. Kept apart from the list call, whose meta.total only ever
+// describes the current filter and page.
+export function getBlogSummary() {
+  return unwrap(adminApi.get('/blog/posts/summary'));
+}

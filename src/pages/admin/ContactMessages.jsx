@@ -1,10 +1,18 @@
 import { useState } from 'react';
-import { listContactMessages, markContactMessageRead } from '../../api/admin/contactMessages.api';
+import {
+  listContactMessages,
+  markContactMessageRead,
+  getContactSummary,
+} from '../../api/admin/contactMessages.api';
 import { useAsync } from '../../hooks/useAsync';
 import { formatDateTime } from '../../utils/format';
 import DataTable from '../../components/admin/table/DataTable';
 import Badge from '../../components/ui/Badge';
-import Button from '../../components/ui/Button';
+import PageHeader from '../../components/admin/PageHeader';
+import StatTiles from '../../components/admin/StatTiles';
+import { MailIcon, MailOpenIcon, ClockIcon, ListIcon } from '../../components/admin/tileIcons';
+import { NoMessagesArt } from '../../components/ui/emptyArt';
+import ActionMenu from '../../components/ui/ActionMenu';
 import Modal from '../../components/ui/Modal';
 import ErrorState from '../../components/ui/ErrorState';
 
@@ -16,6 +24,8 @@ export default function ContactMessages() {
     () => listContactMessages({ page, pageSize: 10 }),
     [page],
   );
+
+  const { data: summary } = useAsync(() => getContactSummary(), []);
 
   const rows = data?.data || [];
   const meta = data?.meta;
@@ -34,7 +44,19 @@ export default function ContactMessages() {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-xl font-semibold text-charcoal">Contact Messages</h1>
+      <PageHeader
+        title="Contact Messages"
+        subtitle="Enquiries sent through the contact form on your storefront."
+      />
+
+      <StatTiles
+        tiles={[
+          { key: 'total', label: 'Total messages', value: summary?.total, tone: 'primary', icon: <ListIcon /> },
+          { key: 'unread', label: 'Unread', value: summary?.unread, tone: summary?.unread > 0 ? 'warning' : 'neutral', icon: <MailIcon /> },
+          { key: 'read', label: 'Read', value: summary?.read, tone: 'good', icon: <MailOpenIcon /> },
+          { key: 'week', label: 'This week', value: summary?.thisWeek, tone: 'neutral', icon: <ClockIcon /> },
+        ]}
+      />
 
       {error ? (
         <ErrorState message="Could not load contact messages." onRetry={refetch} />
@@ -43,7 +65,9 @@ export default function ContactMessages() {
           loading={loading}
           rows={rows}
           onRowClick={handleView}
-          emptyMessage="No messages submitted yet."
+          emptyArt={<NoMessagesArt />}
+          emptyTitle="No messages yet"
+          emptyMessage="Enquiries sent through the contact form on your storefront land here."
           columns={[
             { key: 'name', label: 'Name' },
             { key: 'email', label: 'Email' },
@@ -64,12 +88,9 @@ export default function ContactMessages() {
             },
             {
               key: 'actions',
-              label: '',
-              render: (row) => (
-                <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleView(row); }}>
-                  View
-                </Button>
-              ),
+              label: 'Actions',
+              actions: true,
+              render: (row) => <ActionMenu items={[{ label: 'View message', onClick: () => handleView(row) }]} />,
             },
           ]}
           pagination={

@@ -1,20 +1,36 @@
-import { useNavigate } from 'react-router-dom';
-import { getLowStock } from '../../api/admin/products.api';
+import { getLowStock, getInventorySummary } from '../../api/admin/products.api';
 import { useAsync } from '../../hooks/useAsync';
 import DataTable from '../../components/admin/table/DataTable';
-import Button from '../../components/ui/Button';
+import ActionMenu from '../../components/ui/ActionMenu';
+import PageHeader from '../../components/admin/PageHeader';
+import StatTiles from '../../components/admin/StatTiles';
+import { LayersIcon, AlertIcon, CrossIcon, BoxIcon } from '../../components/admin/tileIcons';
+import { AllClearArt } from '../../components/ui/emptyArt';
 import ErrorState from '../../components/ui/ErrorState';
 import { cn } from '../../utils/cn';
 
 export default function Inventory() {
-  const navigate = useNavigate();
   const { data, loading, error, refetch } = useAsync(() => getLowStock(), []);
+  // Loaded on its own so a slow list never leaves the counts blank.
+  const { data: summary } = useAsync(() => getInventorySummary(), []);
 
   const rows = data || [];
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-xl font-semibold text-charcoal">Low Stock Inventory</h1>
+      <PageHeader
+        title="Inventory"
+        subtitle="Variants at or below their own low-stock threshold, lowest first."
+      />
+
+      <StatTiles
+        tiles={[
+          { key: 'variants', label: 'Total variants', value: summary?.totalVariants, tone: 'primary', icon: <LayersIcon /> },
+          { key: 'units', label: 'Units in stock', value: summary?.unitsInStock, tone: 'neutral', icon: <BoxIcon /> },
+          { key: 'low', label: 'Running low', value: summary?.lowStock, tone: summary?.lowStock > 0 ? 'warning' : 'good', icon: <AlertIcon /> },
+          { key: 'out', label: 'Out of stock', value: summary?.outOfStock, tone: summary?.outOfStock > 0 ? 'danger' : 'good', icon: <CrossIcon /> },
+        ]}
+      />
 
       {error ? (
         <ErrorState message="Could not load inventory." onRetry={refetch} />
@@ -22,7 +38,9 @@ export default function Inventory() {
         <DataTable
           loading={loading}
           rows={rows}
-          emptyMessage="Nothing is low on stock right now."
+          emptyArt={<AllClearArt />}
+          emptyTitle="Stock levels are healthy"
+          emptyMessage="Nothing is running low. Any variant that drops below its threshold shows up here."
           columns={[
             { key: 'product_name', label: 'Product', render: (row) => row.product_name || row.productName },
             { key: 'spec', label: 'Spec', render: (row) => row.spec || '-' },
@@ -51,18 +69,18 @@ export default function Inventory() {
             },
             {
               key: 'actions',
-              label: '',
+              label: 'Actions',
+              actions: true,
               render: (row) => {
                 const productId = row.product_id ?? row.productId;
                 return (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => productId && navigate(`/admin/products/${productId}/edit`)}
-                    disabled={!productId}
-                  >
-                    Restock
-                  </Button>
+                  <ActionMenu
+                    items={[
+                      productId
+                        ? { label: 'Restock', to: `/admin/products/${productId}/edit` }
+                        : { label: 'Restock', disabled: true },
+                    ]}
+                  />
                 );
               },
             },

@@ -1,12 +1,23 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { listCoupons, createCoupon, updateCoupon, deleteCoupon } from '../../api/admin/coupons.api';
+import {
+  listCoupons,
+  createCoupon,
+  updateCoupon,
+  deleteCoupon,
+  getCouponSummary,
+} from '../../api/admin/coupons.api';
 import { listCategories } from '../../api/admin/categories.api';
 import { useAsync } from '../../hooks/useAsync';
 import { useDisclosure } from '../../hooks/useDisclosure';
 import { formatDate } from '../../utils/format';
 import DataTable from '../../components/admin/table/DataTable';
 import Badge from '../../components/ui/Badge';
+import PageHeader from '../../components/admin/PageHeader';
+import StatTiles from '../../components/admin/StatTiles';
+import { TicketIcon, CheckIcon, ClockIcon, CoinIcon } from '../../components/admin/tileIcons';
+import { NoCouponsArt } from '../../components/ui/emptyArt';
+import ActionMenu from '../../components/ui/ActionMenu';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
@@ -34,6 +45,7 @@ export default function Coupons() {
   const [page, setPage] = useState(1);
   const { data, loading, error, refetch } = useAsync(() => listCoupons({ page, pageSize: 10 }), [page]);
   const { data: categories } = useAsync(() => listCategories(), []);
+  const { data: summary } = useAsync(() => getCouponSummary(), []);
   const { isOpen, open, close } = useDisclosure(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -121,12 +133,24 @@ export default function Coupons() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-charcoal">Coupons</h1>
-        <Button variant="gold" onClick={openCreate}>
-          Add Coupon
-        </Button>
-      </div>
+      <PageHeader
+        title="Coupons"
+        subtitle="Discount codes customers can apply at checkout."
+        actions={
+          <Button variant="gold" onClick={openCreate}>
+            Add Coupon
+          </Button>
+        }
+      />
+
+      <StatTiles
+        tiles={[
+          { key: 'total', label: 'Total coupons', value: summary?.total, tone: 'primary', icon: <TicketIcon /> },
+          { key: 'live', label: 'Live right now', value: summary?.live, tone: 'good', icon: <CheckIcon /> },
+          { key: 'expired', label: 'Expired', value: summary?.expired, tone: 'neutral', icon: <ClockIcon /> },
+          { key: 'uses', label: 'Times redeemed', value: summary?.totalUses, tone: 'accent', icon: <CoinIcon /> },
+        ]}
+      />
 
       {error ? (
         <ErrorState message="Could not load coupons." onRetry={refetch} />
@@ -134,7 +158,9 @@ export default function Coupons() {
         <DataTable
           loading={loading}
           rows={rows}
-          emptyMessage="No coupons yet."
+          emptyArt={<NoCouponsArt />}
+          emptyTitle="No coupons yet"
+          emptyMessage="Create a discount code and it will show up here with its usage count."
           columns={[
             { key: 'code', label: 'Code' },
             { key: 'type', label: 'Type', render: (row) => (row.type === 'percentage' ? 'Percentage' : 'Fixed') },
@@ -156,16 +182,15 @@ export default function Coupons() {
             },
             {
               key: 'actions',
-              label: '',
+              label: 'Actions',
+              actions: true,
               render: (row) => (
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => openEdit(row)}>
-                    Edit
-                  </Button>
-                  <Button variant="danger" size="sm" onClick={() => setDeleteTarget(row)}>
-                    Delete
-                  </Button>
-                </div>
+                <ActionMenu
+                  items={[
+                    { label: 'Edit', onClick: () => openEdit(row) },
+                    { label: 'Delete', onClick: () => setDeleteTarget(row), danger: true },
+                  ]}
+                />
               ),
             },
           ]}

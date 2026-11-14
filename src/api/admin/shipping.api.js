@@ -19,3 +19,9 @@ export function updateShippingZone(id, payload) {
 export function deleteShippingZone(id) {
   return unwrap(adminApi.delete(`/shipping/zones/${id}`));
 }
+
+// Counts for the page tiles. Kept apart from the list call, whose meta.total only ever
+// describes the current filter and page.
+export function getShippingSummary() {
+  return unwrap(adminApi.get('/shipping/summary'));
+}

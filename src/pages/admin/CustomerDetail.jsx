@@ -6,6 +6,7 @@ import { useAsync } from '../../hooks/useAsync';
 import { formatCurrency, formatDate, formatDateTime } from '../../utils/format';
 import DataTable from '../../components/admin/table/DataTable';
 import Badge from '../../components/ui/Badge';
+import { WaitingForOrdersArt } from '../../components/ui/emptyArt';
 import Button from '../../components/ui/Button';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import ErrorState from '../../components/ui/ErrorState';
@@ -62,7 +63,7 @@ export default function CustomerDetail() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-charcoal">{customer.name}</h1>
           <p className="text-sm text-charcoal-light">Customer since {formatDate(customer.created_at)}</p>
@@ -88,7 +89,9 @@ export default function CustomerDetail() {
             <DataTable
               rows={customer.orders || []}
               onRowClick={(row) => navigate(`/admin/orders/${row.id}`)}
-              emptyMessage="No orders yet."
+              emptyArt={<WaitingForOrdersArt />}
+              emptyTitle="No orders from this customer"
+              emptyMessage="Anything they order will be listed here."
               columns={[
                 { key: 'order_number', label: 'Order #' },
                 { key: 'status', label: 'Status', render: (row) => <Badge status={row.status} /> },

@@ -4,6 +4,12 @@ export function listProducts(params) {
   return adminApi.get('/products', { params }).then((res) => res.data);
 }
 
+// Counts for the page's headline tiles. Separate from listProducts() because the list is
+// filtered and paged — its meta.total only ever describes the current filter.
+export function getProductSummary() {
+  return unwrap(adminApi.get('/products/summary'));
+}
+
 export function getLowStock() {
   return unwrap(adminApi.get('/products/low-stock'));
 }
@@ -18,6 +24,12 @@ export function createProduct(payload) {
 
 export function updateProduct(id, payload) {
   return unwrap(adminApi.put(`/products/${id}`, payload));
+}
+
+// A targeted PATCH rather than updateProduct(): that one replaces every field, so using it
+// for a single toggle would push the whole (possibly stale) product back to the server.
+export function setProductFeatured(id, isFeatured) {
+  return unwrap(adminApi.patch(`/products/${id}/featured`, { isFeatured }));
 }
 
 export function deleteProduct(id) {
@@ -54,4 +66,9 @@ export function deleteProductImage(productId, imageId) {
 
 export function setPrimaryImage(productId, imageId) {
   return unwrap(adminApi.put(`/products/${productId}/images/${imageId}/primary`));
+}
+
+// Variant-level stock counts for the inventory page.
+export function getInventorySummary() {
+  return unwrap(adminApi.get('/products/inventory-summary'));
 }

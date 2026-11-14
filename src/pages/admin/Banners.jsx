@@ -1,10 +1,21 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { listBanners, createBanner, updateBanner, deleteBanner } from '../../api/admin/banners.api';
+import {
+  listBanners,
+  createBanner,
+  updateBanner,
+  deleteBanner,
+  getBannerSummary,
+} from '../../api/admin/banners.api';
 import { useAsync } from '../../hooks/useAsync';
 import { useDisclosure } from '../../hooks/useDisclosure';
 import ImageUploader from '../../components/admin/form/ImageUploader';
 import Badge from '../../components/ui/Badge';
+import PageHeader from '../../components/admin/PageHeader';
+import StatTiles from '../../components/admin/StatTiles';
+import { ImageIcon, CheckIcon, ClockIcon, CrossIcon } from '../../components/admin/tileIcons';
+import { NoContentArt } from '../../components/ui/emptyArt';
+import ActionMenu from '../../components/ui/ActionMenu';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
@@ -30,6 +41,7 @@ const emptyForm = {
 export default function Banners() {
   const [page, setPage] = useState(1);
   const { data, loading, error, refetch } = useAsync(() => listBanners({ page, pageSize: 10 }), [page]);
+  const { data: summary } = useAsync(() => getBannerSummary(), []);
   const { isOpen, open, close } = useDisclosure(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -125,12 +137,24 @@ export default function Banners() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-charcoal">Banners</h1>
-        <Button variant="gold" onClick={openCreate}>
-          Add Banner
-        </Button>
-      </div>
+      <PageHeader
+        title="Banners"
+        subtitle="Promotional strips across your storefront, with optional start and end dates."
+        actions={
+          <Button variant="gold" onClick={openCreate}>
+            Add Banner
+          </Button>
+        }
+      />
+
+      <StatTiles
+        tiles={[
+          { key: 'total', label: 'Total banners', value: summary?.total, tone: 'primary', icon: <ImageIcon /> },
+          { key: 'showing', label: 'Showing now', value: summary?.showing, tone: 'good', icon: <CheckIcon /> },
+          { key: 'scheduled', label: 'Scheduled', value: summary?.scheduled, tone: 'neutral', icon: <ClockIcon /> },
+          { key: 'expired', label: 'Expired', value: summary?.expired, tone: 'neutral', icon: <CrossIcon /> },
+        ]}
+      />
 
       {error ? (
         <ErrorState message="Could not load banners." onRetry={refetch} />
@@ -140,7 +164,11 @@ export default function Banners() {
         </div>
       ) : rows.length === 0 ? (
         <div className="rounded-lg border border-stone-200 bg-white">
-          <EmptyState title="No banners yet" description="Add your first promotional banner." />
+          <EmptyState
+            art={<NoContentArt />}
+            title="No banners yet"
+            description="Banners are the promotional strips across your storefront — add one to fill the space."
+          />
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -152,22 +180,24 @@ export default function Banners() {
                 className="h-36 w-full object-cover"
               />
               <div className="flex flex-1 flex-col gap-2 p-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-charcoal">{banner.title || '(untitled)'}</h3>
-                  <Badge status={(banner.is_active ?? banner.isActive) ? 'active' : 'inactive'} />
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="min-w-0 flex-1 text-sm font-semibold text-charcoal">
+                    {banner.title || '(untitled)'}
+                  </h3>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Badge status={(banner.is_active ?? banner.isActive) ? 'active' : 'inactive'} />
+                    <ActionMenu
+                      items={[
+                        { label: 'Edit', onClick: () => openEdit(banner) },
+                        { label: 'Delete', onClick: () => setDeleteTarget(banner), danger: true },
+                      ]}
+                    />
+                  </div>
                 </div>
                 <p className="text-xs text-charcoal-light">Placement: {banner.placement || '-'}</p>
                 <p className="text-xs text-charcoal-light">
                   Sort order: {banner.sort_order ?? banner.sortOrder ?? 0}
                 </p>
-                <div className="mt-auto flex gap-2 pt-2">
-                  <Button variant="outline" size="sm" onClick={() => openEdit(banner)}>
-                    Edit
-                  </Button>
-                  <Button variant="danger" size="sm" onClick={() => setDeleteTarget(banner)}>
-                    Delete
-                  </Button>
-                </div>
               </div>
             </div>
           ))}

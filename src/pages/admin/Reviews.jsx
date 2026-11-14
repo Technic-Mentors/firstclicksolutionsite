@@ -1,11 +1,23 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { listReviews, createReview, approveReview, rejectReview, deleteReview } from '../../api/admin/reviews.api';
+import {
+  listReviews,
+  createReview,
+  approveReview,
+  rejectReview,
+  deleteReview,
+  getReviewSummary,
+} from '../../api/admin/reviews.api';
 import { listProducts } from '../../api/admin/products.api';
 import { useAsync } from '../../hooks/useAsync';
 import DataTable from '../../components/admin/table/DataTable';
 import Badge from '../../components/ui/Badge';
+import PageHeader from '../../components/admin/PageHeader';
+import StatTiles from '../../components/admin/StatTiles';
+import { StarIcon, ClockIcon, CheckIcon, CrossIcon } from '../../components/admin/tileIcons';
+import { NoReviewsArt } from '../../components/ui/emptyArt';
+import ActionMenu from '../../components/ui/ActionMenu';
 import Button from '../../components/ui/Button';
 import Select from '../../components/ui/Select';
 import SearchableSelect from '../../components/ui/SearchableSelect';
@@ -45,6 +57,7 @@ export default function Reviews() {
   const [adding, setAdding] = useState(false);
 
   const { data: productsData } = useAsync(() => listProducts({ pageSize: 500, sort: 'name_asc' }), []);
+  const { data: summary } = useAsync(() => getReviewSummary(), []);
   const productOptions = (productsData?.data || []).map((p) => ({ value: p.id, label: p.name }));
 
   const rows = data?.data || [];
@@ -117,12 +130,25 @@ export default function Reviews() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-charcoal">Reviews</h1>
-        <Button size="sm" onClick={() => setAddOpen(true)}>
-          Add Review
-        </Button>
-      </div>
+      <PageHeader
+        title="Reviews"
+        subtitle="Customer reviews wait here for approval before they appear on the storefront."
+        actions={
+          <Button size="sm" onClick={() => setAddOpen(true)}>
+            Add Review
+          </Button>
+        }
+      />
+
+      <StatTiles
+        tiles={[
+          { key: 'total', label: 'Total reviews', value: summary?.total, tone: 'primary', icon: <StarIcon /> },
+          { key: 'pending', label: 'Awaiting approval', value: summary?.pending, tone: summary?.pending > 0 ? 'warning' : 'neutral', icon: <ClockIcon /> },
+          { key: 'approved', label: 'Published', value: summary?.approved, tone: 'good', icon: <CheckIcon /> },
+          { key: 'rating', label: 'Average rating', value: summary?.averageRating || undefined, tone: 'accent', icon: <StarIcon /> },
+          { key: 'rejected', label: 'Rejected', value: summary?.rejected, tone: 'neutral', icon: <CrossIcon /> },
+        ]}
+      />
 
       <div className="flex flex-wrap items-end gap-3 rounded-lg border border-stone-200 bg-white p-4">
         <div className="w-52">
@@ -148,7 +174,9 @@ export default function Reviews() {
         <DataTable
           loading={loading}
           rows={rows}
-          emptyMessage="No reviews found."
+          emptyArt={<NoReviewsArt />}
+          emptyTitle="No reviews found"
+          emptyMessage="Customer reviews land here for approval before they appear on the storefront."
           columns={[
             {
               key: 'product_name',
@@ -177,23 +205,18 @@ export default function Reviews() {
             { key: 'status', label: 'Status', render: (row) => <Badge status={row.status} /> },
             {
               key: 'actions',
-              label: '',
+              label: 'Actions',
+              actions: true,
               render: (row) => (
-                <div className="flex flex-wrap gap-2">
-                  {row.status === 'pending' && (
-                    <>
-                      <Button variant="outline" size="sm" onClick={() => handleApprove(row)}>
-                        Approve
-                      </Button>
-                      <Button variant="danger" size="sm" onClick={() => handleReject(row)}>
-                        Reject
-                      </Button>
-                    </>
-                  )}
-                  <Button variant="danger" size="sm" onClick={() => setDeleteTarget(row)}>
-                    Delete
-                  </Button>
-                </div>
+                <ActionMenu
+                  items={[
+                    row.status === 'pending' ? { label: 'Approve', onClick: () => handleApprove(row) } : null,
+                    row.status === 'pending'
+                      ? { label: 'Reject', onClick: () => handleReject(row), danger: true }
+                      : null,
+                    { label: 'Delete', onClick: () => setDeleteTarget(row), danger: true },
+                  ]}
+                />
               ),
             },
           ]}

@@ -4,6 +4,18 @@ export function listCategories() {
   return unwrap(adminApi.get('/categories'));
 }
 
+// Counts for the page tiles — listCategories() is shared with dropdowns elsewhere and
+// should not grow aggregate work for them.
+export function getCategorySummary() {
+  return unwrap(adminApi.get('/categories/summary'));
+}
+
+// Targeted PATCH: updateCategory() rewrites every column from its payload, so a single
+// toggle must not go through it.
+export function setCategoryVisibility(id, isActive) {
+  return unwrap(adminApi.patch(`/categories/${id}/visibility`, { isActive }));
+}
+
 export function getCategory(id) {
   return unwrap(adminApi.get(`/categories/${id}`));
 }

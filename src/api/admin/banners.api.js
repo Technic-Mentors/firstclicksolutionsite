@@ -20,3 +20,9 @@ export function updateBanner(id, payload) {
 export function deleteBanner(id) {
   return unwrap(adminApi.delete(`/banners/${id}`));
 }
+
+// Counts for the page tiles. Kept apart from the list call, whose meta.total only ever
+// describes the current filter and page.
+export function getBannerSummary() {
+  return unwrap(adminApi.get('/banners/summary'));
+}

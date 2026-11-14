@@ -1,11 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { listBlogPosts, deleteBlogPost } from '../../api/admin/blog.api';
+import { listBlogPosts, deleteBlogPost, getBlogSummary } from '../../api/admin/blog.api';
 import { useAsync } from '../../hooks/useAsync';
 import { formatDate } from '../../utils/format';
 import DataTable from '../../components/admin/table/DataTable';
 import Badge from '../../components/ui/Badge';
+import PageHeader from '../../components/admin/PageHeader';
+import StatTiles from '../../components/admin/StatTiles';
+import { FileIcon, CheckIcon, PencilIcon, ImageIcon } from '../../components/admin/tileIcons';
+import { NoContentArt } from '../../components/ui/emptyArt';
+import ActionMenu from '../../components/ui/ActionMenu';
 import Button from '../../components/ui/Button';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import ErrorState from '../../components/ui/ErrorState';
@@ -15,6 +20,7 @@ export default function BlogList() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const { data, loading, error, refetch } = useAsync(() => listBlogPosts({ page, pageSize: 10 }), [page]);
+  const { data: summary } = useAsync(() => getBlogSummary(), []);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -37,12 +43,24 @@ export default function BlogList() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-charcoal">Blog</h1>
-        <Button variant="gold" onClick={() => navigate('/admin/blog/new')}>
-          New Post
-        </Button>
-      </div>
+      <PageHeader
+        title="Blog"
+        subtitle="Posts shown in the blog section of your storefront."
+        actions={
+          <Button variant="gold" onClick={() => navigate('/admin/blog/new')}>
+            New Post
+          </Button>
+        }
+      />
+
+      <StatTiles
+        tiles={[
+          { key: 'total', label: 'Total posts', value: summary?.total, tone: 'primary', icon: <FileIcon /> },
+          { key: 'published', label: 'Published', value: summary?.published, tone: 'good', icon: <CheckIcon /> },
+          { key: 'draft', label: 'Drafts', value: summary?.draft, tone: 'neutral', icon: <PencilIcon /> },
+          { key: 'image', label: 'Missing image', value: summary?.missingImage, tone: summary?.missingImage > 0 ? 'warning' : 'neutral', icon: <ImageIcon /> },
+        ]}
+      />
 
       {error ? (
         <ErrorState message="Could not load blog posts." onRetry={refetch} />
@@ -50,7 +68,9 @@ export default function BlogList() {
         <DataTable
           loading={loading}
           rows={rows}
-          emptyMessage="No blog posts yet."
+          emptyArt={<NoContentArt />}
+          emptyTitle="No blog posts yet"
+          emptyMessage="Write your first post to start filling the blog on your storefront."
           columns={[
             { key: 'title', label: 'Title' },
             { key: 'category_name', label: 'Category', render: (row) => row.category_name || row.categoryName || '-' },
@@ -63,16 +83,15 @@ export default function BlogList() {
             },
             {
               key: 'actions',
-              label: '',
+              label: 'Actions',
+              actions: true,
               render: (row) => (
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => navigate(`/admin/blog/${row.id}/edit`)}>
-                    Edit
-                  </Button>
-                  <Button variant="danger" size="sm" onClick={() => setDeleteTarget(row)}>
-                    Delete
-                  </Button>
-                </div>
+                <ActionMenu
+                  items={[
+                    { label: 'Edit', to: `/admin/blog/${row.id}/edit` },
+                    { label: 'Delete', onClick: () => setDeleteTarget(row), danger: true },
+                  ]}
+                />
               ),
             },
           ]}

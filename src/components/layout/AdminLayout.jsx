@@ -1,39 +1,88 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAdminAuthStore } from '../../store/useAdminAuthStore';
 import { cn } from '../../utils/cn';
 import { assetUrl } from '../../utils/media';
+import { getBadgeCounts } from '../../api/admin/dashboard.api';
 import NotificationBell from '../admin/dashboard/NotificationBell';
 import AdminProfileModal from '../admin/AdminProfileModal';
 import Breadcrumbs from './Breadcrumbs';
 
-const LINKS = [
-  { to: '/admin', label: 'Dashboard', end: true, icon: GridIcon },
-  { to: '/admin/reports', label: 'Reports', icon: ChartIcon },
-  { to: '/admin/orders', label: 'Orders', icon: OrdersIcon },
-  { to: '/admin/products', label: 'Products', icon: BoxIcon },
-  { to: '/admin/categories', label: 'Categories', icon: TagIcon },
-  { to: '/admin/inventory', label: 'Inventory', icon: LayersIcon },
-  { to: '/admin/customers', label: 'Customers', icon: UsersIcon },
-  { to: '/admin/coupons', label: 'Coupons', icon: PercentIcon },
-  { to: '/admin/reviews', label: 'Reviews', icon: StarIcon },
-  { to: '/admin/banners', label: 'Banners', icon: ImageIcon },
-  { to: '/admin/blog', label: 'Blog', icon: FileIcon },
-  { to: '/admin/shipping', label: 'Shipping', icon: TruckIcon },
-  { to: '/admin/contact-messages', label: 'Contact Messages', icon: MailIcon },
-  { to: '/admin/settings', label: 'Settings', icon: GearIcon },
+// Grouped so fourteen links stay scannable, and ordered the way the work actually runs:
+// set the catalogue up first (a product needs a category, stock needs a product), then the
+// day-to-day queues, then the things touched occasionally. Within a group the order is the
+// order you'd do them in, which is why Categories sits above Products.
+const NAV_GROUPS = [
+  {
+    heading: null, // the landing page needs no label above it
+    links: [{ to: '/admin', label: 'Dashboard', end: true, icon: GridIcon }],
+  },
+  {
+    heading: 'Catalogue',
+    links: [
+      { to: '/admin/categories', label: 'Categories', icon: TagIcon },
+      { to: '/admin/products', label: 'Products', icon: BoxIcon },
+      { to: '/admin/inventory', label: 'Inventory', icon: LayersIcon, badge: 'inventory' },
+    ],
+  },
+  {
+    heading: 'Operations',
+    links: [
+      { to: '/admin/orders', label: 'Orders', icon: OrdersIcon, badge: 'orders' },
+      { to: '/admin/contact-messages', label: 'Contact Messages', icon: MailIcon, badge: 'contactMessages' },
+      { to: '/admin/reviews', label: 'Reviews', icon: StarIcon, badge: 'reviews' },
+    ],
+  },
+  {
+    heading: 'Customers & marketing',
+    links: [
+      { to: '/admin/customers', label: 'Customers', icon: UsersIcon },
+      { to: '/admin/coupons', label: 'Coupons', icon: PercentIcon },
+      { to: '/admin/banners', label: 'Banners', icon: ImageIcon },
+      { to: '/admin/blog', label: 'Blog', icon: FileIcon },
+    ],
+  },
+  {
+    heading: 'Insights & setup',
+    links: [
+      { to: '/admin/reports', label: 'Reports', icon: ChartIcon },
+      { to: '/admin/shipping', label: 'Shipping', icon: TruckIcon },
+      { to: '/admin/settings', label: 'Settings', icon: GearIcon },
+    ],
+  },
 ];
 
 export default function AdminLayout() {
   const admin = useAdminAuthStore((s) => s.admin);
+  const logout = useAdminAuthStore((s) => s.logout);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem('admin_sidebar_collapsed') === 'true');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [badges, setBadges] = useState(null);
 
   useEffect(() => {
     localStorage.setItem('admin_sidebar_collapsed', String(collapsed));
   }, [collapsed]);
+
+  // Refetched on navigation so a badge clears as soon as the admin deals with the queue
+  // behind it (reads the message, approves the review) rather than going stale until reload.
+  useEffect(() => {
+    let cancelled = false;
+    getBadgeCounts()
+      .then((counts) => !cancelled && setBadges(counts))
+      .catch(() => !cancelled && setBadges(null));
+    return () => {
+      cancelled = true;
+    };
+  }, [location.pathname]);
+
+  async function handleLogout() {
+    await logout();
+    navigate('/admin/login');
+  }
 
   const sidebarWidth = collapsed ? 'md:w-16' : 'md:w-60';
   const contentPad = collapsed ? 'md:pl-16' : 'md:pl-60';
@@ -42,46 +91,110 @@ export default function AdminLayout() {
     const isCollapsed = collapsed && !isMobile;
     return (
       <>
-        <div className={cn('flex items-center gap-2 border-b border-stone-200 px-4 py-4', isCollapsed ? 'justify-center' : 'justify-between')}>
-          {!isCollapsed && (
-            <div className="flex items-center gap-2 overflow-hidden">
-              <img src="/logo.png" alt="MA Universal" className="h-9 w-9 shrink-0" />
-              <span className="truncate font-serif text-base font-semibold text-charcoal">Admin Panel</span>
-            </div>
-          )}
-          {!isMobile && (
-            <button
-              type="button"
-              onClick={() => setCollapsed((v) => !v)}
-              className="hidden shrink-0 rounded-md p-1.5 text-charcoal-light hover:bg-stone-100 hover:text-gold-600 md:block"
-              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              <HamburgerIcon />
-            </button>
-          )}
+        <div className={cn('flex items-center border-b border-white/10 px-4 py-4', isCollapsed && 'justify-center px-0')}>
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            {/* The logo is dark lettering on transparency, so it needs a light chip to stay
+                legible against the green. */}
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white p-1">
+              <img src="/logo.png" alt="" className="h-full w-full object-contain" />
+            </span>
+            {!isCollapsed && (
+              <span className="min-w-0 leading-tight">
+                <span className="block truncate text-sm font-semibold text-white">First Click</span>
+                <span className="block truncate text-[10px] uppercase tracking-[0.12em] text-white/45">
+                  Solutions · Admin
+                </span>
+              </span>
+            )}
+          </div>
         </div>
-        <nav className="flex-1 space-y-1 overflow-y-auto px-2.5 py-4">
-          {LINKS.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              end={link.end}
-              title={isCollapsed ? link.label : undefined}
-              onClick={() => setMobileOpen(false)}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                  isCollapsed && 'justify-center px-0',
-                  isActive ? 'bg-gold-50 text-gold-700' : 'text-charcoal-light hover:bg-stone-100',
-                )
-              }
-            >
-              <link.icon className="h-[18px] w-[18px] shrink-0" />
-              {!isCollapsed && link.label}
-            </NavLink>
+        <nav className="sidebar-scroll flex-1 overflow-y-auto px-2.5 py-3">
+          {NAV_GROUPS.map((group, groupIndex) => (
+            <div key={group.heading ?? 'main'} className={cn(groupIndex > 0 && 'mt-4')}>
+              {group.heading &&
+                // Collapsed to icons there is no room for a word, so the grouping is carried
+                // by a rule instead — the sections still read apart at a glance.
+                (isCollapsed ? (
+                  <div className="mx-auto mb-2 w-6 border-t border-white/15" />
+                ) : (
+                  <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-white/40">
+                    {group.heading}
+                  </p>
+                ))}
+              <div className="space-y-1">
+                {group.links.map((link) => {
+                  const count = link.badge ? badges?.[link.badge] : 0;
+                  return (
+                    <NavLink
+                      key={link.to}
+                      to={link.to}
+                      end={link.end}
+                      title={isCollapsed ? link.label : undefined}
+                      onClick={() => setMobileOpen(false)}
+                      className={({ isActive }) =>
+                        cn(
+                          'relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                          isCollapsed && 'justify-center px-0',
+                          isActive
+                            ? 'bg-gold-500 text-white shadow-sm'
+                            : 'text-white/75 hover:bg-white/10 hover:text-white',
+                        )
+                      }
+                    >
+                      <link.icon className="h-[18px] w-[18px] shrink-0" />
+                      {isCollapsed ? (
+                        // No room for the number, so a dot just says "something is waiting".
+                        count > 0 && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-leaf-400" />
+                      ) : (
+                        <>
+                          <span className="flex-1 truncate">{link.label}</span>
+                          {count > 0 && (
+                            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-leaf-400 px-1.5 text-[11px] font-semibold text-forest-700">
+                              {count > 99 ? '99+' : count}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </NavLink>
+                  );
+                })}
+              </div>
+            </div>
           ))}
         </nav>
+
+        <div className="border-t border-white/10 px-2.5 py-3">
+          <a
+            href="/"
+            target="_blank"
+            rel="noreferrer"
+            title={isCollapsed ? 'View storefront' : undefined}
+            className={cn(
+              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white',
+              isCollapsed && 'justify-center px-0',
+            )}
+          >
+            <StorefrontIcon className="h-[18px] w-[18px] shrink-0" />
+            {!isCollapsed && (
+              <>
+                <span className="flex-1 truncate">View storefront</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-leaf-400" />
+              </>
+            )}
+          </a>
+          <button
+            type="button"
+            onClick={handleLogout}
+            title={isCollapsed ? 'Log out' : undefined}
+            className={cn(
+              'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white',
+              isCollapsed && 'justify-center px-0',
+            )}
+          >
+            <LogoutIcon className="h-[18px] w-[18px] shrink-0" />
+            {!isCollapsed && 'Log out'}
+          </button>
+        </div>
       </>
     );
   }
@@ -91,18 +204,34 @@ export default function AdminLayout() {
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-stone-200 bg-white transition-all duration-200 md:flex',
+          'fixed inset-y-0 left-0 z-30 hidden flex-col bg-forest-700 transition-all duration-200 md:flex',
           sidebarWidth,
         )}
       >
         {renderSidebarContent(false)}
+
+        {/* The toggle rides on the sidebar's edge and never changes place or disappears, so
+            collapsing is reversible from the same spot that collapsed it. The arrow points
+            the way the panel will move. A hamburger inside the rail could not do this: it
+            looked like a menu, and once collapsed there was nothing to say it was the way
+            back out. */}
+        <button
+          type="button"
+          onClick={() => setCollapsed((v) => !v)}
+          className="absolute -right-3 top-[4.75rem] z-10 hidden h-6 w-6 items-center justify-center rounded-full border border-stone-300 bg-white text-charcoal-light shadow-md transition-colors hover:border-gold-400 hover:text-gold-600 md:flex"
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-expanded={!collapsed}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          <ChevronIcon pointingRight={collapsed} />
+        </button>
       </aside>
 
       {/* Mobile sidebar (slide-in drawer) */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="absolute inset-0 bg-charcoal/50" onClick={() => setMobileOpen(false)} />
-          <aside className="relative flex h-full w-64 flex-col bg-white shadow-xl">{renderSidebarContent(true)}</aside>
+          <aside className="relative flex h-full w-64 flex-col bg-forest-700 shadow-xl">{renderSidebarContent(true)}</aside>
         </div>
       )}
 
@@ -153,10 +282,27 @@ function MenuIcon() {
     </svg>
   );
 }
-function HamburgerIcon() {
+function ChevronIcon({ pointingRight }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d="M3 6h18M3 12h18M3 18h18" />
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+      {pointingRight ? <path d="m10 6 6 6-6 6" /> : <path d="m14 6-6 6 6 6" />}
+    </svg>
+  );
+}
+function StorefrontIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...props}>
+      <path d="M3 9h18l-1.2-4.4A2 2 0 0 0 17.9 3H6.1a2 2 0 0 0-1.9 1.6L3 9Z" />
+      <path d="M4 9v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9" />
+      <path d="M9 21v-6h6v6" />
+    </svg>
+  );
+}
+function LogoutIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...props}>
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="m16 17 5-5-5-5M21 12H9" />
     </svg>
   );
 }

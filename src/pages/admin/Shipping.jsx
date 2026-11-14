@@ -6,11 +6,18 @@ import {
   createShippingZone,
   updateShippingZone,
   deleteShippingZone,
+  getShippingSummary,
 } from '../../api/admin/shipping.api';
 import { useAsync } from '../../hooks/useAsync';
+import { formatCurrency } from '../../utils/format';
 import { useDisclosure } from '../../hooks/useDisclosure';
 import DataTable from '../../components/admin/table/DataTable';
 import Badge from '../../components/ui/Badge';
+import PageHeader from '../../components/admin/PageHeader';
+import StatTiles from '../../components/admin/StatTiles';
+import { PinIcon, CheckIcon, CoinIcon, AlertIcon } from '../../components/admin/tileIcons';
+import { NoZonesArt } from '../../components/ui/emptyArt';
+import ActionMenu from '../../components/ui/ActionMenu';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import { getErrorMessage } from '../../utils/errorMessage';
@@ -23,6 +30,7 @@ const emptyZoneForm = { city: '', charge: '', isActive: true };
 
 export default function Shipping() {
   const { data, loading, error, refetch } = useAsync(() => getShipping(), []);
+  const { data: summary } = useAsync(() => getShippingSummary(), []);
   const [settingsForm, setSettingsForm] = useState({ defaultShippingRate: '', freeShippingThreshold: '' });
   const [savingSettings, setSavingSettings] = useState(false);
 
@@ -130,7 +138,19 @@ export default function Shipping() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-semibold text-charcoal">Shipping</h1>
+      <PageHeader
+        title="Shipping"
+        subtitle="Delivery rates by city, plus the defaults used when no zone matches."
+      />
+
+      <StatTiles
+        tiles={[
+          { key: 'total', label: 'Shipping zones', value: summary?.total, tone: 'primary', icon: <PinIcon /> },
+          { key: 'active', label: 'Active zones', value: summary?.active, tone: 'good', icon: <CheckIcon /> },
+          { key: 'avg', label: 'Average charge', value: summary ? formatCurrency(summary.averageCharge) : undefined, tone: 'accent', icon: <CoinIcon /> },
+          { key: 'max', label: 'Highest charge', value: summary ? formatCurrency(summary.highestCharge) : undefined, tone: 'neutral', icon: <AlertIcon /> },
+        ]}
+      />
 
       <form onSubmit={handleSaveSettings} className="rounded-lg border border-stone-200 bg-white p-5">
         <h3 className="mb-4 text-sm font-semibold text-charcoal">General Settings</h3>
@@ -170,7 +190,9 @@ export default function Shipping() {
 
       <DataTable
         rows={zones}
-        emptyMessage="No shipping zones configured."
+        emptyArt={<NoZonesArt />}
+        emptyTitle="No shipping zones yet"
+        emptyMessage="Add a zone so customers can be charged the right delivery rate at checkout."
         columns={[
           { key: 'city', label: 'City' },
           { key: 'charge', label: 'Charge', render: (row) => `Rs. ${row.charge}` },
@@ -181,16 +203,15 @@ export default function Shipping() {
           },
           {
             key: 'actions',
-            label: '',
+            label: 'Actions',
+            actions: true,
             render: (row) => (
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => openEditZone(row)}>
-                  Edit
-                </Button>
-                <Button variant="danger" size="sm" onClick={() => setDeleteTarget(row)}>
-                  Delete
-                </Button>
-              </div>
+              <ActionMenu
+                items={[
+                  { label: 'Edit', onClick: () => openEditZone(row) },
+                  { label: 'Delete', onClick: () => setDeleteTarget(row), danger: true },
+                ]}
+              />
             ),
           },
         ]}

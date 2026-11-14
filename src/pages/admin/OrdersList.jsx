@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { listOrders } from '../../api/admin/orders.api';
+import { listOrders, getOrderSummary } from '../../api/admin/orders.api';
 import { useAsync } from '../../hooks/useAsync';
 import { useDebounce } from '../../hooks/useDebounce';
 import { formatCurrency, formatDateTime } from '../../utils/format';
 import DataTable from '../../components/admin/table/DataTable';
 import Badge from '../../components/ui/Badge';
-import Button from '../../components/ui/Button';
+import PageHeader from '../../components/admin/PageHeader';
+import StatTiles from '../../components/admin/StatTiles';
+import { ListIcon, ClockIcon, TruckIcon, CheckIcon, CrossIcon } from '../../components/admin/tileIcons';
+import { WaitingForOrdersArt } from '../../components/ui/emptyArt';
+import ActionMenu from '../../components/ui/ActionMenu';
 import Input from '../../components/ui/Input';
 import SearchableSelect from '../../components/ui/SearchableSelect';
 import ErrorState from '../../components/ui/ErrorState';
@@ -36,12 +40,27 @@ export default function OrdersList() {
     [status, debouncedSearch, dateFrom, dateTo, page],
   );
 
+  const { data: summary } = useAsync(() => getOrderSummary(), []);
+
   const rows = data?.data || [];
   const meta = data?.meta;
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-xl font-semibold text-charcoal">Orders</h1>
+      <PageHeader
+        title="Orders"
+        subtitle="Every order placed on the storefront, and where each one has got to."
+      />
+
+      <StatTiles
+        tiles={[
+          { key: 'total', label: 'Total orders', value: summary?.total, tone: 'primary', icon: <ListIcon /> },
+          { key: 'awaiting', label: 'Awaiting confirmation', value: summary?.awaiting, tone: summary?.awaiting > 0 ? 'warning' : 'neutral', icon: <ClockIcon /> },
+          { key: 'progress', label: 'In progress', value: summary?.inProgress, tone: 'neutral', icon: <TruckIcon /> },
+          { key: 'delivered', label: 'Delivered', value: summary?.delivered, tone: 'good', icon: <CheckIcon /> },
+          { key: 'stopped', label: 'Cancelled / returned', value: summary?.stopped, tone: 'neutral', icon: <CrossIcon /> },
+        ]}
+      />
 
       <div className="flex flex-wrap items-end gap-3 rounded-lg border border-stone-200 bg-white p-4">
         <div className="w-52">
@@ -100,7 +119,9 @@ export default function OrdersList() {
           loading={loading}
           rows={rows}
           onRowClick={(row) => navigate(`/admin/orders/${row.id}`)}
-          emptyMessage="No orders match your filters."
+          emptyArt={<WaitingForOrdersArt />}
+          emptyTitle="No orders to show"
+          emptyMessage="Either nothing has been ordered yet, or no order matches the filters above."
           columns={[
             { key: 'order_number', label: 'Order #' },
             { key: 'customer_name', label: 'Customer' },
@@ -110,19 +131,9 @@ export default function OrdersList() {
             { key: 'created_at', label: 'Placed', render: (row) => formatDateTime(row.created_at) },
             {
               key: 'actions',
-              label: '',
-              render: (row) => (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/admin/orders/${row.id}`);
-                  }}
-                >
-                  View
-                </Button>
-              ),
+              label: 'Actions',
+              actions: true,
+              render: (row) => <ActionMenu items={[{ label: 'View order', to: `/admin/orders/${row.id}` }]} />,
             },
           ]}
           pagination={

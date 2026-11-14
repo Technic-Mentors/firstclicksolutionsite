@@ -19,3 +19,9 @@ export function rejectReview(id) {
 export function deleteReview(id) {
   return unwrap(adminApi.delete(`/reviews/${id}`));
 }
+
+// Counts for the page tiles. Kept apart from the list call, whose meta.total only ever
+// describes the current filter and page.
+export function getReviewSummary() {
+  return unwrap(adminApi.get('/reviews/summary'));
+}

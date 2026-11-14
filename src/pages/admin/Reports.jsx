@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getSalesReport, getSalesExportUrl } from '../../api/admin/reports.api';
+import toast from 'react-hot-toast';
+import { getSalesReport, downloadSalesCsv } from '../../api/admin/reports.api';
 import { listOrders } from '../../api/admin/orders.api';
 import { useAsync } from '../../hooks/useAsync';
 import { formatCurrency, formatDateTime } from '../../utils/format';
@@ -10,6 +11,7 @@ import SalesTrendChart from '../../components/admin/dashboard/SalesTrendChart';
 import TopList from '../../components/admin/dashboard/TopList';
 import DataTable from '../../components/admin/table/DataTable';
 import Badge from '../../components/ui/Badge';
+import { NoResultsArt } from '../../components/ui/emptyArt';
 import Input from '../../components/ui/Input';
 import SearchableSelect from '../../components/ui/SearchableSelect';
 import ErrorState from '../../components/ui/ErrorState';
@@ -39,6 +41,18 @@ export default function Reports() {
   const [dateTo, setDateTo] = useState(searchParams.get('dateTo') || defaultTo);
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
+  const [exporting, setExporting] = useState(false);
+
+  async function handleExport() {
+    setExporting(true);
+    try {
+      await downloadSalesCsv({ dateFrom, dateTo, status: status || undefined });
+    } catch {
+      toast.error('Could not export the report. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const { data: report, loading, error, refetch } = useAsync(
     () => getSalesReport({ dateFrom, dateTo, topLimit: 8, status: status || undefined }),
@@ -63,15 +77,15 @@ export default function Reports() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl font-semibold text-charcoal">Sales Reports</h1>
-        <a
-          href={getSalesExportUrl({ dateFrom, dateTo, status: status || undefined })}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 rounded-md bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-600"
+        <button
+          type="button"
+          onClick={handleExport}
+          disabled={exporting}
+          className="inline-flex items-center gap-2 rounded-md bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-600 disabled:opacity-60"
         >
           <DownloadIcon />
-          Export CSV
-        </a>
+          {exporting ? 'Preparing…' : 'Export CSV'}
+        </button>
       </div>
 
       <div className="flex flex-wrap items-end gap-3 rounded-lg border border-stone-200 bg-white p-4">
@@ -149,7 +163,9 @@ export default function Reports() {
             <DataTable
               loading={ordersLoading}
               rows={orderRows}
-              emptyMessage="No orders in this range."
+              emptyArt={<NoResultsArt />}
+              emptyTitle="No orders in this range"
+              emptyMessage="Try widening the date range or clearing the status filter."
               onRowClick={(row) => navigate(`/admin/orders/${row.id}`)}
               columns={[
                 { key: 'order_number', label: 'Order #' },
