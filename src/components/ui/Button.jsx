@@ -10,10 +10,13 @@ const VARIANTS = {
   danger: 'bg-red-600 text-white hover:bg-red-700 disabled:bg-red-200',
 };
 
+// Fixed heights rather than vertical padding. With padding, a bordered variant came out two
+// pixels taller than a filled one — so an outline button and a solid button sitting in the
+// same row never lined up, and neither matched an input beside them.
 const SIZES = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-5 py-2.5 text-sm',
-  lg: 'px-7 py-3.5 text-base',
+  sm: 'h-8 px-3 text-sm',
+  md: 'h-10 px-5 text-sm',
+  lg: 'h-12 px-7 text-base',
 };
 
 export default function Button({

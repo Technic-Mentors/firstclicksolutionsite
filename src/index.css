@@ -185,3 +185,54 @@ body {
   }
   .dash-draw { stroke-dashoffset: 0; }
 }
+
+/* Sign-in artwork.
+   Idle motion only — the page's job is to take a password, so nothing here should pull the
+   eye away from the form or keep moving once it has been noticed. All of it stops for
+   anyone who asked their system for reduced motion. */
+@keyframes art-rise {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+@keyframes art-drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes art-spin {
+  to { transform: rotate(360deg); }
+}
+
+.art-bar {
+  transform-origin: bottom;
+  animation: art-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.art-drift { animation: art-drift 4.5s ease-in-out infinite; }
+.art-drift-slow { animation: art-drift 5.5s ease-in-out infinite 0.8s; }
+.art-drift-slower { animation: art-drift 6.5s ease-in-out infinite 1.6s; }
+
+.art-ring {
+  transform-origin: center;
+  animation: art-spin 70s linear infinite;
+}
+
+.art-draw {
+  stroke-dasharray: 220;
+  stroke-dashoffset: 220;
+  animation: dash-draw 1.6s ease-out forwards 0.5s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art-bar,
+  .art-drift,
+  .art-drift-slow,
+  .art-drift-slower,
+  .art-ring,
+  .art-draw {
+    animation: none;
+  }
+  .art-bar { transform: none; }
+  .art-draw { stroke-dashoffset: 0; }
+}

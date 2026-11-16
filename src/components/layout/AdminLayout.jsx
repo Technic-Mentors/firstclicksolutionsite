@@ -5,6 +5,7 @@ import { cn } from '../../utils/cn';
 import { assetUrl } from '../../utils/media';
 import { getBadgeCounts } from '../../api/admin/dashboard.api';
 import NotificationBell from '../admin/dashboard/NotificationBell';
+import ActionMenu from '../ui/ActionMenu';
 import AdminProfileModal from '../admin/AdminProfileModal';
 import Breadcrumbs from './Breadcrumbs';
 
@@ -91,6 +92,11 @@ export default function AdminLayout() {
     const isCollapsed = collapsed && !isMobile;
     return (
       <>
+        {/* The logo is dark lettering on transparency, so it sits on a light panel to stay
+            legible against the green. Expanded it runs the full width of the rail — the
+            wordmark already reads "First Click Solutions", so repeating that in text beside
+            it only stole the room the logo needed. Collapsed there is no width for a
+            wordmark, so the same panel becomes a square and the logo scales down inside it. */}
         <div className={cn('flex items-center border-b border-white/10 px-4 py-4', isCollapsed && 'justify-center px-0')}>
           <div className="flex items-center gap-2.5 overflow-hidden">
             {/* The logo is dark lettering on transparency, so it needs a light chip to stay
@@ -248,20 +254,36 @@ export default function AdminLayout() {
           <div className="hidden md:block" />
           <div className="flex items-center gap-5">
             <NotificationBell />
-            <button
-              type="button"
-              onClick={() => setProfileOpen(true)}
-              className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-stone-100"
-            >
-              {admin?.avatar ? (
-                <img src={assetUrl(admin.avatar)} alt="" className="h-7 w-7 rounded-full object-cover" />
-              ) : (
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gold-100 text-xs font-semibold text-gold-700">
-                  {admin?.name?.[0]?.toUpperCase() || 'A'}
-                </div>
-              )}
-              <span className="hidden text-sm font-medium text-charcoal sm:inline">{admin?.name}</span>
-            </button>
+            {/* The avatar opens a menu rather than the profile dialog directly: clicking it
+                used to be the only way out of the panel, and a logout buried inside an
+                "edit profile" form is not where anyone looks for it. */}
+            <ActionMenu
+              label="Account menu"
+              width={224}
+              buttonClassName="gap-2 px-2 py-1"
+              trigger={
+                <>
+                  <Avatar admin={admin} className="h-7 w-7" />
+                  <span className="hidden max-w-[10rem] truncate text-sm font-medium text-charcoal sm:inline">
+                    {admin?.name}
+                  </span>
+                  <ChevronDownIcon />
+                </>
+              }
+              header={
+                <span className="flex items-center gap-2.5">
+                  <Avatar admin={admin} className="h-9 w-9" />
+                  <span className="min-w-0 leading-tight">
+                    <span className="block truncate text-sm font-medium text-charcoal">{admin?.name}</span>
+                    <span className="block truncate text-xs text-charcoal-light">{admin?.email}</span>
+                  </span>
+                </span>
+              }
+              items={[
+                { label: 'Edit profile', icon: <UserIcon />, onClick: () => setProfileOpen(true) },
+                { label: 'Log out', icon: <LogoutIcon className="h-4 w-4" />, onClick: handleLogout, danger: true },
+              ]}
+            />
           </div>
         </header>
         <main className="flex-1 p-4 sm:p-6">
@@ -272,6 +294,40 @@ export default function AdminLayout() {
 
       <AdminProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
     </div>
+  );
+}
+
+/** The admin's picture, or their initial when there is none. */
+function Avatar({ admin, className }) {
+  if (admin?.avatar) {
+    return <img src={assetUrl(admin.avatar)} alt="" className={cn('shrink-0 rounded-full object-cover', className)} />;
+  }
+  return (
+    <span
+      className={cn(
+        'flex shrink-0 items-center justify-center rounded-full bg-gold-100 text-xs font-semibold text-gold-700',
+        className,
+      )}
+    >
+      {admin?.name?.[0]?.toUpperCase() || 'A'}
+    </span>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="hidden text-charcoal-light sm:block">
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+      <circle cx="12" cy="8" r="3.6" />
+      <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
+    </svg>
   );
 }
 

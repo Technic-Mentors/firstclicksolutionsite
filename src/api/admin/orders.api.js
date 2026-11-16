@@ -14,6 +14,6 @@ export function updateOrderStatus(id, payload) {
 
 // Counts for the page tiles. Kept apart from the list call, whose meta.total only ever
 // describes the current filter and page.
-export function getOrderSummary() {
-  return unwrap(adminApi.get('/orders/summary'));
+export function getOrderSummary(params) {
+  return unwrap(adminApi.get('/orders/summary', { params }));
 }

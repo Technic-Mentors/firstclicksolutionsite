@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import FieldLabel from './FieldLabel';
 import { cn } from '../../utils/cn';
 
 /**
@@ -10,6 +11,7 @@ import { cn } from '../../utils/cn';
  */
 export default function SearchableSelect({
   label,
+  required,
   options,
   value,
   onChange,
@@ -50,7 +52,7 @@ export default function SearchableSelect({
 
   return (
     <div className="flex flex-col gap-1.5" ref={containerRef}>
-      {label && <label className="text-sm font-medium text-charcoal-light">{label}</label>}
+      <FieldLabel required={required}>{label}</FieldLabel>
       <div className={cn('relative', className)}>
         <button
           type="button"

@@ -24,7 +24,7 @@ export default function FilterBar({ search, tabs, chips, trailing }) {
               onChange={(e) => search.onChange(e.target.value)}
               placeholder={search.placeholder}
               aria-label={search.placeholder}
-              className="w-full rounded-lg border border-stone-300 py-2 pl-9 pr-3 text-sm text-charcoal placeholder:text-stone-400 focus:border-gold-400 focus:outline-none focus:ring-1 focus:ring-gold-400"
+              className="h-10 w-full rounded-lg border border-stone-300 pl-9 pr-3 text-sm text-charcoal placeholder:text-stone-400 focus:border-gold-400 focus:outline-none focus:ring-1 focus:ring-gold-400"
             />
           </div>
         )}
@@ -70,7 +70,7 @@ export function FilterChip({ active, onClick, children }) {
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
         active
           ? 'border-forest-600 bg-forest-600 text-white'
           : 'border-stone-300 text-charcoal-light hover:border-stone-400 hover:text-charcoal',
@@ -78,6 +78,21 @@ export function FilterChip({ active, onClick, children }) {
     >
       {children}
     </button>
+  );
+}
+
+/** The count that rides inside a chip. */
+export function ChipCount({ active, children }) {
+  if (children === undefined || children === null) return null;
+  return (
+    <span
+      className={cn(
+        'rounded px-1 text-[10px] font-semibold',
+        active ? 'bg-white/20 text-white' : 'bg-stone-100 text-charcoal-light',
+      )}
+    >
+      {children}
+    </span>
   );
 }
 

@@ -1,22 +1,22 @@
 import { forwardRef, useState } from 'react';
 import { cn } from '../../utils/cn';
+import FieldLabel from './FieldLabel';
 
-const Input = forwardRef(function Input({ label, error, className, id, type, ...props }, ref) {
+const Input = forwardRef(function Input({ label, error, className, id, type, required, ...props }, ref) {
   const inputId = id || props.name;
   const isPassword = type === 'password';
   const [visible, setVisible] = useState(false);
 
   return (
     <div className="flex flex-col gap-1.5">
-      {label && (
-        <label htmlFor={inputId} className="text-sm font-medium text-charcoal-light">
-          {label}
-        </label>
-      )}
+      <FieldLabel htmlFor={inputId} required={required}>
+        {label}
+      </FieldLabel>
       <div className="relative">
         <input
           ref={ref}
           id={inputId}
+          required={required}
           type={isPassword ? (visible ? 'text' : 'password') : type}
           className={cn(
             'w-full rounded-md border border-stone-300 bg-white px-3.5 py-2.5 text-sm text-charcoal placeholder:text-stone-400',

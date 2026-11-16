@@ -6,8 +6,8 @@ export function listProducts(params) {
 
 // Counts for the page's headline tiles. Separate from listProducts() because the list is
 // filtered and paged — its meta.total only ever describes the current filter.
-export function getProductSummary() {
-  return unwrap(adminApi.get('/products/summary'));
+export function getProductSummary(params) {
+  return unwrap(adminApi.get('/products/summary', { params }));
 }
 
 export function getLowStock() {

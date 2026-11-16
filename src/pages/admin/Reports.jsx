@@ -11,8 +11,10 @@ import SalesTrendChart from '../../components/admin/dashboard/SalesTrendChart';
 import TopList from '../../components/admin/dashboard/TopList';
 import DataTable from '../../components/admin/table/DataTable';
 import Badge from '../../components/ui/Badge';
+import PageHeader from '../../components/admin/PageHeader';
+import FilterBar, { FilterChip } from '../../components/admin/FilterBar';
 import { NoResultsArt } from '../../components/ui/emptyArt';
-import Input from '../../components/ui/Input';
+import Button from '../../components/ui/Button';
 import SearchableSelect from '../../components/ui/SearchableSelect';
 import ErrorState from '../../components/ui/ErrorState';
 import Spinner from '../../components/ui/Spinner';
@@ -41,6 +43,7 @@ export default function Reports() {
   const [dateTo, setDateTo] = useState(searchParams.get('dateTo') || defaultTo);
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [exporting, setExporting] = useState(false);
 
   async function handleExport() {
@@ -60,8 +63,8 @@ export default function Reports() {
   );
 
   const { data: ordersData, loading: ordersLoading } = useAsync(
-    () => listOrders({ dateFrom, dateTo, status: status || undefined, page, pageSize: 10 }),
-    [dateFrom, dateTo, status, page],
+    () => listOrders({ dateFrom, dateTo, status: status || undefined, page, pageSize }),
+    [dateFrom, dateTo, status, page, pageSize],
   );
 
   function applyPreset(days) {
@@ -75,50 +78,60 @@ export default function Reports() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-charcoal">Sales Reports</h1>
-        <button
-          type="button"
-          onClick={handleExport}
-          disabled={exporting}
-          className="inline-flex items-center gap-2 rounded-md bg-gold-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gold-600 disabled:opacity-60"
-        >
-          <DownloadIcon />
-          {exporting ? 'Preparing…' : 'Export CSV'}
-        </button>
-      </div>
+      <PageHeader
+        title="Sales Reports"
+        subtitle="Revenue and orders for a date range, with the detail behind the figures."
+        actions={
+          <Button type="button" variant="gold" onClick={handleExport} loading={exporting}>
+            <DownloadIcon />
+            Export CSV
+          </Button>
+        }
+      />
 
-      <div className="flex flex-wrap items-end gap-3 rounded-lg border border-stone-200 bg-white p-4">
-        <div className="w-40">
-          <Input label="From" type="date" value={dateFrom} onChange={(e) => { setDateFrom(e.target.value); setPage(1); }} />
-        </div>
-        <div className="w-40">
-          <Input label="To" type="date" value={dateTo} onChange={(e) => { setDateTo(e.target.value); setPage(1); }} />
-        </div>
-        <div className="w-44">
-          <SearchableSelect
-            label="Order Status"
-            value={status}
-            onChange={(val) => { setStatus(val); setPage(1); }}
-            options={[
-              { value: '', label: 'All statuses' },
-              ...STATUSES.map((s) => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })),
-            ]}
-          />
-        </div>
-        <div className="flex flex-wrap gap-2 pb-0.5">
-          {PRESETS.map((p) => (
-            <button
-              key={p.label}
-              type="button"
-              onClick={() => applyPreset(p.days)}
-              className="rounded-md border border-stone-300 px-3 py-2 text-xs font-medium text-charcoal-light transition-colors hover:border-gold-400 hover:text-gold-600"
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <FilterBar
+        chips={
+          <>
+            {PRESETS.map((preset) => (
+              <FilterChip key={preset.label} onClick={() => applyPreset(preset.days)}>
+                {preset.label}
+              </FilterChip>
+            ))}
+          </>
+        }
+        trailing={
+          <>
+            <label className="flex items-center gap-2 text-sm text-charcoal-light">
+              <span>From</span>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
+                className="h-10 rounded-lg border border-stone-300 px-3 text-sm text-charcoal focus:border-gold-400 focus:outline-none focus:ring-1 focus:ring-gold-400"
+              />
+            </label>
+            <label className="flex items-center gap-2 text-sm text-charcoal-light">
+              <span>To</span>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
+                className="h-10 rounded-lg border border-stone-300 px-3 text-sm text-charcoal focus:border-gold-400 focus:outline-none focus:ring-1 focus:ring-gold-400"
+              />
+            </label>
+            <div className="w-44">
+              <SearchableSelect
+                value={status}
+                onChange={(val) => { setStatus(val); setPage(1); }}
+                options={[
+                  { value: '', label: 'All statuses' },
+                  ...STATUSES.map((s) => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })),
+                ]}
+              />
+            </div>
+          </>
+        }
+      />
 
       {error ? (
         <ErrorState message="Could not load the sales report." onRetry={refetch} />
@@ -182,6 +195,8 @@ export default function Reports() {
                       total: orderMeta.total,
                       totalPages: orderMeta.totalPages,
                       onPageChange: setPage,
+                      onPageSizeChange: (size) => { setPageSize(size); setPage(1); },
+                      itemLabel: 'orders',
                     }
                   : undefined
               }

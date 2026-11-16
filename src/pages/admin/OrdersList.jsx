@@ -6,12 +6,12 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { formatCurrency, formatDateTime } from '../../utils/format';
 import DataTable from '../../components/admin/table/DataTable';
 import Badge from '../../components/ui/Badge';
+import FilterBar from '../../components/admin/FilterBar';
 import PageHeader from '../../components/admin/PageHeader';
 import StatTiles from '../../components/admin/StatTiles';
 import { ListIcon, ClockIcon, TruckIcon, CheckIcon, CrossIcon } from '../../components/admin/tileIcons';
 import { WaitingForOrdersArt } from '../../components/ui/emptyArt';
 import ActionMenu from '../../components/ui/ActionMenu';
-import Input from '../../components/ui/Input';
 import SearchableSelect from '../../components/ui/SearchableSelect';
 import ErrorState from '../../components/ui/ErrorState';
 
@@ -25,7 +25,9 @@ export default function OrdersList() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const debouncedSearch = useDebounce(search, 400);
+  const isFiltered = Boolean(debouncedSearch || status || dateFrom || dateTo);
 
   const { data, loading, error, refetch } = useAsync(
     () =>
@@ -35,12 +37,22 @@ export default function OrdersList() {
         dateFrom: dateFrom || undefined,
         dateTo: dateTo || undefined,
         page,
-        pageSize: 10,
+        pageSize,
       }),
-    [status, debouncedSearch, dateFrom, dateTo, page],
+    [status, debouncedSearch, dateFrom, dateTo, page, pageSize],
   );
 
-  const { data: summary } = useAsync(() => getOrderSummary(), []);
+  // Same filters as the list, so the tiles count the orders on screen.
+  const { data: summary } = useAsync(
+    () =>
+      getOrderSummary({
+        status: status || undefined,
+        search: debouncedSearch || undefined,
+        dateFrom: dateFrom || undefined,
+        dateTo: dateTo || undefined,
+      }),
+    [status, debouncedSearch, dateFrom, dateTo],
+  );
 
   const rows = data?.data || [];
   const meta = data?.meta;
@@ -50,7 +62,25 @@ export default function OrdersList() {
       <PageHeader
         title="Orders"
         subtitle="Every order placed on the storefront, and where each one has got to."
+        search={{
+          value: search,
+          onChange: (v) => { setSearch(v); setPage(1); },
+          placeholder: 'Search by order number or customer',
+        }}
       />
+
+      {isFiltered && (
+        <p className="-mb-2 text-xs text-charcoal-light">
+          Showing counts for the current filter.{' '}
+          <button
+            type="button"
+            onClick={() => { setSearch(''); setStatus(''); setDateFrom(''); setDateTo(''); setPage(1); }}
+            className="font-medium text-gold-600 hover:text-gold-700"
+          >
+            Clear filters
+          </button>
+        </p>
+      )}
 
       <StatTiles
         tiles={[
@@ -62,55 +92,40 @@ export default function OrdersList() {
         ]}
       />
 
-      <div className="flex flex-wrap items-end gap-3 rounded-lg border border-stone-200 bg-white p-4">
-        <div className="w-52">
-          <Input
-            label="Search"
-            placeholder="Order # or customer"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-          />
-        </div>
-        <div className="w-44">
-          <SearchableSelect
-            label="Status"
-            value={status}
-            onChange={(val) => {
-              setStatus(val);
-              setPage(1);
-            }}
-            options={[
-              { value: '', label: 'All statuses' },
-              ...STATUSES.map((s) => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })),
-            ]}
-          />
-        </div>
-        <div className="w-40">
-          <Input
-            label="From"
-            type="date"
-            value={dateFrom}
-            onChange={(e) => {
-              setDateFrom(e.target.value);
-              setPage(1);
-            }}
-          />
-        </div>
-        <div className="w-40">
-          <Input
-            label="To"
-            type="date"
-            value={dateTo}
-            onChange={(e) => {
-              setDateTo(e.target.value);
-              setPage(1);
-            }}
-          />
-        </div>
-      </div>
+      <FilterBar
+        trailing={
+          <>
+            <div className="w-44">
+              <SearchableSelect
+                value={status}
+                onChange={(val) => { setStatus(val); setPage(1); }}
+                options={[
+                  { value: '', label: 'All statuses' },
+                  ...STATUSES.map((s) => ({ value: s, label: s[0].toUpperCase() + s.slice(1) })),
+                ]}
+              />
+            </div>
+            <label className="flex items-center gap-2 text-sm text-charcoal-light">
+              <span>From</span>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
+                className="h-10 rounded-lg border border-stone-300 px-3 text-sm text-charcoal focus:border-gold-400 focus:outline-none focus:ring-1 focus:ring-gold-400"
+              />
+            </label>
+            <label className="flex items-center gap-2 text-sm text-charcoal-light">
+              <span>To</span>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
+                className="h-10 rounded-lg border border-stone-300 px-3 text-sm text-charcoal focus:border-gold-400 focus:outline-none focus:ring-1 focus:ring-gold-400"
+              />
+            </label>
+          </>
+        }
+      />
 
       {error ? (
         <ErrorState message="Could not load orders." onRetry={refetch} />
@@ -144,6 +159,8 @@ export default function OrdersList() {
                   total: meta.total,
                   totalPages: meta.totalPages,
                   onPageChange: setPage,
+                  onPageSizeChange: (size) => { setPageSize(size); setPage(1); },
+                  itemLabel: 'orders',
                 }
               : undefined
           }

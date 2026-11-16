@@ -43,7 +43,8 @@ const emptyForm = {
 
 export default function Coupons() {
   const [page, setPage] = useState(1);
-  const { data, loading, error, refetch } = useAsync(() => listCoupons({ page, pageSize: 10 }), [page]);
+  const [pageSize, setPageSize] = useState(10);
+  const { data, loading, error, refetch } = useAsync(() => listCoupons({ page, pageSize }), [page, pageSize]);
   const { data: categories } = useAsync(() => listCategories(), []);
   const { data: summary } = useAsync(() => getCouponSummary(), []);
   const { isOpen, open, close } = useDisclosure(false);
@@ -196,7 +197,15 @@ export default function Coupons() {
           ]}
           pagination={
             meta
-              ? { page: meta.page, pageSize: meta.pageSize, total: meta.total, totalPages: meta.totalPages, onPageChange: setPage }
+              ? {
+                  page: meta.page,
+                  pageSize: meta.pageSize,
+                  total: meta.total,
+                  totalPages: meta.totalPages,
+                  onPageChange: setPage,
+                  onPageSizeChange: (size) => { setPageSize(size); setPage(1); },
+                  itemLabel: 'coupons',
+                }
               : undefined
           }
         />

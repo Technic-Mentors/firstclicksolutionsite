@@ -169,7 +169,10 @@ export default function DataTable({
             page={pagination.page}
             totalPages={pagination.totalPages}
             total={pagination.total}
+            pageSize={pagination.pageSize}
             onPageChange={pagination.onPageChange}
+            onPageSizeChange={pagination.onPageSizeChange}
+            itemLabel={pagination.itemLabel}
           />
         </div>
       )}

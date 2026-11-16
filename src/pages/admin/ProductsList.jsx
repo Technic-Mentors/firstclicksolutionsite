@@ -15,7 +15,7 @@ import { cn } from '../../utils/cn';
 import DataTable from '../../components/admin/table/DataTable';
 import PageHeader from '../../components/admin/PageHeader';
 import StatTiles from '../../components/admin/StatTiles';
-import FilterBar, { FilterChip } from '../../components/admin/FilterBar';
+import FilterBar, { FilterChip, ChipCount } from '../../components/admin/FilterBar';
 import Badge from '../../components/ui/Badge';
 import { NoProductsArt } from '../../components/ui/emptyArt';
 import ActionMenu from '../../components/ui/ActionMenu';
@@ -53,6 +53,7 @@ export default function ProductsList() {
   const [categoryId, setCategoryId] = useState('');
   const [sort, setSort] = useState('newest');
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   // The list comes from useAsync, which owns its data, so the toggle keeps its own overlay
@@ -60,10 +61,15 @@ export default function ProductsList() {
   // waiting for a round trip, and lets it flip back if the server refuses.
   const [featuredOverride, setFeaturedOverride] = useState({});
   const [featuredBusy, setFeaturedBusy] = useState({});
+  const [exporting, setExporting] = useState(false);
   const debouncedSearch = useDebounce(search, 400);
 
   const { data: categories } = useAsync(() => listCategories(), []);
-  const { data: summary, refetch: refetchSummary } = useAsync(() => getProductSummary(), []);
+  // Refetched with the same filters as the list, so the tiles count what is on screen.
+  const { data: summary, refetch: refetchSummary } = useAsync(
+    () => getProductSummary({ search: debouncedSearch || undefined, categoryId: categoryId || undefined }),
+    [debouncedSearch, categoryId],
+  );
   const { data, loading, error, refetch } = useAsync(
     () =>
       listProducts({
@@ -71,11 +77,12 @@ export default function ProductsList() {
         categoryId: categoryId || undefined,
         sort,
         page,
-        pageSize: 10,
+        pageSize,
       }),
-    [debouncedSearch, categoryId, sort, page],
+    [debouncedSearch, categoryId, sort, page, pageSize],
   );
 
+  const isFiltered = Boolean(debouncedSearch || categoryId);
   const rows = data?.data || [];
   const meta = data?.meta;
 
@@ -88,6 +95,64 @@ export default function ProductsList() {
   function applyFilter(next) {
     next();
     setPage(1);
+  }
+
+  // Built in the browser from the rows the current filters return. The backend has no
+  // product export, and adding one just to serve a button would be a bigger change than the
+  // button is worth — the list endpoint already has every column this needs.
+  async function handleExport() {
+    setExporting(true);
+    try {
+      const all = await listProducts({
+        search: debouncedSearch || undefined,
+        categoryId: categoryId || undefined,
+        sort,
+        page: 1,
+        pageSize: 1000,
+      });
+      const rows = all?.data || [];
+      if (rows.length === 0) {
+        toast.error('Nothing to export with these filters.');
+        return;
+      }
+
+      const headers = ['Name', 'Slug', 'Category', 'Price', 'Stock', 'Status', 'Featured'];
+      // Quotes doubled and every value wrapped, so a comma or a quote inside a product name
+      // cannot split the row.
+      const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      const csv = [
+        headers.map(escape).join(','),
+        ...rows.map((r) =>
+          [
+            r.name,
+            r.slug,
+            r.category_name,
+            r.base_price,
+            r.total_stock ?? 0,
+            r.is_active ? 'Active' : 'Draft',
+            r.is_featured ? 'Yes' : 'No',
+          ]
+            .map(escape)
+            .join(','),
+        ),
+        // CRLF and a leading byte-order mark, because Excel opens a plain UTF-8 CSV with
+        // mangled accents and treats LF-only files as one long line.
+      ].join('\r\n');
+
+      const url = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `products-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      toast.success(`Exported ${rows.length} product${rows.length === 1 ? '' : 's'}.`);
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Could not export the product list.'));
+    } finally {
+      setExporting(false);
+    }
   }
 
   function isFeatured(row) {
@@ -148,21 +213,45 @@ export default function ProductsList() {
       <PageHeader
         title="Products"
         subtitle="Manage your catalogue, pricing, stock and what's featured on the storefront."
+        search={{
+          value: search,
+          onChange: (v) => applyFilter(() => setSearch(v)),
+          placeholder: 'Search by name or slug',
+        }}
         actions={
-          <Button variant="gold" onClick={() => navigate('/admin/products/new')}>
-            Add Product
-          </Button>
+          <>
+            <Button type="button" variant="outline" onClick={handleExport} loading={exporting} className="min-w-[130px]">
+              <DownloadIcon />
+              Export
+            </Button>
+            <Button variant="gold" onClick={() => navigate('/admin/products/new')} className="min-w-[130px]">
+              Add product
+            </Button>
+          </>
         }
       />
+
+      {isFiltered && (
+        <p className="-mb-2 text-xs text-charcoal-light">
+          Showing counts for the current filter.{' '}
+          <button
+            type="button"
+            onClick={() => applyFilter(() => { setSearch(''); setCategoryId(''); })}
+            className="font-medium text-gold-600 hover:text-gold-700"
+          >
+            Clear filters
+          </button>
+        </p>
+      )}
 
       <StatTiles tiles={tiles} />
 
       <FilterBar
-        search={{ value: search, onChange: (v) => applyFilter(() => setSearch(v)), placeholder: 'Search by name' }}
         chips={
           <>
             <FilterChip active={categoryId === ''} onClick={() => applyFilter(() => setCategoryId(''))}>
               All categories
+              <ChipCount active={categoryId === ''}>{summary?.total}</ChipCount>
             </FilterChip>
             {(categories || []).map((category) => (
               <FilterChip
@@ -171,6 +260,7 @@ export default function ProductsList() {
                 onClick={() => applyFilter(() => setCategoryId(category.id))}
               >
                 {category.name}
+                <ChipCount active={String(categoryId) === String(category.id)}>{category.product_count}</ChipCount>
               </FilterChip>
             ))}
           </>
@@ -182,7 +272,7 @@ export default function ProductsList() {
               value={sort}
               onChange={(e) => applyFilter(() => setSort(e.target.value))}
               aria-label="Sort products"
-              className="rounded-lg border border-stone-300 py-2 pl-3 pr-8 text-sm text-charcoal focus:border-gold-400 focus:outline-none focus:ring-1 focus:ring-gold-400"
+              className="h-10 rounded-lg border border-stone-300 pl-3 pr-8 text-sm text-charcoal focus:border-gold-400 focus:outline-none focus:ring-1 focus:ring-gold-400"
             >
               {SORTS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -328,7 +418,10 @@ export default function ProductsList() {
           ]}
           pagination={
             meta
-              ? { page: meta.page, pageSize: meta.pageSize, total: meta.total, totalPages: meta.totalPages, onPageChange: setPage }
+              ? { page: meta.page, pageSize,
+                  total: meta.total, totalPages: meta.totalPages, onPageChange: setPage,
+                  onPageSizeChange: (size) => { setPageSize(size); setPage(1); },
+                  itemLabel: 'products' }
               : undefined
           }
         />
@@ -348,6 +441,14 @@ export default function ProductsList() {
   );
 }
 
+
+function DownloadIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3v12M7 11l5 5 5-5M4 21h16" />
+    </svg>
+  );
+}
 
 function BoxIcon() {
   return (

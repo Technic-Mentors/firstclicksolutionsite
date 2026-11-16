@@ -45,6 +45,8 @@ const Profile = lazy(() => import('./pages/account/Profile'));
 // Admin pages
 const AdminLayout = lazy(() => import('./components/layout/AdminLayout'));
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
+const AdminForgotPassword = lazy(() => import('./pages/admin/AdminForgotPassword'));
+const AdminResetPassword = lazy(() => import('./pages/admin/AdminResetPassword'));
 const Dashboard = lazy(() => import('./pages/admin/Dashboard'));
 const Reports = lazy(() => import('./pages/admin/Reports'));
 const AdminOrdersList = lazy(() => import('./pages/admin/OrdersList'));
@@ -200,6 +202,10 @@ export default function App() {
           </Route>
 
           <Route path="admin/login" element={<AdminLogin />} />
+          {/* Outside the protected block: someone who has lost their password cannot be
+              signed in, and the reset email links straight to the second one. */}
+          <Route path="admin/forgot-password" element={<AdminForgotPassword />} />
+          <Route path="admin/reset-password/:token" element={<AdminResetPassword />} />
           <Route element={<AdminProtectedRoute />}>
             <Route path="admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />

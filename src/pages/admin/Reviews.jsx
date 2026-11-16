@@ -13,13 +13,13 @@ import { listProducts } from '../../api/admin/products.api';
 import { useAsync } from '../../hooks/useAsync';
 import DataTable from '../../components/admin/table/DataTable';
 import Badge from '../../components/ui/Badge';
+import FilterBar, { FilterTab } from '../../components/admin/FilterBar';
 import PageHeader from '../../components/admin/PageHeader';
 import StatTiles from '../../components/admin/StatTiles';
 import { StarIcon, ClockIcon, CheckIcon, CrossIcon } from '../../components/admin/tileIcons';
 import { NoReviewsArt } from '../../components/ui/emptyArt';
 import ActionMenu from '../../components/ui/ActionMenu';
 import Button from '../../components/ui/Button';
-import Select from '../../components/ui/Select';
 import SearchableSelect from '../../components/ui/SearchableSelect';
 import Input from '../../components/ui/Input';
 import Textarea from '../../components/ui/Textarea';
@@ -44,9 +44,10 @@ function Stars({ rating }) {
 export default function Reviews() {
   const [status, setStatus] = useState('pending');
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const { data, loading, error, refetch } = useAsync(
-    () => listReviews({ status: status || undefined, page, pageSize: 10 }),
-    [status, page],
+    () => listReviews({ status: status || undefined, page, pageSize }),
+    [status, page, pageSize],
   );
 
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -150,23 +151,27 @@ export default function Reviews() {
         ]}
       />
 
-      <div className="flex flex-wrap items-end gap-3 rounded-lg border border-stone-200 bg-white p-4">
-        <div className="w-52">
-          <Select
-            label="Status"
-            value={status}
-            onChange={(e) => {
-              setStatus(e.target.value);
-              setPage(1);
-            }}
-          >
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="">All</option>
-          </Select>
-        </div>
-      </div>
+      <FilterBar
+        tabs={
+          <>
+            {[
+              { value: 'pending', label: 'Pending', count: summary?.pending },
+              { value: 'approved', label: 'Approved', count: summary?.approved },
+              { value: 'rejected', label: 'Rejected', count: summary?.rejected },
+              { value: '', label: 'All', count: summary?.total },
+            ].map((option) => (
+              <FilterTab
+                key={option.value || 'all'}
+                active={status === option.value}
+                onClick={() => { setStatus(option.value); setPage(1); }}
+                count={option.count}
+              >
+                {option.label}
+              </FilterTab>
+            ))}
+          </>
+        }
+      />
 
       {error ? (
         <ErrorState message="Could not load reviews." onRetry={refetch} />
@@ -228,6 +233,8 @@ export default function Reviews() {
                   total: meta.total,
                   totalPages: meta.totalPages,
                   onPageChange: setPage,
+                  onPageSizeChange: (size) => { setPageSize(size); setPage(1); },
+                  itemLabel: 'reviews',
                 }
               : undefined
           }

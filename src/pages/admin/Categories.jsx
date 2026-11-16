@@ -65,6 +65,8 @@ export default function Categories() {
     });
   }, [all, search, tab]);
 
+  const isFiltered = Boolean(search.trim() || tab !== 'all');
+
   const nameById = useMemo(() => new Map(all.map((c) => [String(c.id), c.name])), [all]);
 
   function openCreate() {
@@ -155,13 +157,25 @@ export default function Categories() {
     }
   }
 
+  // Counted from the rows actually on screen once a filter is on, so the tiles never
+  // contradict the grid below them. The whole list is already in the browser here, so this
+  // needs no extra request — unlike Products and Orders, where the server has to do it.
+  const counted = isFiltered
+    ? {
+        total: shown.length,
+        visible: shown.filter((c) => c.is_active).length,
+        productsAssigned: shown.reduce((sum, c) => sum + Number(c.product_count ?? 0), 0),
+        missingBanner: shown.filter((c) => !c.banner_image).length,
+      }
+    : summary;
+
   const tiles = [
-    { key: 'total', label: 'Total categories', value: summary?.total, tone: 'primary', icon: <TagIcon /> },
-    { key: 'visible', label: 'Visible on store', value: summary?.visible, tone: 'good', icon: <EyeIcon /> },
+    { key: 'total', label: 'Total categories', value: counted?.total, tone: 'primary', icon: <TagIcon /> },
+    { key: 'visible', label: 'Visible on store', value: counted?.visible, tone: 'good', icon: <EyeIcon /> },
     {
       key: 'products',
       label: 'Products assigned',
-      value: summary?.productsAssigned,
+      value: counted?.productsAssigned,
       tone: 'neutral',
       icon: <BoxIcon />,
       to: '/admin/products',
@@ -169,10 +183,10 @@ export default function Categories() {
     {
       key: 'banner',
       label: 'Missing banner',
-      value: summary?.missingBanner,
+      value: counted?.missingBanner,
       // Only a problem when it is non-zero, so it stays neutral at zero rather than
       // colouring a row that has nothing wrong with it.
-      tone: summary?.missingBanner > 0 ? 'warning' : 'neutral',
+      tone: counted?.missingBanner > 0 ? 'warning' : 'neutral',
       icon: <ImageIcon />,
     },
   ];
@@ -182,6 +196,7 @@ export default function Categories() {
       <PageHeader
         title="Categories"
         subtitle="Organise how products are grouped and shown in the storefront menu."
+        search={{ value: search, onChange: setSearch, placeholder: 'Search categories' }}
         actions={
           <Button variant="gold" onClick={openCreate}>
             Add Category
@@ -189,10 +204,22 @@ export default function Categories() {
         }
       />
 
+      {isFiltered && (
+        <p className="-mb-2 text-xs text-charcoal-light">
+          Showing counts for the current filter.{' '}
+          <button
+            type="button"
+            onClick={() => { setSearch(''); setTab('all'); }}
+            className="font-medium text-gold-600 hover:text-gold-700"
+          >
+            Clear filters
+          </button>
+        </p>
+      )}
+
       <StatTiles tiles={tiles} />
 
       <FilterBar
-        search={{ value: search, onChange: setSearch, placeholder: 'Search categories' }}
         tabs={
           <>
             <FilterTab active={tab === 'all'} onClick={() => setTab('all')} count={counts.all}>

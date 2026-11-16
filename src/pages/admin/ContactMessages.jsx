@@ -18,11 +18,12 @@ import ErrorState from '../../components/ui/ErrorState';
 
 export default function ContactMessages() {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [viewing, setViewing] = useState(null);
 
   const { data, loading, error, refetch } = useAsync(
-    () => listContactMessages({ page, pageSize: 10 }),
-    [page],
+    () => listContactMessages({ page, pageSize }),
+    [page, pageSize],
   );
 
   const { data: summary } = useAsync(() => getContactSummary(), []);
@@ -101,6 +102,8 @@ export default function ContactMessages() {
                   total: meta.total,
                   totalPages: meta.totalPages,
                   onPageChange: setPage,
+                  onPageSizeChange: (size) => { setPageSize(size); setPage(1); },
+                  itemLabel: 'messages',
                 }
               : undefined
           }

@@ -42,35 +42,78 @@ export default function Inventory() {
           emptyTitle="Stock levels are healthy"
           emptyMessage="Nothing is running low. Any variant that drops below its threshold shows up here."
           columns={[
-            { key: 'product_name', label: 'Product', render: (row) => row.product_name || row.productName },
-            { key: 'spec', label: 'Spec', render: (row) => row.spec || '-' },
-            { key: 'condition_grade', label: 'Condition', render: (row) => row.condition_grade || '-' },
+            // Widths that add to 100% put the table on table-fixed, so long product names
+            // and specs truncate inside their column instead of pushing the row wider than
+            // the panel and forcing a sidescroll.
+            {
+              key: 'product_name',
+              label: 'Product',
+              primary: true,
+              width: '32%',
+              render: (row) => (
+                <span className="block truncate font-medium text-charcoal" title={row.product_name || row.productName}>
+                  {row.product_name || row.productName}
+                </span>
+              ),
+            },
+            {
+              key: 'spec',
+              label: 'Spec',
+              width: '25%',
+              render: (row) => (
+                <span className="block truncate text-charcoal-light" title={row.spec || ''}>
+                  {row.spec || '-'}
+                </span>
+              ),
+            },
+            {
+              key: 'condition_grade',
+              label: 'Condition',
+              width: '12%',
+              render: (row) => row.condition_grade || '-',
+            },
             {
               key: 'stock_quantity',
-              label: 'Current Stock',
+              label: 'Stock',
+              width: '10%',
+              align: 'right',
               render: (row) => {
                 const stock = row.stock_quantity ?? row.stockQuantity ?? 0;
+                const threshold = row.low_stock_threshold ?? row.lowStockThreshold;
                 return (
-                  <span
-                    className={cn(
-                      'font-semibold',
-                      stock <= 0 ? 'text-red-600' : 'text-amber-600',
+                  <span className="flex flex-col items-end leading-tight">
+                    <span className={cn('font-semibold', stock <= 0 ? 'text-red-600' : 'text-amber-600')}>
+                      {stock}
+                    </span>
+                    {threshold !== undefined && threshold !== null && (
+                      <span className="text-[11px] text-charcoal-light">of {threshold}</span>
                     )}
-                  >
-                    {stock}
                   </span>
                 );
               },
             },
             {
-              key: 'low_stock_threshold',
-              label: 'Threshold',
-              render: (row) => row.low_stock_threshold ?? row.lowStockThreshold ?? '-',
+              key: 'status',
+              label: 'Status',
+              width: '14%',
+              render: (row) => {
+                const stock = row.stock_quantity ?? row.stockQuantity ?? 0;
+                return stock <= 0 ? (
+                  <span className="inline-block rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700">
+                    Out of stock
+                  </span>
+                ) : (
+                  <span className="inline-block rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-700">
+                    Running low
+                  </span>
+                );
+              },
             },
             {
               key: 'actions',
               label: 'Actions',
               actions: true,
+              width: '7%',
               render: (row) => {
                 const productId = row.product_id ?? row.productId;
                 return (

@@ -16,28 +16,59 @@
 
 const memory = new Map();
 
+// Where a session is kept. localStorage survives closing the browser; sessionStorage dies
+// with the tab, which is what "don't keep me signed in" has to actually mean — a checkbox
+// that changed nothing would be worse than no checkbox.
+let persistSession = true;
+
+export function setSessionPersistence(persist) {
+  persistSession = Boolean(persist);
+}
+
+function stores() {
+  try {
+    return persistSession ? [window.localStorage] : [window.sessionStorage];
+  } catch {
+    return [];
+  }
+}
+
 function storageKey(scope, kind) {
   return `fcs:${scope}:${kind}`;
 }
 
 // localStorage throws in some private-browsing modes and when site data is blocked, so every
 // access is guarded and falls back to an in-memory copy that lasts until the tab is closed.
+// Reads look in both stores regardless of the current preference, so a session started
+// before the choice was made is still found after a reload.
 function read(key) {
-  try {
-    const stored = window.localStorage.getItem(key);
-    if (stored !== null) return stored;
-  } catch {
-    /* fall through to memory */
+  for (const store of [() => window.localStorage, () => window.sessionStorage]) {
+    try {
+      const stored = store().getItem(key);
+      if (stored !== null) return stored;
+    } catch {
+      /* blocked or unavailable - try the next one */
+    }
   }
   return memory.get(key) ?? null;
 }
 
 function write(key, value) {
   memory.set(key, value);
+  // Clear the other store first, or an old persistent session would outlive a later
+  // session-only login.
   try {
-    window.localStorage.setItem(key, value);
+    window.localStorage.removeItem(key);
+    window.sessionStorage.removeItem(key);
   } catch {
-    /* memory-only session */
+    /* nothing to clear */
+  }
+  for (const store of stores()) {
+    try {
+      store.setItem(key, value);
+    } catch {
+      /* memory-only session */
+    }
   }
 }
 
@@ -45,6 +76,7 @@ function remove(key) {
   memory.delete(key);
   try {
     window.localStorage.removeItem(key);
+    window.sessionStorage.removeItem(key);
   } catch {
     /* nothing to clear */
   }

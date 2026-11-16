@@ -14,7 +14,18 @@ import { cn } from '../../utils/cn';
  * `items` take { label, onClick | to, icon?, danger?, disabled? }. A `null` entry is skipped,
  * so callers can write conditional actions inline without filtering first.
  */
-export default function ActionMenu({ items = [], label = 'Actions', align = 'right', buttonClassName }) {
+export default function ActionMenu({
+  items = [],
+  label = 'Actions',
+  align = 'right',
+  buttonClassName,
+  // A caller can swap the "…" for its own trigger (an avatar, a name) and add a block above
+  // the items. Both exist so the profile menu in the top bar can reuse this one dropdown
+  // rather than growing a second implementation of outside-click, Escape and positioning.
+  trigger,
+  header,
+  width = 176,
+}) {
   const visible = items.filter(Boolean);
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState(null);
@@ -24,10 +35,9 @@ export default function ActionMenu({ items = [], label = 'Actions', align = 'rig
   useLayoutEffect(() => {
     if (!open || !triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
-    const width = 176;
     // Flip above when there is not enough room below, so the last row of a long table
     // does not open a menu that runs off the bottom of the window.
-    const estimatedHeight = visible.length * 36 + 10;
+    const estimatedHeight = visible.length * 36 + 10 + (header ? 58 : 0);
     const openUp = rect.bottom + estimatedHeight > window.innerHeight && rect.top > estimatedHeight;
 
     setPosition({
@@ -35,7 +45,7 @@ export default function ActionMenu({ items = [], label = 'Actions', align = 'rig
       left: align === 'right' ? Math.max(8, rect.right - width) : rect.left,
       width,
     });
-  }, [open, align, visible.length]);
+  }, [open, align, visible.length, header, width]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -89,14 +99,15 @@ export default function ActionMenu({ items = [], label = 'Actions', align = 'rig
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={label}
-        title={label}
+        title={trigger ? undefined : label}
         className={cn(
-          'inline-flex h-8 w-8 items-center justify-center rounded-md text-charcoal-light transition-colors hover:bg-stone-100 hover:text-charcoal',
+          'inline-flex items-center justify-center rounded-md text-charcoal-light transition-colors hover:bg-stone-100 hover:text-charcoal',
+          !trigger && 'h-8 w-8',
           open && 'bg-stone-100 text-charcoal',
           buttonClassName,
         )}
       >
-        <DotsIcon />
+        {trigger ?? <DotsIcon />}
       </button>
 
       {open &&
@@ -110,6 +121,7 @@ export default function ActionMenu({ items = [], label = 'Actions', align = 'rig
             className="z-50 overflow-hidden rounded-lg border border-stone-200 bg-white py-1 shadow-lg"
             onClick={(event) => event.stopPropagation()}
           >
+            {header && <div className="border-b border-stone-100 px-3 py-2.5">{header}</div>}
             {visible.map((item, idx) =>
               item.to && !item.disabled ? (
                 <Link key={idx} to={item.to} role="menuitem" className={itemClass(item)} onClick={() => setOpen(false)}>

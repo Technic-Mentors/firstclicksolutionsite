@@ -19,7 +19,8 @@ import { getErrorMessage } from '../../utils/errorMessage';
 export default function BlogList() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
-  const { data, loading, error, refetch } = useAsync(() => listBlogPosts({ page, pageSize: 10 }), [page]);
+  const [pageSize, setPageSize] = useState(10);
+  const { data, loading, error, refetch } = useAsync(() => listBlogPosts({ page, pageSize }), [page, pageSize]);
   const { data: summary } = useAsync(() => getBlogSummary(), []);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -103,6 +104,8 @@ export default function BlogList() {
                   total: meta.total,
                   totalPages: meta.totalPages,
                   onPageChange: setPage,
+                  onPageSizeChange: (size) => { setPageSize(size); setPage(1); },
+                  itemLabel: 'posts',
                 }
               : undefined
           }

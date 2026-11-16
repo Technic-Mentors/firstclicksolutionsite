@@ -14,6 +14,6 @@ export function blockCustomer(id, isBlocked) {
 
 // Counts for the page tiles. Kept apart from the list call, whose meta.total only ever
 // describes the current filter and page.
-export function getCustomerSummary() {
-  return unwrap(adminApi.get('/customers/summary'));
+export function getCustomerSummary(params) {
+  return unwrap(adminApi.get('/customers/summary', { params }));
 }

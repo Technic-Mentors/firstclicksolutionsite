@@ -11,21 +11,25 @@ import StatTiles from '../../components/admin/StatTiles';
 import { UsersIcon, CheckIcon, BoxIcon, BanIcon } from '../../components/admin/tileIcons';
 import { NoCustomersArt } from '../../components/ui/emptyArt';
 import ActionMenu from '../../components/ui/ActionMenu';
-import Input from '../../components/ui/Input';
 import ErrorState from '../../components/ui/ErrorState';
 
 export default function CustomersList() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const debouncedSearch = useDebounce(search, 400);
 
   const { data, loading, error, refetch } = useAsync(
-    () => listCustomers({ search: debouncedSearch || undefined, page, pageSize: 10 }),
-    [debouncedSearch, page],
+    () => listCustomers({ search: debouncedSearch || undefined, page, pageSize }),
+    [debouncedSearch, page, pageSize],
   );
 
-  const { data: summary } = useAsync(() => getCustomerSummary(), []);
+  // Same filter as the list, so the tiles count the customers on screen.
+  const { data: summary } = useAsync(
+    () => getCustomerSummary({ search: debouncedSearch || undefined }),
+    [debouncedSearch],
+  );
 
   const rows = data?.data || [];
   const meta = data?.meta;
@@ -35,7 +39,25 @@ export default function CustomersList() {
       <PageHeader
         title="Customers"
         subtitle="Everyone who has registered an account on your storefront."
+        search={{
+          value: search,
+          onChange: (v) => { setSearch(v); setPage(1); },
+          placeholder: 'Search by name, email or phone',
+        }}
       />
+
+      {debouncedSearch && (
+        <p className="-mb-2 text-xs text-charcoal-light">
+          Showing counts for the current filter.{' '}
+          <button
+            type="button"
+            onClick={() => { setSearch(''); setPage(1); }}
+            className="font-medium text-gold-600 hover:text-gold-700"
+          >
+            Clear search
+          </button>
+        </p>
+      )}
 
       <StatTiles
         tiles={[
@@ -45,20 +67,6 @@ export default function CustomersList() {
           { key: 'blocked', label: 'Blocked', value: summary?.blocked, tone: summary?.blocked > 0 ? 'danger' : 'neutral', icon: <BanIcon /> },
         ]}
       />
-
-      <div className="flex flex-wrap items-end gap-3 rounded-lg border border-stone-200 bg-white p-4">
-        <div className="w-64">
-          <Input
-            label="Search"
-            placeholder="Search by name, email or phone"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-          />
-        </div>
-      </div>
 
       {error ? (
         <ErrorState message="Could not load customers." onRetry={refetch} />
@@ -104,6 +112,8 @@ export default function CustomersList() {
                   total: meta.total,
                   totalPages: meta.totalPages,
                   onPageChange: setPage,
+                  onPageSizeChange: (size) => { setPageSize(size); setPage(1); },
+                  itemLabel: 'customers',
                 }
               : undefined
           }
