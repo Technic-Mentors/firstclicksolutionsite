@@ -44,6 +44,23 @@ export default function VariantSelector({ variants = [], onChange }) {
 
   return (
     <div className="space-y-4">
+      {/* A product with a single build still has a spec and a grade the admin typed in, and
+          the shopper needs to read them. Only the choosing is hidden when there is nothing
+          to choose between — the value itself is always printed. */}
+      {specs.length === 1 && specs[0] && (
+        <div>
+          <p className="mb-1 text-sm font-medium text-charcoal-light">Specification</p>
+          <p className="text-sm text-charcoal">{specs[0]}</p>
+        </div>
+      )}
+
+      {grades.length === 1 && grades[0] && (
+        <div>
+          <p className="mb-1 text-sm font-medium text-charcoal-light">Condition</p>
+          <p className="text-sm text-charcoal">{grades[0]}</p>
+        </div>
+      )}
+
       {specs.length > 1 && (
         <div>
           <p className="mb-2 text-sm font-medium text-charcoal-light">Specification</p>

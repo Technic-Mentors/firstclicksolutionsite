@@ -340,18 +340,44 @@ const Header = React.forwardRef(function Header(_, ref) {
                       transition={{ duration: 0.2, ease: 'easeOut' }}
                       className="overflow-hidden"
                     >
-                      <div className="flex flex-col gap-3 pb-2 pl-3 pt-3">
+                      {/* The same shape as the desktop mega menu, stacked: an icon tile and
+                          the category name, with its subcategories as chips underneath so a
+                          phone reaches them without a second menu level. */}
+                      <div className="flex flex-col gap-1.5 pb-2 pt-3">
                         {topCategories.length > 0 ? (
-                          topCategories.map((cat) => (
-                            <NavLink
-                              key={cat.id}
-                              to={`/onlineshop?category=${cat.slug}`}
-                              onClick={() => setMobileMenuOpen(false)}
-                              className={({ isActive }) => navLinkClass(isActive)}
-                            >
-                              {cat.name}
-                            </NavLink>
-                          ))
+                          topCategories.map((cat) => {
+                            const subs = subcategoriesOf(cat.id);
+                            return (
+                              <div key={cat.id} className="rounded-xl border border-stone-200 bg-cream-dark/60 p-2">
+                                <Link
+                                  to={`/onlineshop?category=${cat.slug}`}
+                                  onClick={() => setMobileMenuOpen(false)}
+                                  className="flex items-center gap-2.5 rounded-lg px-1 py-1 text-sm font-medium text-charcoal transition-colors hover:text-gold-600"
+                                >
+                                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-gold-600 ring-1 ring-stone-200">
+                                    <CategoryGlyph name={cat.name} className="h-4 w-4" />
+                                  </span>
+                                  <span className="min-w-0 flex-1 truncate">{cat.name}</span>
+                                  <ChevronRightIcon className="h-3.5 w-3.5 text-gold-500" />
+                                </Link>
+
+                                {subs.length > 0 && (
+                                  <div className="mt-1.5 flex flex-wrap gap-1.5 pl-[2.6rem]">
+                                    {subs.map((sub) => (
+                                      <Link
+                                        key={sub.id}
+                                        to={`/onlineshop?category=${sub.slug}`}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11.5px] text-charcoal-light transition-colors hover:border-gold-300 hover:bg-gold-50 hover:text-gold-700"
+                                      >
+                                        {sub.name}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
                         ) : (
                           <span className="text-sm text-charcoal-light">No categories yet.</span>
                         )}
@@ -519,34 +545,39 @@ function navLinkClass(isActive) {
   }`;
 }
 
+/**
+ * The Categories mega menu: the list of categories down the left, and whichever one is being
+ * pointed at opened out on the right with its description, its subcategories as chips, and a
+ * way straight into the shop.
+ *
+ * The old panel printed every category as a column of links, which ran out of room past four
+ * of them and said nothing about any one. Here the panel is the same size however many
+ * categories exist, and that space buys a description and a route into the subcategories.
+ */
 function CategoriesDropdown({ topCategories, subcategoriesOf }) {
   const [open, setOpen] = useState(false);
+  const [activeId, setActiveId] = useState(null);
   const ref = useRef(null);
-  const count = topCategories.length;
 
-  // A fixed 640px / 4-column panel left empty grey cells when only a couple of
-  // categories exist, so the panel now shrinks and centres with its content.
-  const panelWidth =
-    count <= 1
-      ? 'w-[min(92vw,300px)]'
-      : count === 2
-        ? 'w-[min(92vw,460px)]'
-        : count === 3
-          ? 'w-[min(92vw,560px)]'
-          : 'w-[min(92vw,640px)]';
-  const gridCols =
-    count <= 2 ? 'grid-cols-1 sm:grid-cols-2' : count === 3 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-2 sm:grid-cols-4';
+  // The first category stands in until one is pointed at, so the right-hand panel is never
+  // blank — and it falls back again if the active one disappears while the list reloads.
+  const active = topCategories.find((cat) => cat.id === activeId) || topCategories[0] || null;
+  const subs = active ? subcategoriesOf(active.id) : [];
 
   useEffect(() => {
     function handleClick(e) {
-      if (ref.current && !ref.current.contains(e.target)) {
-        setOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    function handleKey(e) {
+      if (e.key === 'Escape') setOpen(false);
     }
 
     document.addEventListener('mousedown', handleClick);
-
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleKey);
+    };
   }, []);
 
   return (
@@ -558,8 +589,13 @@ function CategoriesDropdown({ topCategories, subcategoriesOf }) {
     >
       <button
         type="button"
+        aria-expanded={open}
+        aria-haspopup="true"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1 rounded-full px-3.5 py-1.5 text-sm font-medium tracking-wide text-charcoal transition-colors hover:bg-gold-50 hover:text-gold-600"
+        className={cn(
+          'flex items-center gap-1 rounded-full px-3.5 py-1.5 text-sm font-medium tracking-wide transition-colors',
+          open ? 'bg-gold-500 text-white shadow-sm' : 'text-charcoal hover:bg-gold-50 hover:text-gold-600',
+        )}
       >
         Categories
         <ChevronIcon open={open} />
@@ -572,73 +608,218 @@ function CategoriesDropdown({ topCategories, subcategoriesOf }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className={cn('absolute left-1/2 top-full z-30 -translate-x-1/2 pt-3', panelWidth)}
+            className="absolute left-1/2 top-full z-30 w-[min(92vw,860px)] -translate-x-1/2 pt-3"
           >
-            <div className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-xl ring-1 ring-black/5">
-              <div className="h-1 w-full bg-gradient-to-r from-gold-300 via-gold-500 to-gold-300" />
+            <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-2xl ring-1 ring-black/5">
+              <div className="h-[3px] w-full bg-gold-500" />
 
-              <div className={cn('grid gap-px bg-stone-100', gridCols)}>
-                {topCategories.length === 0 ? (
-                  <p className="col-span-full px-6 py-5 text-sm text-charcoal-light">
-                    No categories yet.
-                  </p>
-                ) : (
-                  topCategories.map((cat) => {
-                    const subs = subcategoriesOf(cat.id);
+              {topCategories.length === 0 ? (
+                <p className="px-6 py-5 text-sm text-charcoal-light">No categories yet.</p>
+              ) : (
+                <>
+                  <div className="grid lg:grid-cols-[212px_minmax(0,1fr)]">
+                    <div className="max-h-[52vh] overflow-y-auto border-b border-stone-100 bg-cream-dark p-2 lg:max-h-[60vh] lg:border-b-0 lg:border-r">
+                      {topCategories.map((cat) => {
+                        const isActive = active?.id === cat.id;
+                        return (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onMouseEnter={() => setActiveId(cat.id)}
+                            onFocus={() => setActiveId(cat.id)}
+                            onClick={() => setActiveId(cat.id)}
+                            className={cn(
+                              'flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[13px] transition-colors',
+                              isActive
+                                ? 'bg-white font-medium text-forest-700 shadow-sm ring-1 ring-stone-200/70'
+                                : 'text-charcoal-light hover:bg-white/70',
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors',
+                                isActive ? 'bg-gold-500 text-white' : 'bg-white text-charcoal-light ring-1 ring-stone-200',
+                              )}
+                            >
+                              <CategoryGlyph name={cat.name} className="h-4 w-4" />
+                            </span>
+                            <span className="min-w-0 flex-1 truncate">{cat.name}</span>
+                            <ChevronRightIcon
+                              className={cn('h-3.5 w-3.5 shrink-0', isActive ? 'text-gold-500' : 'text-transparent')}
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
 
-                    return (
-                      <div
-                        key={cat.id}
-                        className="bg-white px-4 py-5"
-                      >
-                        <Link
-                          to={`/onlineshop?category=${cat.slug}`}
-                          onClick={() => setOpen(false)}
-                          className="group mb-3 flex items-center gap-2.5 border-b border-stone-100 pb-3 font-serif text-[15px] text-charcoal hover:text-gold-600"
-                        >
-                          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gold-50 text-sm font-semibold text-gold-700 transition-transform group-hover:scale-105">
-                            {cat.name[0]}
+                    {active && (
+                      <div className="flex min-w-0 flex-col p-5">
+                        <div className="flex items-start gap-3">
+                          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gold-50 text-gold-600">
+                            <CategoryGlyph name={active.name} className="h-6 w-6" />
                           </span>
-                          {cat.name}
-                        </Link>
+                          <div className="min-w-0">
+                            <h3 className="font-serif text-lg leading-tight text-forest-700">{active.name}</h3>
+                            <p className="mt-1 text-[12px] leading-relaxed text-charcoal-light">
+                              {active.description ||
+                                `Every ${active.name.toLowerCase()} we stock, tested and covered by our warranty.`}
+                            </p>
+                          </div>
+                        </div>
 
-                        {subs.length > 0 ? (
-                          <ul className="space-y-0.5">
-                            {subs.map((sub) => (
-                              <li key={sub.id}>
+                        {subs.length > 0 && (
+                          <>
+                            <p className="mt-4 text-[11px] font-medium text-forest-700">Popular picks</p>
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {subs.map((sub) => (
                                 <Link
+                                  key={sub.id}
                                   to={`/onlineshop?category=${sub.slug}`}
                                   onClick={() => setOpen(false)}
-                                  className="block rounded-md px-2 py-1.5 text-[13px] text-charcoal-light transition-colors hover:bg-gold-50/60 hover:text-gold-700"
+                                  className="rounded-full border border-stone-200 bg-white px-3 py-1 text-[11.5px] text-charcoal transition-colors hover:border-gold-300 hover:bg-gold-50 hover:text-gold-700"
                                 >
                                   {sub.name}
                                 </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="px-2 text-[13px] text-stone-400">
-                            Shop all {cat.name.toLowerCase()}
-                          </p>
+                              ))}
+                            </div>
+                          </>
                         )}
 
                         <Link
-                          to={`/onlineshop?category=${cat.slug}`}
+                          to={`/onlineshop?category=${active.slug}`}
                           onClick={() => setOpen(false)}
-                          className="mt-3 inline-block text-[12px] font-medium text-gold-600 hover:text-gold-700"
+                          className="mt-5 inline-flex w-fit items-center gap-1.5 rounded-full bg-gold-500 px-4 py-2 text-[12px] font-medium text-white transition-colors hover:bg-gold-600"
                         >
-                          Shop all {cat.name} &rarr;
+                          View all {active.name.toLowerCase()}
+                          <ChevronRightIcon className="h-3.5 w-3.5" />
                         </Link>
                       </div>
-                    );
-                  })
-                )}
-              </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+/**
+ * A glyph chosen from the category's own name — the catalogue has no icon field, and a name
+ * like "Gaming PCs" or "LCDs / LEDs" already says which picture belongs to it. Anything
+ * unrecognised falls back to a neutral tag, so a new category is never a blank square.
+ */
+function CategoryGlyph({ name = '', className }) {
+  const text = name.toLowerCase();
+  const props = {
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.7,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    className,
+    'aria-hidden': true,
+  };
+
+  if (text.includes('laptop') || text.includes('notebook')) {
+    return (
+      <svg {...props}>
+        <rect x="4" y="5" width="16" height="11" rx="1.5" />
+        <path d="M2 19h20" />
+      </svg>
+    );
+  }
+  if (text.includes('gaming') || text.includes('gamer')) {
+    return (
+      <svg {...props}>
+        <path d="M8 6.5h8a4.5 4.5 0 0 1 4.4 5.4l-.7 3.5A3 3 0 0 1 15 17l-1.3-1.5h-3.4L9 17a3 3 0 0 1-4.7-1.6l-.7-3.5A4.5 4.5 0 0 1 8 6.5Z" />
+        <path d="M7.5 11.5h2.6M8.8 10.2v2.6" />
+        <circle cx="15.6" cy="11.2" r="0.85" fill="currentColor" stroke="none" />
+        <circle cx="17.4" cy="13" r="0.85" fill="currentColor" stroke="none" />
+      </svg>
+    );
+  }
+  if (
+    text.includes('dual') ||
+    text.includes('monitor') ||
+    text.includes('lcd') ||
+    text.includes('led') ||
+    text.includes('screen')
+  ) {
+    return (
+      <svg {...props}>
+        <rect x="2.5" y="5" width="12" height="9" rx="1.5" />
+        <rect x="16" y="8" width="5.5" height="6" rx="1.2" />
+        <path d="M8.5 14v4M6 18h5" />
+      </svg>
+    );
+  }
+  if (text.includes('mini') || text.includes('micro') || text.includes('tiny')) {
+    return (
+      <svg {...props}>
+        <rect x="6" y="6" width="12" height="12" rx="2" />
+        <rect x="9.5" y="9.5" width="5" height="5" rx="1" />
+        <path d="M12 3v3M12 18v3M3 12h3M18 12h3" />
+      </svg>
+    );
+  }
+  if (text.includes('sff') || text.includes('small') || text.includes('server')) {
+    return (
+      <svg {...props}>
+        <rect x="3" y="4.5" width="18" height="6" rx="1.5" />
+        <rect x="3" y="13.5" width="18" height="6" rx="1.5" />
+        <path d="M6.5 7.5h.01M6.5 16.5h.01" />
+      </svg>
+    );
+  }
+  if (
+    text.includes('desktop') ||
+    text.includes('tower') ||
+    text.includes('computer') ||
+    text.includes('pc') ||
+    text.includes('refurb')
+  ) {
+    return (
+      <svg {...props}>
+        <rect x="6" y="3" width="12" height="18" rx="2" />
+        <path d="M9.5 7h5M9.5 10h5M12 16.5h.01" />
+      </svg>
+    );
+  }
+  if (text.includes('accessor') || text.includes('part') || text.includes('cable')) {
+    return (
+      <svg {...props}>
+        <path d="M7 7V5a2 2 0 0 1 4 0v2M13 7V5a2 2 0 0 1 4 0v2" />
+        <rect x="5" y="7" width="14" height="6" rx="1.5" />
+        <path d="M12 13v4a3 3 0 0 0 3 3h1" />
+      </svg>
+    );
+  }
+  return (
+    <svg {...props}>
+      <path d="M3.5 11.2V5.5a2 2 0 0 1 2-2h5.7a2 2 0 0 1 1.4.6l7 7a2 2 0 0 1 0 2.8l-5.7 5.7a2 2 0 0 1-2.8 0l-7-7a2 2 0 0 1-.6-1.4Z" />
+      <circle cx="8" cy="8" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function ChevronRightIcon({ className }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="m9 6 6 6-6 6" />
+    </svg>
   );
 }
 

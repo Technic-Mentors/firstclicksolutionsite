@@ -91,6 +91,7 @@ export default function ProductForm() {
       description: '',
       careInstructions: '',
       fabric: '',
+      material: '',
       basePrice: '',
       compareAtPrice: '',
       sortOrder: 0,
@@ -131,6 +132,7 @@ export default function ProductForm() {
         description: product.description || '',
         careInstructions: product.care_instructions || product.careInstructions || '',
         fabric: product.fabric || '',
+        material: product.material || '',
         basePrice: product.base_price ?? product.basePrice ?? '',
         compareAtPrice: product.compare_at_price ?? product.compareAtPrice ?? '',
         sortOrder: product.sort_order ?? product.sortOrder ?? 0,
@@ -200,6 +202,7 @@ export default function ProductForm() {
         description: values.description || undefined,
         careInstructions: values.careInstructions || undefined,
         fabric: values.fabric || undefined,
+        material: values.material || undefined,
         basePrice: Number(values.basePrice),
         compareAtPrice: values.compareAtPrice === '' ? undefined : Number(values.compareAtPrice),
         sortOrder: values.sortOrder === '' ? 0 : Number(values.sortOrder),
@@ -423,11 +426,51 @@ export default function ProductForm() {
                     {(values.name || '').length} / 200
                   </p>
                 </div>
-                <Input label="Material" maxLength={100} {...register('fabric')} />
+                {/* The column is still called `fabric` from the clothing template this
+                    project started as, but the storefront shows it as "Brand" and the
+                    catalogue fills it with Dell, HP, Lenovo. The admin label said
+                    "Material", so material descriptions were being typed into the field the
+                    shop prints under Brand. */}
+                {/* Every field here says where it lands on the product page, so what is
+                    typed in the admin and what the shopper reads can be matched up
+                    without saving and going to look. */}
+                <div className="flex flex-col gap-1">
+                  <Input
+                    label="Brand"
+                    maxLength={100}
+                    placeholder="Dell, HP, Lenovo…"
+                    {...register('fabric')}
+                  />
+                  <FieldHint>Product page → Specifications → Brand</FieldHint>
+                </div>
+                {/* Build/material notes used to be typed into `fabric` and printed under
+                    Brand. They have their own column now. */}
+                <div className="flex flex-col gap-1">
+                  <Input
+                    label="Material / build"
+                    maxLength={255}
+                    placeholder="Black steel chassis with a plastic front bezel…"
+                    {...register('material')}
+                  />
+                  <FieldHint>Product page → Specifications → Material / build</FieldHint>
+                </div>
               </div>
               <div className="mt-4 grid grid-cols-1 gap-4">
-                <Textarea label="Description" rows={4} {...register('description')} />
-                <Textarea label="Care Instructions" rows={2} {...register('careInstructions')} />
+                <div className="flex flex-col gap-1">
+                  <Textarea label="Description" rows={4} {...register('description')} />
+                  <FieldHint>Product page → Description</FieldHint>
+                </div>
+                {/* Same story: stored as `care_instructions`, shown on the storefront as
+                    "Condition". */}
+                <div className="flex flex-col gap-1">
+                  <Textarea
+                    label="Condition notes"
+                    rows={2}
+                    placeholder="Grade A — light cosmetic marks, fully tested, 12 month warranty."
+                    {...register('careInstructions')}
+                  />
+                  <FieldHint>Product page → Condition &amp; what&rsquo;s included</FieldHint>
+                </div>
               </div>
             </StepPanel>
           )}
@@ -468,7 +511,7 @@ export default function ProductForm() {
           {step === 2 && (
             <StepPanel
               title="Variants"
-              description="Every product needs at least one. Stock is tracked per variant, not per product."
+              description="Every product needs at least one. Spec, condition and SKU all print in the Specifications table on the product page, and stock is tracked per variant, not per product."
               action={
                 <Button type="button" variant="outline" size="sm" onClick={() => append(emptyVariant())}>
                   Add variant
@@ -659,8 +702,14 @@ export default function ProductForm() {
               )}
 
               <div className="mt-5 grid grid-cols-1 gap-4 border-t border-stone-100 pt-5 sm:grid-cols-2">
-                <Input label="Meta Title" {...register('metaTitle')} />
-                <Input label="Meta Description" {...register('metaDescription')} />
+                <div className="flex flex-col gap-1">
+                  <Input label="Meta Title" {...register('metaTitle')} />
+                  <FieldHint>Browser tab and search results. Blank uses the product name.</FieldHint>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <Input label="Meta Description" {...register('metaDescription')} />
+                  <FieldHint>Search result snippet. Blank uses the description.</FieldHint>
+                </div>
               </div>
             </StepPanel>
           )}
@@ -704,6 +753,10 @@ export default function ProductForm() {
       </div>
     </div>
   );
+}
+
+function FieldHint({ children }) {
+  return <p className="text-[11px] text-charcoal-light">{children}</p>;
 }
 
 function StepPanel({ title, description, action, children }) {
